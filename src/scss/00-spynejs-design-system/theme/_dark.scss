@@ -1,0 +1,12 @@
+// Dark theme.
+//
+// Emitted on `main#app[data-theme='dark']` by `theme-vars`. It carries only what
+// differs from the light theme: the Material colour roles for the dark scheme, and
+// the dark values of the Shell variables that have no Material role. The bridge is
+// not repeated: its entries refer to roles, and the roles are what change here.
+
+@use 'sass:map';
+@use '../tokens/material';
+@use 'bridge';
+
+$dark-theme: map.merge(material.$sys-color-dark, bridge.$kept-dark);

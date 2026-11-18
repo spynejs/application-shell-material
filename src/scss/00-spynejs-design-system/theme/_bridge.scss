@@ -1,0 +1,98 @@
+// The bridge: the Shell's own variable names, defined from Material roles.
+//
+// Component styles keep reading --brand, --paper, --text-muted and the rest; this
+// map is where each of those names gets its value. Every value is a reference to a
+// --md-sys-* property (emitted from tokens/_material.scss), so one definition serves
+// both colour schemes: the role changes underneath, the reference does not.
+//
+// Which role a Shell name takes is a judgement, made once here. Material's values
+// are the tokens; no Shell value is carried over except the few in $kept-light /
+// $kept-dark, which have no Material role to take.
+
+@use 'sass:map';
+@use '../tokens/material';
+
+// The elevated card's resting and hover elevations, from Google's card tokens.
+$card-elevation: map.get(material.$elevated-card, 'container-elevation');
+$card-hover-elevation: map.get(
+  material.$elevated-card,
+  'hover-container-elevation'
+);
+
+$bridge: (
+  // Surfaces. The Shell's `surface` is its own name and is not Material's `surface`.
+  bg-base: var(--md-sys-color-surface),
+  paper: var(--md-sys-color-surface),
+  bg: var(--md-sys-color-surface-container-low),
+  surface: var(--md-sys-color-surface-container),
+  border: var(--md-sys-color-outline),
+  // Brand
+  brand: var(--md-sys-color-primary),
+  brand-contrast: var(--md-sys-color-on-primary),
+  // Text
+  text-primary: var(--md-sys-color-on-surface),
+  text-secondary: var(--md-sys-color-on-surface-variant),
+  text-muted: var(--md-sys-color-on-surface-variant),
+  text-inverse: var(--md-sys-color-inverse-on-surface),
+  text-link: var(--md-sys-color-primary),
+  text-visited: var(--md-sys-color-primary),
+  // Status. Material has one status role, error.
+  error: var(--md-sys-color-error),
+  danger: var(--md-sys-color-error),
+  on-danger: var(--md-sys-color-on-error),
+  // Palette shades that the Shell's elements read directly (selection, visited
+  // links, table rows). Each takes the role its one use calls for.
+  primary-100: var(--md-sys-color-primary-container),
+  primary-900: var(--md-sys-color-on-primary-container),
+  primary-300: var(--md-sys-color-primary),
+  neutral-50: var(--md-sys-color-surface-container-low),
+  neutral-100: var(--md-sys-color-surface-container),
+  // Shape, by name.
+  radius-xs: var(--md-sys-shape-corner-extra-small),
+  radius-sm: var(--md-sys-shape-corner-small),
+  radius-md: var(--md-sys-shape-corner-medium),
+  radius-lg: var(--md-sys-shape-corner-large),
+  radius-xl: var(--md-sys-shape-corner-extra-large),
+  radius-2xl: var(--md-sys-shape-corner-extra-large),
+  radius-full: var(--md-sys-shape-corner-full),
+  // Elevation, by role. The Shell reads one of its four shadows, --shadow-lg, and
+  // only on its containers: the page items and the landing hero. In Material's terms
+  // those are elevated cards, so that shadow is the elevated card's resting
+  // elevation (level 1), read from Google's card tokens. Material keeps a resting
+  // surface low; it is the Shell's name that says "large".
+  // The other three are read by nothing in the Shell. They are set around the card
+  // so the four still run from lighter to heavier: nothing below the card's level,
+  // and the card's hover level for the largest.
+  shadow-sm: material.elevation-shadow($card-elevation),
+  shadow-md: material.elevation-shadow($card-elevation),
+  shadow-lg: material.elevation-shadow($card-elevation),
+  shadow-xl: material.elevation-shadow($card-hover-elevation),
+  // Motion. Easing by role; a duration named for its length takes the Material
+  // duration of that length. The easing names are the ones the Shell emits
+  // (tokens/_motion.scss writes --ease-ease-in, not --ease-in).
+  ease-ease-in: var(--md-sys-motion-easing-standard-accelerate),
+  ease-ease-out: var(--md-sys-motion-easing-standard-decelerate),
+  ease-ease-in-out: var(--md-sys-motion-easing-standard),
+  duration-100: var(--md-sys-motion-duration-short2),
+  duration-200: var(--md-sys-motion-duration-short4),
+  duration-300: var(--md-sys-motion-duration-medium2),
+  duration-500: var(--md-sys-motion-duration-long2),
+  duration-700: var(--md-sys-motion-duration-extra-long1),
+  duration-1000: var(--md-sys-motion-duration-extra-long4)
+);
+
+// Kept from the Shell: baseline Material 3 has no success, info or warning role.
+// These are the Shell's values at material-M0, unchanged, pending a ruling.
+$kept-light: (
+  success: #0d9488,
+  on-success: #ffffff,
+  info: #0284c7,
+  warn: #ca8a04,
+);
+
+$kept-dark: (
+  success: #0d9488,
+  on-success: #ffffff,
+  info: #38bdf8,
+  warn: #facc15,
+);

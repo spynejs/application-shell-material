@@ -1,0 +1,96 @@
+// Material snackbar.
+//
+// Values are read at build time from Google's snackbar tokens (@material/web 2.5.0,
+// tokens/versions/latest) through tokens/_material.scss. Placement and motion follow
+// m3.material.io (Snackbar, guidelines; Transitions), read 2026-11-17, and are marked
+// where they are used.
+//
+// The markup is two views: #material-snackbar-host, an empty region that is always
+// there, and .material-snackbar, added when the Material channel shows one and gone
+// when its time is up. Nothing here decides when; that is the channel.
+
+@use 'sass:map';
+@use '../../00-spynejs-design-system/tokens/material';
+
+$t: material.$snackbar;
+
+@mixin styles {
+  main#app {
+    // "At the bottom of a UI, in front of the main content", a fixed distance from
+    // the leading, trailing and bottom edges; centred in a wider layout.
+    #material-snackbar-host {
+      position: fixed;
+      z-index: 1100; // in front of the header (1000) and the drawer (999)
+      inset-inline: 16px;
+      inset-block-end: 16px;
+      display: flex;
+      justify-content: center;
+      // The region itself is empty space: it must not take clicks meant for the page.
+      pointer-events: none;
+    }
+
+    .material-snackbar {
+      display: flex;
+      align-items: center;
+      box-sizing: border-box;
+      min-block-size: map.get($t, 'with-single-line-container-height');
+      inline-size: fit-content;
+      max-inline-size: min(100%, 600px);
+      padding: 14px 16px;
+      border-radius: map.get($t, 'container-shape');
+      background: map.get($t, 'container-color');
+      box-shadow: material.elevation-shadow(map.get($t, 'container-elevation'));
+      color: map.get($t, 'supporting-text-color');
+      pointer-events: auto;
+      // "A snackbar at the bottom of the screen expands upwards." It is revealed from
+      // its bottom edge; the fade is kept very short, as Material asks of anything
+      // that arrives over other content. 250ms and 50ms are Material's medium1 and
+      // short1 durations; the page gives no numbers. The reveal does not hold its
+      // last frame: a clip left in place would cut off the shadow.
+      animation:
+        material-snackbar-expand var(--md-sys-motion-duration-medium1)
+          var(--md-sys-motion-easing-emphasized-decelerate) backwards,
+        material-snackbar-fade var(--md-sys-motion-duration-short1) linear both;
+    }
+
+    .material-snackbar__text {
+      margin: 0;
+      color: inherit;
+      font-family: map.get($t, 'supporting-text-font'), system-ui, sans-serif;
+      font-size: map.get($t, 'supporting-text-size');
+      line-height: map.get($t, 'supporting-text-line-height');
+      font-weight: map.get($t, 'supporting-text-weight');
+      letter-spacing: map.get($t, 'supporting-text-tracking');
+    }
+
+    // Reduced motion: Material asks for "subtle fades instead of intense sliding
+    // or scaling animations" (Transitions, applying transitions). The snackbar
+    // does not expand; it fades in, quickly (100ms, the short2 duration).
+    @media (prefers-reduced-motion: reduce) {
+      .material-snackbar {
+        animation: material-snackbar-fade var(--md-sys-motion-duration-short2)
+          linear both;
+      }
+    }
+  }
+
+  @keyframes material-snackbar-expand {
+    from {
+      clip-path: inset(100% 0 0 0 round 4px);
+    }
+
+    to {
+      clip-path: inset(0 0 0 0 round 4px);
+    }
+  }
+
+  @keyframes material-snackbar-fade {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+}

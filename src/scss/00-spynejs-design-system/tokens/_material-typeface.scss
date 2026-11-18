@@ -1,0 +1,23 @@
+// Roboto, self-hosted. No font is loaded from a CDN.
+//
+// Material's typeface tokens (md-ref-typeface brand and plain) both name Roboto.
+// The files are the Latin subset from @fontsource/roboto 5.3.0 (SIL OFL 1.1; the
+// licence is in static/fonts/licenses/Roboto.OFL.txt), copied into static/fonts/.
+//
+// Weights: 400, 500 and 700 are Material's three (regular, medium, bold). 600 is not
+// a Material weight; it is here because the Shell's headings ask for semibold, and
+// without a 600 file the browser would draw them bold.
+//
+// webpack does not rewrite url() in stylesheets, so the path is built from
+// $STATIC_DIR, which app.scss passes in: `with ($STATIC_DIR: $STATIC_DIR)`.
+$STATIC_DIR: './static/' !default;
+
+@each $weight in (400, 500, 600, 700) {
+  @font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: $weight;
+    font-display: swap;
+    src: url('#{$STATIC_DIR}fonts/roboto-#{$weight}.woff2') format('woff2');
+  }
+}

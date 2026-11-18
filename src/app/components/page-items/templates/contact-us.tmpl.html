@@ -1,0 +1,102 @@
+<div class="contact-us__status" role="status" aria-live="polite">
+  <h2 class="contact-us__status-title"></h2>
+  <p class="contact-us__status-msg"></p>
+</div>
+
+<div class="contact-us__form-holder">
+  <h2>{{title}}</h2>
+
+  <p class="contact-subtitle">{{subtitle}}</p>
+
+  <form class="contact-us__form" data-event-prevent-default="true" novalidate>
+    <!--
+      A field's control, once for each case: one line or several, and plain,
+      required or disabled. An attribute such as "required" is there or not
+      there, so each case is an element of its own inside a section, and the
+      form's trait gives every field exactly one section (contactUs$ShapeData).
+    -->
+    {{#formFields}}
+    <div class="contact-us__field">
+      <label for="{{attrId}}">{{label}}</label>
+      {{#controlInput}}
+      <input
+        id="{{attrId}}"
+        name="{{attrName}}"
+        type="{{attrType}}"
+        placeholder="{{attrPlaceholder}}"
+        aria-describedby="{{attrId}}-error"
+      />
+      {{/controlInput}}
+      {{#controlInputRequired}}
+      <input
+        id="{{attrId}}"
+        name="{{attrName}}"
+        type="{{attrType}}"
+        placeholder="{{attrPlaceholder}}"
+        required
+        aria-describedby="{{attrId}}-error"
+      />
+      {{/controlInputRequired}}
+      {{#controlInputDisabled}}
+      <input
+        id="{{attrId}}"
+        name="{{attrName}}"
+        type="{{attrType}}"
+        placeholder="{{attrPlaceholder}}"
+        disabled
+        aria-describedby="{{attrId}}-error"
+      />
+      {{/controlInputDisabled}}
+      {{#controlTextarea}}
+      <textarea
+        id="{{attrId}}"
+        name="{{attrName}}"
+        rows="5"
+        placeholder="{{attrPlaceholder}}"
+        aria-describedby="{{attrId}}-error"
+      ></textarea>
+      {{/controlTextarea}}
+      {{#controlTextareaRequired}}
+      <textarea
+        id="{{attrId}}"
+        name="{{attrName}}"
+        rows="5"
+        placeholder="{{attrPlaceholder}}"
+        required
+        aria-describedby="{{attrId}}-error"
+      ></textarea>
+      {{/controlTextareaRequired}}
+      {{#controlTextareaDisabled}}
+      <textarea
+        id="{{attrId}}"
+        name="{{attrName}}"
+        rows="5"
+        placeholder="{{attrPlaceholder}}"
+        disabled
+        aria-describedby="{{attrId}}-error"
+      ></textarea>
+      {{/controlTextareaDisabled}}
+      <p class="contact-us__field-error" id="{{attrId}}-error"></p>
+    </div>
+    {{/formFields}}
+
+    <div class="contact-us__field">
+      <label for="contact-message">{{messageLabel}}</label>
+      <textarea
+        id="contact-message"
+        name="message"
+        rows="5"
+        placeholder="{{attrMessagePlaceholder}}"
+        required
+        aria-describedby="contact-message-error"
+      ></textarea>
+      <p class="contact-us__field-error" id="contact-message-error"></p>
+    </div>
+
+    <div class="contact-us__actions">
+      <button class="btn {{attrButtonClass}}" type="submit">
+        Send Message
+      </button>
+    </div>
+  </form>
+</div>

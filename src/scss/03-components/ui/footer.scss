@@ -1,0 +1,48 @@
+@use '../../02-variables/palette' as palette;
+
+/* Site Footer */
+.site-footer,
+#site-footer {
+  height: var(--footer-height);
+  background-color: var(--bg);
+  border-top: 1px solid var(--rule);
+
+  .footer-content {
+    inline-size: min(100%, var(--max-content-width));
+    margin-inline: auto;
+    padding-inline: clamp(0.25rem, 2vw, 1rem);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    color: var(--text-muted);
+    min-width: 0;
+    gap: 0.25rem 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .footer-text {
+    min-width: 0;
+  }
+
+  // Image-source credit (model key photoCredit). Rendered only when the
+  // model carries the node; remove the node once the photos are replaced.
+  .footer-credit {
+    flex: none;
+    margin-inline-start: auto;
+    font-size: 0.8125rem;
+
+    a {
+      color: inherit;
+      text-decoration: underline;
+      text-underline-offset: 0.15em;
+    }
+  }
+
+  // Stacked (narrow) footer: the credit sits centred under the text.
+  @media (max-width: 768px) {
+    .footer-credit {
+      margin-inline: auto;
+    }
+  }
+}

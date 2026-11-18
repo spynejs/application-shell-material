@@ -1,0 +1,29 @@
+// Material component styles.
+//
+// Everything in this folder restyles the Shell's elements as Material components
+// without editing the Shell's own style files: each file here is loaded after them
+// (app.scss includes `styles` last), so the cascade does the work and a merge from
+// upstream has nothing to collide with. The button and the navigation drawer were
+// ported before this folder existed and live where they were written
+// (elements/_buttons.scss, ui/menu-drawer.scss).
+@use 'app-bar';
+@use 'cards';
+@use 'focus';
+@use 'motion';
+@use 'navigation';
+@use 'ripple';
+@use 'snackbar';
+@use 'text-fields';
+@use 'type';
+
+@mixin styles {
+  @include ripple.properties;
+  @include type.styles;
+  @include cards.styles;
+  @include app-bar.styles;
+  @include navigation.styles;
+  @include text-fields.styles;
+  @include focus.styles;
+  @include motion.styles;
+  @include snackbar.styles;
+}

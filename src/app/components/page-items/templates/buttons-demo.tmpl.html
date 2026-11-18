@@ -1,0 +1,108 @@
+<header class="buttons-demo__header">
+  <h2>{{headline}}</h2>
+  <p>{{intro}}</p>
+</header>
+{{#styles}}
+<section class="buttons-demo__style">
+  <h3>{{name}}</h3>
+  <p class="buttons-demo__note">{{note}}</p>
+  <div class="buttons-demo__set">
+    <button type="button" class="btn {{attrClass}}">{{label}}</button>
+    <button type="button" class="btn {{attrClass}}">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 -960 960 960"
+        aria-hidden="true"
+      >
+        <path
+          d="M565-395q35-35 35-85t-35-85q-35-35-85-35t-85 35q-35 35-35 85t35 85q35 35 85 35t85-35Zm-226.5 56.5Q280-397 280-480t58.5-141.5Q397-680 480-680t141.5 58.5Q680-563 680-480t-58.5 141.5Q563-280 480-280t-141.5-58.5ZM200-440H40v-80h160v80Zm720 0H760v-80h160v80ZM440-760v-160h80v160h-80Zm0 720v-160h80v160h-80ZM256-650l-101-97 57-59 96 100-52 56Zm492 496-97-101 53-55 101 97-57 59Zm-98-550 97-101 59 57-100 96-56-52ZM154-212l101-97 55 53-97 101-59-57Zm326-268Z"
+        /></svg
+      >{{iconLabel}}
+    </button>
+    <button type="button" class="btn {{attrClass}}" disabled>
+      {{disabledLabel}}
+    </button>
+    <a
+      class="btn {{attrClass}}"
+      data-channel="ROUTE"
+      data-event-prevent-default="true"
+      data-page-id="buttons"
+      data-end-route="true"
+      href="/buttons"
+      >{{linkLabel}}</a
+    >
+    <a
+      class="btn {{attrClass}}"
+      data-channel="ROUTE"
+      data-event-prevent-default="true"
+      data-page-id="buttons"
+      data-end-route="true"
+      href="/buttons"
+      ><svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 -960 960 960"
+        aria-hidden="true"
+      >
+        <path
+          d="M565-395q35-35 35-85t-35-85q-35-35-85-35t-85 35q-35 35-35 85t35 85q35 35 85 35t85-35Zm-226.5 56.5Q280-397 280-480t58.5-141.5Q397-680 480-680t141.5 58.5Q680-563 680-480t-58.5 141.5Q563-280 480-280t-141.5-58.5ZM200-440H40v-80h160v80Zm720 0H760v-80h160v80ZM440-760v-160h80v160h-80Zm0 720v-160h80v160h-80ZM256-650l-101-97 57-59 96 100-52 56Zm492 496-97-101 53-55 101 97-57 59Zm-98-550 97-101 59 57-100 96-56-52ZM154-212l101-97 55 53-97 101-59-57Zm326-268Z"
+        /></svg
+      >{{iconLinkLabel}}</a
+    >
+    <a class="btn {{attrClass}}" aria-disabled="true" tabindex="-1"
+      >{{disabledLinkLabel}}</a
+    >
+  </div>
+</section>
+{{/styles}}
+<header class="buttons-demo__header">
+  <h2>{{sizesHeadline}}</h2>
+  <p>{{sizesIntro}}</p>
+</header>
+{{#sizes}}
+<section class="buttons-demo__style">
+  <h3>{{name}}</h3>
+  <p class="buttons-demo__note">{{note}}</p>
+  <div class="buttons-demo__set">
+    <button type="button" class="btn btn-filled {{attrClass}}">
+      {{roundLabel}}
+    </button>
+    <button type="button" class="btn btn-tonal {{attrClass}}">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 -960 960 960"
+        aria-hidden="true"
+      >
+        <path
+          d="M565-395q35-35 35-85t-35-85q-35-35-85-35t-85 35q-35 35-35 85t35 85q35 35 85 35t85-35Zm-226.5 56.5Q280-397 280-480t58.5-141.5Q397-680 480-680t141.5 58.5Q680-563 680-480t-58.5 141.5Q563-280 480-280t-141.5-58.5ZM200-440H40v-80h160v80Zm720 0H760v-80h160v80ZM440-760v-160h80v160h-80Zm0 720v-160h80v160h-80ZM256-650l-101-97 57-59 96 100-52 56Zm492 496-97-101 53-55 101 97-57 59Zm-98-550 97-101 59 57-100 96-56-52ZM154-212l101-97 55 53-97 101-59-57Zm326-268Z"
+        /></svg
+      >{{roundIconLabel}}
+    </button>
+    <button type="button" class="btn btn-outlined {{attrClass}} btn-square">
+      {{squareLabel}}
+    </button>
+    <button type="button" class="btn btn-elevated {{attrClass}} btn-square">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 -960 960 960"
+        aria-hidden="true"
+      >
+        <path
+          d="M565-395q35-35 35-85t-35-85q-35-35-85-35t-85 35q-35 35-35 85t35 85q35 35 85 35t85-35Zm-226.5 56.5Q280-397 280-480t58.5-141.5Q397-680 480-680t141.5 58.5Q680-563 680-480t-58.5 141.5Q563-280 480-280t-141.5-58.5ZM200-440H40v-80h160v80Zm720 0H760v-80h160v80ZM440-760v-160h80v160h-80Zm0 720v-160h80v160h-80ZM256-650l-101-97 57-59 96 100-52 56Zm492 496-97-101 53-55 101 97-57 59Zm-98-550 97-101 59 57-100 96-56-52ZM154-212l101-97 55 53-97 101-59-57Zm326-268Z"
+        /></svg
+      >{{squareIconLabel}}
+    </button>
+    <button type="button" class="btn btn-filled {{attrClass}}" disabled>
+      {{disabledLabel}}
+    </button>
+    <a
+      class="btn btn-text {{attrClass}}"
+      data-channel="ROUTE"
+      data-event-prevent-default="true"
+      data-page-id="buttons"
+      data-end-route="true"
+      href="/buttons"
+      >{{linkLabel}}</a
+    >
+  </div>
+</section>
+{{/sizes}}

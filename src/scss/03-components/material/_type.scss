@@ -1,0 +1,72 @@
+// Material type scale — which Material type style each kind of text takes.
+//
+// The styles themselves (size, line height, weight, letter spacing, and which of the
+// two typefaces) are Material's, emitted by the theme as --md-sys-typescale-*. This
+// file only assigns them. Headings take the emphasized set, the Expressive revision's
+// heavier variant; text takes the plain one.
+//
+// The selectors repeat the Shell's own (main#app h1, main#app p), and this file is
+// loaded after them, so it replaces the Shell's base sizes and nothing more specific:
+// a component that sets its own size keeps it until that component is ported.
+
+// One Material type style, as the five properties it sets.
+@mixin style($name, $emphasized: false) {
+  $prefix: 'md-sys-typescale-#{$name}';
+  @if $emphasized {
+    $prefix: 'md-sys-typescale-emphasized-#{$name}';
+  }
+
+  font-family: var(--#{$prefix}-font), system-ui, sans-serif;
+  font-size: var(--#{$prefix}-size);
+  line-height: var(--#{$prefix}-line-height);
+  font-weight: var(--#{$prefix}-weight);
+  letter-spacing: var(--#{$prefix}-tracking);
+}
+
+@mixin styles {
+  main#app {
+    // Running text, and everything that inherits from the app's root.
+    @include style('body-large');
+
+    // The header's own h1 is the site title, not a page heading; it is left to the
+    // header.
+    h1:not(header *) {
+      @include style('display-small', $emphasized: true);
+    }
+
+    h2 {
+      @include style('headline-medium', $emphasized: true);
+    }
+
+    h3 {
+      @include style('headline-small', $emphasized: true);
+    }
+
+    h4 {
+      @include style('title-large', $emphasized: true);
+    }
+
+    h5 {
+      @include style('title-medium');
+    }
+
+    h6 {
+      @include style('title-small');
+    }
+
+    p {
+      @include style('body-large');
+    }
+
+    small,
+    .text-sm {
+      @include style('body-medium');
+    }
+
+    // The hero's headline is the one large heading on a page. It was 47px; Material's
+    // nearest display style is display-medium (45px).
+    .hero__headline {
+      @include style('display-medium', $emphasized: true);
+    }
+  }
+}

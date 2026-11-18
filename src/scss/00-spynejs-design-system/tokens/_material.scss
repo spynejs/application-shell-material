@@ -1,0 +1,451 @@
+// Material 3 system tokens, read from Google's Sass at build time.
+//
+// Source: @material/web 2.5.0 (Apache-2.0). This is the only file in the Shell that
+// reads that package. Nothing here is a hand-typed Material value: every colour,
+// corner, type style, duration and opacity below is whatever Google's token modules
+// declare.
+//
+// The package ships two token sets. Every value below comes from the newer one,
+// tokens/versions/latest/sass ("Google Material 3, Version 34.0.21"), which carries
+// the Material 3 Expressive values. The older set (v0_192) is read through the
+// package's index for one thing only: Google's lists of the tokens it supports on
+// the web, which decide the colour, typeface and type-style names emitted here.
+//
+// The maps are keyed by custom-property name without the leading `--`, the same
+// shape as the Shell's theme maps, so `theme-vars` emits them unchanged:
+//   md-sys-color-primary  ->  --md-sys-color-primary
+// Names follow @material/web's docs/theming: --md-sys-color-*, --md-sys-shape-corner-*,
+// --md-sys-typescale-*, --md-ref-typeface-*. Google's web code does not publish
+// motion, state or elevation as custom properties; those three sets are emitted here
+// under the same pattern (--md-sys-motion-*, --md-sys-state-*, --md-sys-elevation-*).
+
+@use 'sass:list';
+@use 'sass:map';
+@use 'sass:math';
+@use 'sass:meta';
+@use 'sass:string';
+@use '@material/web/tokens';
+@use '@material/web/tokens/versions/latest/sass/md-comp-button' as latest-button;
+@use '@material/web/tokens/versions/latest/sass/md-comp-button-meta' as
+  latest-button-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-button-elevated' as
+  latest-button-elevated;
+@use '@material/web/tokens/versions/latest/sass/md-comp-button-elevated-meta' as
+  latest-button-elevated-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-button-filled' as
+  latest-button-filled;
+@use '@material/web/tokens/versions/latest/sass/md-comp-button-filled-meta' as
+  latest-button-filled-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-button-outlined' as
+  latest-button-outlined;
+@use '@material/web/tokens/versions/latest/sass/md-comp-button-outlined-meta' as
+  latest-button-outlined-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-button-text' as
+  latest-button-text;
+@use '@material/web/tokens/versions/latest/sass/md-comp-button-text-meta' as
+  latest-button-text-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-button-tonal' as
+  latest-button-tonal;
+@use '@material/web/tokens/versions/latest/sass/md-comp-button-tonal-meta' as
+  latest-button-tonal-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-button-xsmall' as
+  latest-button-xsmall;
+@use '@material/web/tokens/versions/latest/sass/md-comp-button-small' as
+  latest-button-small;
+@use '@material/web/tokens/versions/latest/sass/md-comp-button-medium' as
+  latest-button-medium;
+@use '@material/web/tokens/versions/latest/sass/md-comp-button-large' as
+  latest-button-large;
+@use '@material/web/tokens/versions/latest/sass/md-comp-button-xlarge' as
+  latest-button-xlarge;
+@use '@material/web/tokens/versions/latest/sass/md-comp-navigation-drawer' as
+  latest-drawer;
+@use '@material/web/tokens/versions/latest/sass/md-comp-navigation-drawer-meta'
+  as latest-drawer-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-nav-rail-collapsed' as
+  latest-nav-rail-collapsed;
+@use '@material/web/tokens/versions/latest/sass/md-comp-scrim' as latest-scrim;
+@use '@material/web/tokens/versions/latest/sass/md-comp-elevated-card' as
+  latest-elevated-card;
+@use '@material/web/tokens/versions/latest/sass/md-comp-elevated-card-meta' as
+  latest-elevated-card-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-outlined-card' as
+  latest-outlined-card;
+@use '@material/web/tokens/versions/latest/sass/md-comp-outlined-card-meta' as
+  latest-outlined-card-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-icon-button-small' as
+  latest-icon-button-small;
+@use '@material/web/tokens/versions/latest/sass/md-comp-icon-button-small-meta'
+  as latest-icon-button-small-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-icon-button-standard' as
+  latest-icon-button-standard;
+@use '@material/web/tokens/versions/latest/sass/md-comp-icon-button-standard-meta'
+  as latest-icon-button-standard-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-outlined-text-field' as
+  latest-outlined-text-field;
+@use '@material/web/tokens/versions/latest/sass/md-comp-outlined-text-field-meta'
+  as latest-outlined-text-field-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-app-bar' as
+  latest-app-bar;
+@use '@material/web/tokens/versions/latest/sass/md-comp-app-bar-meta' as
+  latest-app-bar-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-app-bar-small' as
+  latest-app-bar-small;
+@use '@material/web/tokens/versions/latest/sass/md-comp-app-bar-small-meta' as
+  latest-app-bar-small-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-snackbar' as
+  latest-snackbar;
+@use '@material/web/tokens/versions/latest/sass/md-comp-snackbar-meta' as
+  latest-snackbar-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-scrim-meta' as
+  latest-scrim-meta;
+@use '@material/web/tokens/versions/latest/sass/md-ref-typeface' as
+  latest-typeface;
+@use '@material/web/tokens/versions/latest/sass/md-sys-color' as latest-color;
+@use '@material/web/tokens/versions/latest/sass/md-sys-color__dark' as
+  latest-color-dark;
+@use '@material/web/tokens/versions/latest/sass/md-sys-elevation' as
+  latest-elevation;
+@use '@material/web/tokens/versions/latest/sass/md-sys-motion' as latest-motion;
+@use '@material/web/tokens/versions/latest/sass/md-sys-shape' as latest-shape;
+@use '@material/web/tokens/versions/latest/sass/md-sys-state' as latest-state;
+@use '@material/web/tokens/versions/latest/sass/md-sys-state-focus-indicator' as
+  latest-focus-indicator;
+@use '@material/web/tokens/versions/latest/sass/md-sys-typescale' as
+  latest-typescale;
+@use '@material/web/tokens/versions/latest/sass/md-sys-typescale-meta' as
+  latest-typescale-meta;
+@use '@material/web/tokens/versions/latest/sass/md-sys-typescale-emphasized' as
+  latest-typescale-emphasized;
+@use '@material/web/tokens/versions/latest/sass/md-sys-typescale-emphasized-meta'
+  as latest-typescale-emphasized-meta;
+
+@function _starts-with($text, $start) {
+  @return string.index($text, $start) == 1;
+}
+
+@function _ends-with($text, $end) {
+  $from: string.length($text) - string.length($end) + 1;
+  @return $from > 0 and string.slice($text, $from) == $end;
+}
+
+// Prefix every key of a token map; drop nulls and, where a list of tokens is given,
+// anything outside it. The lists are Google's own: the tokens the package says it
+// supports on the web.
+@function _named($values, $prefix, $supported: null) {
+  $named: ();
+  @each $token, $value in $values {
+    $keep: $supported == null or list.index($supported, $token) != null;
+    @if $value != null and $keep {
+      $named: map.set($named, '#{$prefix}#{$token}', $value);
+    }
+  }
+  @return $named;
+}
+
+// Colour roles, one map per scheme.
+$sys-color-light: _named(
+  meta.module-variables(latest-color),
+  'md-sys-color-',
+  tokens.$md-sys-color-supported-tokens
+);
+
+$sys-color-dark: _named(
+  meta.module-variables(latest-color-dark),
+  'md-sys-color-',
+  tokens.$md-sys-color-supported-tokens
+);
+
+// Type styles: the properties Google supports on the web (font, size, line height,
+// weight), plus the letter spacing the newer set adds. Its variable-font axes are
+// left out: the Shell ships static Roboto. Each value is taken in the form the set's
+// companion module gives it, which keeps a font or weight as a reference to its
+// typeface token (var(--md-ref-typeface-plain)) instead of flattening it to "Roboto".
+$_typescale: ();
+$_typescale-references: meta.module-variables(latest-typescale-meta);
+@each $token, $value in meta.module-variables(latest-typescale) {
+  $supported: list.index(tokens.$md-sys-typescale-supported-tokens, $token) !=
+    null;
+  @if $supported or _ends-with($token, '-tracking') {
+    $reference: map.get($_typescale-references, '#{$token}--resolved');
+    $_typescale: map.set(
+      $_typescale,
+      $token,
+      if($reference != null, $reference, $value)
+    );
+  }
+}
+
+// The emphasized type styles: the Expressive revision's heavier variant of each
+// style, for headings and anything that should carry more weight. The same
+// properties, under names that start with `emphasized-`.
+$_typescale-emphasized: ();
+$_typescale-emphasized-references: meta.module-variables(
+  latest-typescale-emphasized-meta
+);
+@each $token, $value in meta.module-variables(latest-typescale-emphasized) {
+  $supported: list.index(tokens.$md-sys-typescale-supported-tokens, $token) !=
+    null;
+  @if $supported or _ends-with($token, '-tracking') {
+    $reference: map.get(
+      $_typescale-emphasized-references,
+      '#{$token}--resolved'
+    );
+    $_typescale-emphasized: map.set(
+      $_typescale-emphasized,
+      'emphasized-#{$token}',
+      if($reference != null, $reference, $value)
+    );
+  }
+}
+
+// Corners: every single-radius corner. The `corner-value-*` names repeat them, and
+// the one-sided corners are lists; neither is emitted, as before.
+$_shape: ();
+@each $token, $value in meta.module-variables(latest-shape) {
+  $single: meta.type-of($value) == 'number';
+  @if $single and
+    _starts-with($token, 'corner-') and not
+    _starts-with($token, 'corner-value-')
+  {
+    $_shape: map.set($_shape, $token, $value);
+  }
+}
+
+// Motion: durations and easing curves. The newer set also has springs, given as
+// stiffness and damping. CSS has nothing that takes those numbers, so they are not
+// emitted.
+$_motion: ();
+@each $token, $value in meta.module-variables(latest-motion) {
+  @if _starts-with($token, 'duration-') or _starts-with($token, 'easing-') {
+    $_motion: map.set($_motion, $token, $value);
+  }
+}
+
+// Elevation: the six levels. The newer set gives each as a height in dp.
+$_elevation: ();
+@each $token, $value in meta.module-variables(latest-elevation) {
+  @if _starts-with($token, 'level') {
+    $_elevation: map.set($_elevation, $token, $value);
+  }
+}
+
+// Everything that does not change with the colour scheme.
+$sys-static: ();
+@each $set
+  in (
+    _named(
+      meta.module-variables(latest-typeface),
+      'md-ref-typeface-',
+      tokens.$md-ref-typeface-supported-tokens
+    ),
+    _named($_typescale, 'md-sys-typescale-'),
+    _named($_typescale-emphasized, 'md-sys-typescale-'),
+    _named($_shape, 'md-sys-shape-'),
+    _named($_motion, 'md-sys-motion-'),
+    _named(meta.module-variables(latest-state), 'md-sys-state-'),
+    _named($_elevation, 'md-sys-elevation-')
+  )
+{
+  $sys-static: map.merge($sys-static, $set);
+}
+
+// The level, 0 to 5, for an elevation given either as that number (the older set's
+// component tokens) or as a height in dp (the newer set's: 1px is level 1, 3px is
+// level 2, and so on, as its elevation module declares).
+@function elevation-level($elevation) {
+  @if math.is-unitless($elevation) {
+    @return $elevation;
+  }
+
+  @for $level from 0 through 5 {
+    @if map.get($_elevation, 'level#{$level}') == $elevation {
+      @return $level;
+    }
+  }
+
+  @error 'No elevation level is #{$elevation} high.';
+}
+
+// The box-shadow for an elevation, given as a level (0 to 5) or as a height in dp.
+//
+// Google's token for a level is only its number or height. The shadow is drawn by
+// @material/web's elevation element from that number: a key shadow at 30% of the
+// shadow colour and an ambient shadow at 15% (elevation/internal/_elevation.scss,
+// `.shadow::before` and `.shadow::after`). This function does the same arithmetic at
+// build time and returns both layers as one box-shadow value, so a plain element can
+// carry it. The colour stays a reference to --md-sys-color-shadow.
+@function elevation-shadow($elevation) {
+  $level: elevation-level($elevation);
+
+  @if $level <= 0 {
+    @return none;
+  }
+
+  $key-y: math.clamp(0, $level, 1) + math.clamp(0, $level - 3, 1) + 2 *
+    math.clamp(0, $level - 4, 1);
+  $key-blur: 2 * math.clamp(0, $level, 1) + math.clamp(0, $level - 2, 1) +
+    math.clamp(0, $level - 4, 1);
+
+  $ambient-y: math.clamp(0, $level, 1) + math.clamp(0, $level - 1, 1) + 2 *
+    math.clamp(0, $level - 2, 3);
+  $ambient-blur: 3 * math.clamp(0, $level, 2) + 2 * math.clamp(0, $level - 2, 3);
+  $ambient-spread: math.clamp(0, $level, 4) + 2 * math.clamp(0, $level - 4, 1);
+
+  $key-color: color-mix(in srgb, var(--md-sys-color-shadow) 30%, transparent);
+  $ambient-color: color-mix(
+    in srgb,
+    var(--md-sys-color-shadow) 15%,
+    transparent
+  );
+
+  @return (
+    0 #{$key-y}px #{$key-blur}px 0 $key-color,
+    0 #{$ambient-y}px #{$ambient-blur}px #{$ambient-spread}px $ambient-color
+  );
+}
+
+// Component tokens.
+//
+// The newer set gives a component's tokens as plain values: a colour is a hex number
+// and a font is the word Roboto. Neither would follow the theme, so where the set's
+// companion module says a token is a colour role or part of a type style, it is kept
+// as a reference to the property the theme emits (var(--md-sys-color-primary),
+// var(--md-sys-typescale-label-large-size)). Everything else (sizes, opacities,
+// elevations, corners) stays the plain value, which the stylesheets do arithmetic on.
+@function _component($values, $references: ()) {
+  $tokens: ();
+  @each $token, $value in $values {
+    $reference: map.get($references, '#{$token}--resolved');
+    $emitted: false;
+    @if meta.type-of($reference) == 'string' {
+      $emitted: _starts-with('#{$reference}', 'var(--md-sys-color-') or
+        _starts-with('#{$reference}', 'var(--md-sys-typescale-');
+    }
+    @if $emitted {
+      $tokens: map.set($tokens, $token, $reference);
+    } @else if $value != null {
+      $tokens: map.set($tokens, $token, $value);
+    }
+  }
+  @return $tokens;
+}
+
+// The button. `base` is what every style shares; the five styles are keyed by the
+// Shell's class name (.btn-filled, .btn-tonal, ...); the five sizes by theirs
+// (.btn-xs ... .btn-xl).
+//
+// `size-type` is the type style each size's label takes. The newer set carries this
+// only as a mixin in each size module (`label-text`), which a map cannot read, so the
+// five names are written here from those mixins. Google's experimental button
+// (labs/gb/components/button/_button-tokens.scss) uses the same five.
+$button: (
+  base: _component(
+      meta.module-variables(latest-button),
+      meta.module-variables(latest-button-meta)
+    ),
+  filled: _component(
+      meta.module-variables(latest-button-filled),
+      meta.module-variables(latest-button-filled-meta)
+    ),
+  tonal: _component(
+      meta.module-variables(latest-button-tonal),
+      meta.module-variables(latest-button-tonal-meta)
+    ),
+  outlined: _component(
+      meta.module-variables(latest-button-outlined),
+      meta.module-variables(latest-button-outlined-meta)
+    ),
+  elevated: _component(
+      meta.module-variables(latest-button-elevated),
+      meta.module-variables(latest-button-elevated-meta)
+    ),
+  text: _component(
+      meta.module-variables(latest-button-text),
+      meta.module-variables(latest-button-text-meta)
+    ),
+  sizes: (
+    xs: _component(meta.module-variables(latest-button-xsmall)),
+    sm: _component(meta.module-variables(latest-button-small)),
+    md: _component(meta.module-variables(latest-button-medium)),
+    lg: _component(meta.module-variables(latest-button-large)),
+    xl: _component(meta.module-variables(latest-button-xlarge)),
+  ),
+  size-type: (
+    xs: 'label-large',
+    sm: 'label-large',
+    md: 'title-medium',
+    lg: 'headline-small',
+    xl: 'headline-large',
+  ),
+);
+
+// The focus indicator: its thickness and its offsets, outside and inside an element.
+$focus-ring: _component(meta.module-variables(latest-focus-indicator));
+
+// The navigation drawer.
+$navigation-drawer: _component(
+  meta.module-variables(latest-drawer),
+  meta.module-variables(latest-drawer-meta)
+);
+
+// The collapsed navigation rail. The template has no rail; one value is read from
+// here, the space Google puts between a rail's items, which the drawer borrows
+// (ui/menu-drawer.scss).
+$navigation-rail-collapsed: _component(
+  meta.module-variables(latest-nav-rail-collapsed)
+);
+
+// The scrim behind a modal surface: the `scrim` colour role and its opacity.
+$scrim: _component(
+  meta.module-variables(latest-scrim),
+  meta.module-variables(latest-scrim-meta)
+);
+
+// The elevated card: Material's container for content that sits just above the page.
+$elevated-card: _component(
+  meta.module-variables(latest-elevated-card),
+  meta.module-variables(latest-elevated-card-meta)
+);
+
+// The outlined card: a card marked off by a line, with no shadow.
+$outlined-card: _component(
+  meta.module-variables(latest-outlined-card),
+  meta.module-variables(latest-outlined-card-meta)
+);
+
+// The icon button: the standard (unfilled) style at the small, 40px size.
+$icon-button: map.merge(
+  _component(
+    meta.module-variables(latest-icon-button-small),
+    meta.module-variables(latest-icon-button-small-meta)
+  ),
+  _component(
+    meta.module-variables(latest-icon-button-standard),
+    meta.module-variables(latest-icon-button-standard-meta)
+  )
+);
+
+// The outlined text field.
+$outlined-text-field: _component(
+  meta.module-variables(latest-outlined-text-field),
+  meta.module-variables(latest-outlined-text-field-meta)
+);
+
+// The top app bar, at its small size.
+$app-bar: map.merge(
+  _component(
+    meta.module-variables(latest-app-bar),
+    meta.module-variables(latest-app-bar-meta)
+  ),
+  _component(
+    meta.module-variables(latest-app-bar-small),
+    meta.module-variables(latest-app-bar-small-meta)
+  )
+);
+
+// The snackbar.
+$snackbar: _component(
+  meta.module-variables(latest-snackbar),
+  meta.module-variables(latest-snackbar-meta)
+);

@@ -1,0 +1,85 @@
+// Material's ripple, for components other than the button.
+//
+// The button's own ripple was built first and lives with the button
+// (elements/_buttons.scss, material-M2-r2). This file is the same ripple, with the
+// same values from the same source, for the other things a visitor presses: cards,
+// navigation links, icon buttons.
+//
+// Source: @material/web 2.5.0, labs/gb/components/ripple (ripple.scss, ripple.js),
+// and the stable ripple, which agree on these:
+//   - the ripple starts at 20% of its reach and grows to all of it in 450ms on the
+//     standard easing, fading in over 100ms;
+//   - it is solid out to its size and gone at 1.35 times it;
+//   - on release it holds, fades over 375ms, and then resets. The 125ms hold stands in
+//     for Google's 225ms minimum press, which is script: 225ms less the fade-in.
+//
+// Where the ripple starts. It grows from the point that was pressed. That point is
+// two custom properties on the pressed element, --ripple-x and --ripple-y, in pixels
+// from the element's top-left corner. Styles cannot know it: MaterialRippleNullView
+// writes it, from the window channel's pointerdown (the one place script enters).
+// Without them, as after a press from the keyboard, the ripple starts in the middle.
+//
+// The ripple is drawn on a pseudo-element the component gives up for it. Its reach is
+// the pseudo-element's farthest corner from the starting point, so it always covers.
+//
+// Reduced motion: no ripple. Each component keeps the flat pressed layer it had,
+// inside its own reduced-motion rule.
+
+// Registered, so that they can be transitioned. Included once, at the top level.
+@mixin properties {
+  @property --md-ripple-opacity {
+    syntax: '<number>';
+    inherits: false;
+    initial-value: 0;
+  }
+
+  @property --md-ripple-size {
+    syntax: '<percentage>';
+    inherits: false;
+    initial-value: 20%;
+  }
+}
+
+// On the pseudo-element. $color is the component's pressed state-layer colour.
+// $fallback-x and $fallback-y are where the ripple starts with no pressed point: the
+// middle. $offset-x and $offset-y move the starting point, for a pseudo-element that
+// is not the same box as its element.
+@mixin layer(
+  $color,
+  $fallback-x: 50%,
+  $fallback-y: 50%,
+  $offset-x: 0px,
+  $offset-y: 0px
+) {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background-image: radial-gradient(
+    circle farthest-corner at
+      calc(var(--ripple-x, #{$fallback-x}) + #{$offset-x})
+      calc(var(--ripple-y, #{$fallback-y}) + #{$offset-y}),
+    color-mix(
+        in srgb,
+        #{$color} calc(var(--md-ripple-opacity) * 100%),
+        transparent
+      )
+      var(--md-ripple-size),
+    transparent calc(var(--md-ripple-size) * 1.35)
+  );
+  transition:
+    --md-ripple-opacity 375ms linear 125ms,
+    --md-ripple-size 0s linear 500ms;
+}
+
+// On the pseudo-element while its element is pressed. $opacity is the component's
+// pressed state-layer opacity.
+@mixin pressed($opacity) {
+  --md-ripple-opacity: #{$opacity};
+  --md-ripple-size: 100%;
+
+  transition:
+    --md-ripple-opacity 100ms linear,
+    --md-ripple-size 450ms var(--md-sys-motion-easing-standard);
+}

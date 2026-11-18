@@ -1,0 +1,454 @@
+// Buttons — Material 3 Expressive, for plain <button> and <a> markup.
+//
+// Values: every size, colour, opacity, corner and elevation below is read at build
+// time from Google's button tokens (@material/web 2.5.0, tokens/versions/latest,
+// "Google Material 3, Version 34.0.21"), through tokens/_material.scss. What is typed
+// by hand here is what Google keeps in a stylesheet or in script rather than in
+// tokens: the ripple's timings, the focus ring's animation and the curve of the
+// pressed corner. Each is marked with its source.
+//
+// Behaviour follows two readings of Google's own code, as specification:
+//   stable   @material/web's button, ripple and focus ring, at tag v2.5.0
+//   labs     the experimental Expressive button in the same package,
+//            labs/gb/components/{button,ripple,focus}
+// It is written for one element with two pseudo-elements.
+//
+// Classes
+//   .btn                the component; renders filled, 40px, round
+//   .btn-primary        filled (R5)
+//   .btn-filled  .btn-tonal  .btn-outlined  .btn-elevated  .btn-text
+//   .btn-xs  .btn-sm  .btn-md  .btn-lg  .btn-xl      32, 40, 56, 96, 136px high
+//   .btn-square         the square shape, at any size
+// The Shell's older colour variants keep working: .btn-{name} is filled,
+// .btn-outline-{name} is outlined, .btn-plain-{name} is text.
+//
+// States: :hover, :focus-visible, :active, and disabled as [disabled],
+// [aria-disabled='true'] or .disabled. No script (ruling M2-2), but for one thing
+// since material-feel-G: where the ripple starts. It grows from the point that was
+// pressed, which MaterialRippleNullView writes on the button as --ripple-x and
+// --ripple-y; without them it starts in the middle, as it always did. The pressed ripple
+// grows from the centre of the button, as Google's does for a keyboard press.
+
+@use 'sass:map';
+@use 'sass:math';
+@use '../tokens/material';
+
+// The state layer and the ripple are drawn as gradients on one pseudo-element. These
+// three properties are registered so the browser can animate them.
+@property --btn-layer-opacity {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+
+@property --btn-ripple-opacity {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+
+// labs ripple.scss: the ripple starts at 20% of the gradient's radius.
+@property --btn-ripple-size {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 20%;
+}
+
+$_none: 0 0 0 0 transparent;
+$_base: map.get(material.$button, base);
+
+@function _or($value, $fallback) {
+  @if $value == null {
+    @return $fallback;
+  }
+  @return $value;
+}
+
+@function _shadow($elevation) {
+  @if $elevation == null or material.elevation-level($elevation) == 0 {
+    @return $_none;
+  }
+  @return material.elevation-shadow($elevation);
+}
+
+// A colour at an opacity, or transparent when the style has no such token.
+@function _tint($color, $opacity) {
+  @if $color == null or $opacity == null {
+    @return transparent;
+  }
+  @return color-mix(in srgb, $color math.percentage($opacity), transparent);
+}
+
+// A style's own token, or the one every button shares where the style has none.
+@function _shared($style, $token) {
+  @return _or(map.get($style, $token), map.get($_base, $token));
+}
+
+// One Material style, as the private properties the rules below read.
+@mixin _style($name) {
+  $t: map.get(material.$button, $name);
+
+  --_container: #{_or(map.get($t, 'container-color'), transparent)};
+  --_label: #{map.get($t, 'label-text-color')};
+  --_icon: #{map.get($t, 'icon-color')};
+  --_outline: #{_or(map.get($t, 'outline-color'), transparent)};
+
+  // Only a style that has an outline draws one; its width comes from the size.
+  @if map.get($t, 'outline-color') != null {
+    --_outline-width: var(--_outline-size);
+  } @else {
+    --_outline-width: 0px;
+  }
+
+  --_hover-layer: #{map.get($t, 'hovered-state-layer-color')};
+  --_hover-opacity: #{map.get($t, 'hovered-state-layer-opacity')};
+  --_focus-layer: #{map.get($t, 'focused-state-layer-color')};
+  --_focus-opacity: #{map.get($t, 'focused-state-layer-opacity')};
+  --_pressed-layer: #{map.get($t, 'pressed-state-layer-color')};
+  --_pressed-opacity: #{map.get($t, 'pressed-state-layer-opacity')};
+
+  --_shadow: #{_shadow(map.get($t, 'container-elevation'))};
+  --_shadow-hover: #{_shadow(map.get($t, 'hovered-container-elevation'))};
+  --_shadow-focus: #{_shadow(map.get($t, 'focused-container-elevation'))};
+  --_shadow-pressed: #{_shadow(map.get($t, 'pressed-container-elevation'))};
+
+  --_disabled-container: #{_tint(
+      _shared($t, 'disabled-container-color'),
+      _shared($t, 'disabled-container-opacity')
+    )};
+  --_disabled-label: #{_tint(
+      _shared($t, 'disabled-label-text-color'),
+      _shared($t, 'disabled-label-text-opacity')
+    )};
+  --_disabled-icon: #{_tint(
+      _shared($t, 'disabled-icon-color'),
+      _shared($t, 'disabled-icon-opacity')
+    )};
+  --_disabled-outline: #{_or(
+      map.get($t, 'disabled-outline-color'),
+      transparent
+    )};
+}
+
+// One size, the same way. The label's type style is read from the system tokens the
+// theme emits, so it follows them.
+@mixin _size($name) {
+  $s: map.get(material.$button, sizes, $name);
+  $type: map.get(material.$button, size-type, $name);
+
+  --_height: #{map.get($s, 'container-height')};
+  --_space-start: #{map.get($s, 'leading-space')};
+  --_space-end: #{map.get($s, 'trailing-space')};
+  --_gap: #{map.get($s, 'icon-label-space')};
+  --_icon-size: #{map.get($s, 'icon-size')};
+  --_outline-size: #{map.get($s, 'outlined-outline-width')};
+  --_square: #{map.get($s, 'container-shape-square')};
+  --_pressed-shape: #{map.get($s, 'pressed-container-shape')};
+
+  --_font: var(--md-sys-typescale-#{$type}-font);
+  --_font-size: var(--md-sys-typescale-#{$type}-size);
+  --_line-height: var(--md-sys-typescale-#{$type}-line-height);
+  --_weight: var(--md-sys-typescale-#{$type}-weight);
+  --_tracking: var(--md-sys-typescale-#{$type}-tracking);
+}
+
+@mixin button-styles($prefix: '') {
+  $ring-width: map.get(material.$focus-ring, 'thickness');
+  $ring-offset: map.get($_base, 'focus-indicator-outline-offset');
+  $ring-color: map.get($_base, 'focus-indicator-color');
+  // labs focus-ring.scss: the ring grows to 8px in 150ms, then settles in 450ms.
+  $ring-active-width: 8px;
+  $ring-grow: 150ms;
+  $ring-settle: 450ms;
+
+  $icon: ':is(svg, i, .icon)';
+  $disabled: ":is([disabled], [aria-disabled='true'], .disabled)";
+
+  .#{$prefix}btn {
+    @include _style(filled);
+    @include _size(sm);
+
+    // The round shape. The token is the full corner (9999px), which a transition
+    // cannot animate usefully: most of the way from 9999px to 8px looks the same.
+    // Half the height is the same shape and animates (labs _button-tokens.scss,
+    // `root`).
+    --_round: calc(var(--_height) / 2);
+    --_shape: var(--_round);
+    --_state-layer: var(--_hover-layer);
+
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--_gap);
+    box-sizing: border-box;
+    min-height: var(--_height);
+    padding-block: calc((var(--_height) - var(--_line-height)) / 2);
+    padding-inline: var(--_space-start) var(--_space-end);
+    border: 0;
+    border-radius: var(--_shape);
+    outline: 0;
+    background: var(--_container);
+    box-shadow:
+      inset 0 0 0 var(--_outline-width) var(--_outline),
+      var(--_shadow);
+    color: var(--_label);
+    font-family: var(--_font), system-ui, sans-serif;
+    font-size: var(--_font-size);
+    font-weight: var(--_weight);
+    line-height: var(--_line-height);
+    letter-spacing: var(--_tracking);
+    text-decoration: none;
+    white-space: nowrap;
+    vertical-align: top;
+    cursor: pointer;
+    user-select: none;
+    appearance: none;
+    -webkit-tap-highlight-color: transparent;
+    // Elevation: stable button/internal/_elevation.scss, lines 19–20.
+    // Corner: labs button.scss. This curve is Google's stand-in for the token's
+    // spring (stiffness 1400, damping 0.9), which CSS cannot take.
+    transition:
+      box-shadow 280ms var(--md-sys-motion-easing-emphasized),
+      border-radius 350ms cubic-bezier(0.42, 1.67, 0.21, 0.9);
+
+    // State layer and ripple, under the label and over the container.
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      border-radius: inherit;
+      pointer-events: none;
+      // labs ripple.scss: the ripple is solid to its size and gone at 1.35 times it.
+      background-image:
+        radial-gradient(
+          circle farthest-corner at var(--ripple-x, 50%) var(--ripple-y, 50%),
+          color-mix(
+              in srgb,
+              var(--_pressed-layer) calc(var(--btn-ripple-opacity) * 100%),
+              transparent
+            )
+            var(--btn-ripple-size),
+          transparent calc(var(--btn-ripple-size) * 1.35)
+        ),
+        linear-gradient(
+          color-mix(
+            in srgb,
+            var(--_state-layer) calc(var(--btn-layer-opacity) * 100%),
+            transparent
+          )
+        );
+      // Released: the ripple holds, then fades, then resets.
+      // 15ms and 375ms: labs ripple.scss (the stable ripple has the same two).
+      // The 125ms hold stands in for Google's 225ms minimum press, which is script
+      // (labs ripple.js): 225ms less the 100ms fade-in. 500ms is the hold plus the
+      // fade.
+      transition:
+        --btn-layer-opacity 15ms linear,
+        --btn-ripple-opacity 375ms linear 125ms,
+        --btn-ripple-size 0s linear 500ms;
+    }
+
+    // Touch target: stable button/internal/_touch-target.scss, lines 7–14.
+    &::after {
+      content: '';
+      position: absolute;
+      inset-inline: 0;
+      top: 50%;
+      height: max(48px, 100%);
+      transform: translateY(-50%);
+    }
+
+    // Leading icon.
+    > #{$icon} {
+      flex: none;
+      width: var(--_icon-size);
+      height: var(--_icon-size);
+      font-size: var(--_icon-size);
+      color: var(--_icon);
+      fill: currentColor;
+      pointer-events: none;
+    }
+
+    // A spacing utility on the element (the hero's button carries px-8) does not
+    // resize a Material button. Same declarations as above, one attribute more
+    // specific than the utility classes.
+    &:is([class*='px-'], [class*='py-'], [class^='p-'], [class*=' p-']) {
+      padding-block: calc((var(--_height) - var(--_line-height)) / 2);
+      padding-inline: var(--_space-start) var(--_space-end);
+    }
+
+    // Hover: only where the pointer can hover (stable ripple.ts, lines 427–429).
+    @media (hover: hover) {
+      &:hover {
+        box-shadow:
+          inset 0 0 0 var(--_outline-width) var(--_outline),
+          var(--_shadow-hover);
+
+        &::before {
+          --btn-layer-opacity: var(--_hover-opacity);
+        }
+      }
+    }
+
+    // Focus, from the keyboard: the ring and the focus state layer. After hover, so
+    // that a focused button under the pointer shows the focus layer.
+    &:focus-visible {
+      --_state-layer: var(--_focus-layer);
+
+      outline: $ring-width solid $ring-color;
+      outline-offset: $ring-offset;
+      box-shadow:
+        inset 0 0 0 var(--_outline-width) var(--_outline),
+        var(--_shadow-focus);
+      animation: #{$prefix}btn-focus-ring ($ring-grow + $ring-settle)
+        var(--md-sys-motion-easing-standard);
+
+      &::before {
+        --btn-layer-opacity: var(--_focus-opacity);
+      }
+    }
+
+    // Pressed: the corner tightens and the ripple grows.
+    &:active {
+      border-radius: var(--_pressed-shape);
+      box-shadow:
+        inset 0 0 0 var(--_outline-width) var(--_outline),
+        var(--_shadow-pressed);
+
+      &::before {
+        --btn-ripple-opacity: var(--_pressed-opacity);
+        --btn-ripple-size: 100%;
+        // 100ms; 450ms on the standard easing, to 100%: labs ripple.scss.
+        transition:
+          --btn-layer-opacity 15ms linear,
+          --btn-ripple-opacity 100ms linear,
+          --btn-ripple-size 450ms var(--md-sys-motion-easing-standard);
+      }
+    }
+
+    // Disabled. Every style, text and outlined included, shows the disabled
+    // container (labs _button-tokens.scss, `disabled`; the tokens agree).
+    &#{$disabled} {
+      background: var(--_disabled-container);
+      box-shadow: inset 0 0 0 var(--_outline-width) var(--_disabled-outline);
+      color: var(--_disabled-label);
+      cursor: default;
+      pointer-events: none;
+      transition: none;
+
+      &::before {
+        display: none;
+      }
+
+      > #{$icon} {
+        color: var(--_disabled-icon);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: box-shadow 280ms var(--md-sys-motion-easing-emphasized);
+
+      &:focus-visible {
+        animation: none;
+      }
+
+      &::before,
+      &:active::before {
+        transition: none;
+      }
+    }
+
+    // Stable button/internal/_shared.scss, lines 152–167; ripple.ts, lines 441–444.
+    @media (forced-colors: active) {
+      outline: 1px solid CanvasText;
+      outline-offset: -1px;
+
+      &::before {
+        display: none;
+      }
+
+      &#{$disabled} {
+        color: GrayText;
+        outline-color: GrayText;
+      }
+    }
+  }
+
+  // The other four styles. Filled is the default, set on .btn itself.
+  .#{$prefix}btn-tonal {
+    @include _style(tonal);
+  }
+
+  .#{$prefix}btn-outlined,
+  [class*='#{$prefix}btn-outline-'] {
+    @include _style(outlined);
+  }
+
+  .#{$prefix}btn-text,
+  [class*='#{$prefix}btn-plain-'] {
+    @include _style(text);
+  }
+
+  .#{$prefix}btn-elevated {
+    @include _style(elevated);
+  }
+
+  // The other four sizes. 40px (.btn-sm) is the default, set on .btn itself; the
+  // class is defined so a size can be named.
+  @each $size in (xs, sm, md, lg, xl) {
+    .#{$prefix}btn-#{$size} {
+      @include _size($size);
+    }
+  }
+
+  // The square shape, at whatever size the button has.
+  .#{$prefix}btn-square {
+    --_shape: var(--_square);
+  }
+
+  // The ring grows to its active width, then settles (labs focus-ring.scss).
+  @keyframes #{$prefix}btn-focus-ring {
+    0% {
+      outline-width: 0;
+    }
+    #{math.percentage(math.div($ring-grow, $ring-grow + $ring-settle))} {
+      outline-width: $ring-active-width;
+    }
+    100% {
+      outline-width: $ring-width;
+    }
+  }
+
+  // Kept from the Shell, unchanged: not Material button styles.
+  .#{$prefix}btn-icon-only {
+    padding: 0.5rem;
+    border-radius: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    justify-content: center;
+  }
+
+  .#{$prefix}btn-loading {
+    position: relative;
+    pointer-events: none;
+
+    .spinner {
+      margin-right: 0.5rem;
+      border: 2px solid currentColor;
+      border-right-color: transparent;
+      border-radius: 50%;
+      width: 1em;
+      height: 1em;
+      animation: spin 0.75s linear infinite;
+    }
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}

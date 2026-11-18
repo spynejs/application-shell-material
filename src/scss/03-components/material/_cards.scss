@@ -1,0 +1,155 @@
+// Material cards.
+//
+// Values are read at build time from Google's card tokens (@material/web 2.5.0,
+// tokens/versions/latest) through tokens/_material.scss.
+//
+// Which card each of the Shell's containers is:
+//   elevated  the page items and the landing hero: content that sits on the page
+//   outlined  the cards inside them (page cards, feature cards, testimonials), so a
+//             card never casts a shadow onto a card
+// A card that is a link is pressable, and takes Material's states: a state layer, a
+// lift on hover, the focus indicator.
+
+@use 'sass:map';
+@use 'sass:math';
+@use '../../00-spynejs-design-system/tokens/material';
+@use 'ripple';
+@use 'type';
+
+$elevated: material.$elevated-card;
+$outlined: material.$outlined-card;
+
+@mixin styles {
+  main#app {
+    // ---- Elevated: the containers ----
+    // The page item reads its corner from --pi-radius. Its surface and its shadow
+    // already are the elevated card's (the bridge).
+    .page-item {
+      --pi-radius: #{map.get($elevated, 'container-shape')};
+    }
+
+    .hero-component--landing {
+      border-radius: map.get($elevated, 'container-shape');
+      background-color: map.get($elevated, 'container-color');
+    }
+
+    // ---- Outlined: the cards inside ----
+    .page-card,
+    .feature-card,
+    .testimonial {
+      border: map.get($outlined, 'outline-width') solid
+        map.get($outlined, 'outline-color');
+      border-radius: map.get($outlined, 'container-shape');
+      background: map.get($outlined, 'container-color');
+      box-shadow: material.elevation-shadow(
+        map.get($outlined, 'container-elevation')
+      );
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .page-card {
+      --card-text-color: var(--md-sys-color-on-surface);
+      --card-meta-color: var(--md-sys-color-on-surface-variant);
+    }
+
+    .card__title,
+    .feature-card h2 {
+      @include type.style('title-large', $emphasized: true);
+    }
+
+    .card__meta,
+    .feature-card p {
+      @include type.style('body-medium');
+
+      color: var(--md-sys-color-on-surface-variant);
+    }
+
+    // ---- Between cards ----
+    // "Padding between cards: 8dp max" (m3.material.io, Cards, specs, read
+    // 2026-11-18). Google's tokens carry no figure for it. The Shell's grids of
+    // cards have 24 to 32px: the page cards, the feature cards, the testimonials.
+    .card-list,
+    .features,
+    .testimonials-grid {
+      gap: 8px;
+    }
+
+    // ---- A card that is a link ----
+    a.page-card {
+      // Elevation: stable button/internal/_elevation.scss, the same 280ms.
+      transition: box-shadow 280ms var(--md-sys-motion-easing-emphasized);
+
+      // The state layer, over the whole card, image included.
+      &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: map.get($outlined, 'hover-state-layer-color');
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 15ms linear;
+      }
+
+      // A card is a container that can be pressed, not a line of text: it is not
+      // underlined. The Shell underlines a link under the pointer and one that has
+      // keyboard focus (elements/_links.scss); for a card the state layer, the
+      // elevation and the focus indicator say those things.
+      &:hover,
+      &:focus-visible {
+        text-decoration: none;
+      }
+
+      @media (hover: hover) {
+        &:hover {
+          box-shadow: material.elevation-shadow(
+            map.get($outlined, 'hover-container-elevation')
+          );
+
+          &::after {
+            opacity: map.get($outlined, 'hover-state-layer-opacity');
+          }
+        }
+      }
+
+      // The Shell's own focus outline shows for a pointer too; Material's indicator
+      // is for the keyboard.
+      &:focus {
+        outline: 0;
+      }
+
+      &:focus-visible {
+        outline: map.get($outlined, 'focus-indicator-thickness') solid
+          map.get($outlined, 'focus-indicator-color');
+        outline-offset: map.get($outlined, 'focus-indicator-outline-offset');
+
+        &::after {
+          opacity: map.get($outlined, 'focus-state-layer-opacity');
+        }
+      }
+
+      // A press. Where motion is welcome it is Material's ripple, from the pressed
+      // point, over the whole card as the state layer is. With reduced motion asked
+      // for it is the flat layer the card had before.
+      @media (prefers-reduced-motion: reduce) {
+        &:active::after {
+          opacity: map.get($outlined, 'pressed-state-layer-opacity');
+        }
+      }
+
+      @media (prefers-reduced-motion: no-preference) {
+        &::before {
+          @include ripple.layer(
+            map.get($outlined, 'pressed-state-layer-color')
+          );
+        }
+
+        &:active::before {
+          @include ripple.pressed(
+            map.get($outlined, 'pressed-state-layer-opacity')
+          );
+        }
+      }
+    }
+  }
+}

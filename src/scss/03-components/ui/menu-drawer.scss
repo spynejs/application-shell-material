@@ -1,0 +1,228 @@
+// Navigation drawer — Material 3 Expressive values, modal.
+//
+// Values are read at build time from Google's navigation-drawer and scrim tokens
+// (@material/web 2.5.0, tokens/versions/latest, "Google Material 3, Version 34.0.21")
+// through tokens/_material.scss. What Google's tokens do not carry is marked where it
+// is used, with its source.
+//
+// Structure (ui-menu-drawer.tmpl.html): #menu-drawer is a layer over the page, under
+// the header. It holds the scrim and the panel; the panel holds the links. Closed is
+// hidden, not removed (ruling M3-2): the class `open` on #menu-drawer is the state.
+
+@use 'sass:list';
+@use 'sass:map';
+@use 'sass:math';
+@use '../../00-spynejs-design-system/tokens' as *;
+@use '../../00-spynejs-design-system/tokens/material';
+@use '../material/ripple';
+
+$t: material.$navigation-drawer;
+
+// 0.25s, standard easing: labs/navigationdrawer/internal/_navigation-drawer-modal.scss,
+// lines 17–19.
+$duration: 250ms;
+$easing: var(--md-sys-motion-easing-standard);
+
+// Google gives the container's four corners as a list: start-start, start-end,
+// end-end, end-start.
+$shape: map.get($t, 'container-shape');
+
+@function _layer($color, $opacity) {
+  @return color-mix(in srgb, $color math.percentage($opacity), transparent);
+}
+
+#menu-drawer {
+  position: fixed;
+  // Under the header, so the toggle stays in reach while the drawer is open. Material
+  // draws a modal drawer over the full height; the brief asks that the toggle closes it.
+  inset: $spacing-12 0 0 0;
+  z-index: 999; // just under the header's 1000
+  visibility: hidden;
+  pointer-events: none;
+  transition: visibility 0s linear $duration;
+
+  &.open {
+    visibility: visible;
+    pointer-events: auto;
+    transition: visibility 0s linear 0s;
+  }
+
+  // Scrim: the colour role and opacity of Google's scrim tokens (md-comp-scrim). The
+  // drawer's own tokens name a fixed palette colour instead, which would lighten the
+  // page in the dark scheme; it is not used.
+  .menu-drawer__scrim {
+    position: absolute;
+    inset: 0;
+    background: map.get(material.$scrim, 'container-color');
+    opacity: 0;
+    transition: opacity $duration $easing;
+  }
+
+  &.open .menu-drawer__scrim {
+    opacity: map.get(material.$scrim, 'container-opacity');
+  }
+
+  .menu-drawer__panel {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    box-sizing: border-box;
+    // 360px, and never the full width of a narrow screen.
+    inline-size: min(#{map.get($t, 'container-width')}, calc(100% - 56px));
+    padding: 12px; // the kit's container padding; the spec's "active indicator padding"
+    overflow-y: auto;
+    background: map.get($t, 'modal-container-color');
+    border-radius: list.nth($shape, 1) list.nth($shape, 2) list.nth($shape, 3)
+      list.nth($shape, 4);
+    box-shadow: material.elevation-shadow(
+      map.get($t, 'modal-container-elevation')
+    );
+    transform: translateX(-100%);
+    transition: transform $duration $easing;
+  }
+
+  &.open .menu-drawer__panel {
+    transform: none;
+  }
+
+  // A destination. The selected one carries the active indicator.
+  a.nav {
+    --_label: #{map.get($t, 'inactive-label-text-color')};
+    --_layer: transparent;
+
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    min-height: map.get($t, 'active-indicator-height');
+    padding-inline: 24px; // the kit's nav item without an icon
+    border-radius: map.get($t, 'active-indicator-shape');
+    background-color: transparent;
+    background-image: linear-gradient(var(--_layer), var(--_layer));
+    font-family: map.get($t, 'label-text-font'), system-ui, sans-serif;
+    font-size: map.get($t, 'label-text-size');
+    font-weight: map.get($t, 'label-text-weight');
+    line-height: map.get($t, 'label-text-line-height');
+    letter-spacing: map.get($t, 'label-text-tracking');
+    text-decoration: none;
+    cursor: pointer;
+
+    // Space between one destination and the next. Material's drawer has none: its
+    // spec gives "Padding between elements: 0dp" (m3.material.io, Navigation drawer,
+    // specs, read 2026-11-18), so a destination under the pointer touches the
+    // selected one beside it. This template adds a space, as a deliberate departure
+    // from that spec. The figure is Google's for the same job in another component:
+    // the space between the items of a collapsed navigation rail.
+    & + a.nav {
+      margin-block-start: map.get(
+        material.$navigation-rail-collapsed,
+        'item-vertical-space'
+      );
+    }
+
+    &,
+    &:visited {
+      color: var(--_label);
+    }
+
+    @media (hover: hover) {
+      &:hover {
+        --_label: #{map.get($t, 'inactive-hover-label-text-color')};
+        --_layer: #{_layer(
+            map.get($t, 'inactive-hover-state-layer-color'),
+            map.get($t, 'hover-state-layer-opacity')
+          )};
+
+        text-decoration: none;
+      }
+    }
+
+    // Keyboard focus: the state layer, and the indicator drawn inside the item.
+    &:focus-visible {
+      --_label: #{map.get($t, 'inactive-focus-label-text-color')};
+      --_layer: #{_layer(
+          map.get($t, 'inactive-focus-state-layer-color'),
+          map.get($t, 'focus-state-layer-opacity')
+        )};
+
+      outline: map.get($t, 'focus-indicator-thickness') solid
+        map.get($t, 'focus-indicator-color');
+      outline-offset: map.get($t, 'focus-indicator-outline-offset');
+    }
+
+    &:active {
+      --_label: #{map.get($t, 'inactive-pressed-label-text-color')};
+    }
+
+    // A press (material-feel-G). Where motion is welcome it is Material's ripple,
+    // from the pressed point, on a pseudo-element under the label
+    // (material/_ripple.scss). With reduced motion asked for it is the flat layer.
+    position: relative;
+    isolation: isolate;
+
+    @media (prefers-reduced-motion: reduce) {
+      &:active {
+        --_layer: #{_layer(
+            map.get($t, 'inactive-pressed-state-layer-color'),
+            map.get($t, 'pressed-state-layer-opacity')
+          )};
+      }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      &::after {
+        @include ripple.layer(
+          map.get($t, 'inactive-pressed-state-layer-color')
+        );
+
+        z-index: -1;
+      }
+
+      &:active::after {
+        @include ripple.pressed(map.get($t, 'pressed-state-layer-opacity'));
+      }
+    }
+
+    &.selected {
+      --_label: #{map.get($t, 'active-label-text-color')};
+
+      background-color: map.get($t, 'active-indicator-color');
+      font-weight: map.get($t, 'active-label-text-weight');
+      pointer-events: none; // as before: the current page is not a link to itself
+
+      &:focus-visible {
+        --_layer: #{_layer(
+            map.get($t, 'active-focus-state-layer-color'),
+            map.get($t, 'focus-state-layer-opacity')
+          )};
+      }
+    }
+
+    // The Shell nests destinations three deep; Material's drawer has one level. The
+    // nesting is kept, as indentation.
+    &.nav-level-2 {
+      padding-inline-start: 40px;
+    }
+
+    &.nav-level-3 {
+      padding-inline-start: 56px;
+    }
+  }
+
+  // Reduced motion. Material (m3.material.io, Transitions, applying transitions):
+  // with the setting on, "use subtle fades instead of intense sliding or scaling
+  // animations". So the panel does not slide: it stays in place and fades, quickly,
+  // as the same page asks of a fade over other content (100ms, the short2 duration;
+  // the page gives no number). The scrim's fade and the drawer's own timing are as
+  // they are without the setting.
+  @media (prefers-reduced-motion: reduce) {
+    .menu-drawer__panel {
+      transform: none;
+      opacity: 0;
+      transition: opacity var(--md-sys-motion-duration-short2) linear;
+    }
+
+    &.open .menu-drawer__panel {
+      opacity: 1;
+    }
+  }
+}

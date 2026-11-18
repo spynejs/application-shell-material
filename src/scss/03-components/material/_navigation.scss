@@ -1,0 +1,292 @@
+// State layers for what the visitor can press outside the page's content: the
+// header's navigation links, its two icon buttons, the breadcrumbs and the footer's
+// link. Buttons, cards and the drawer's links already have theirs.
+//
+// A press on a navigation link or an icon button is Material's ripple (_ripple.scss),
+// since material-feel-G. The breadcrumbs and the footer's link are text links and
+// keep a flat pressed layer.
+//
+// Material's rule is the same everywhere: a layer in the content's own colour over
+// the element, at 8% under the pointer and 10% when focused or pressed.
+//
+// Values: the navigation links read Google's navigation-drawer tokens (the same
+// destinations, laid out in a row); the icon buttons read the icon-button tokens.
+
+@use 'sass:map';
+@use 'sass:math';
+@use '../../00-spynejs-design-system/tokens/material';
+@use 'ripple';
+@use 'type';
+
+$nav: material.$navigation-drawer;
+$icon: material.$icon-button;
+
+@function _layer($color, $opacity) {
+  @return color-mix(in srgb, $color math.percentage($opacity), transparent);
+}
+
+// A state layer drawn as the element's background image, so it needs no extra element.
+@mixin _layered {
+  --_layer: transparent;
+
+  background-image: linear-gradient(var(--_layer), var(--_layer));
+}
+
+// A press. Where motion is welcome it is Material's ripple, from the pressed point,
+// on a pseudo-element under the label. With reduced motion asked for it is the flat
+// layer these elements had before.
+@mixin _pressed($color, $opacity) {
+  position: relative;
+  isolation: isolate;
+
+  @media (prefers-reduced-motion: reduce) {
+    &:active {
+      --_layer: #{_layer($color, $opacity)};
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    &::after {
+      @include ripple.layer($color);
+
+      z-index: -1;
+    }
+
+    &:active::after {
+      @include ripple.pressed($opacity);
+    }
+  }
+}
+
+@mixin styles {
+  main#app {
+    // ---- Header navigation links: destinations, in a row ----
+    .site-nav {
+      gap: 4px;
+    }
+
+    .site-nav a.nav {
+      @include _layered;
+      @include type.style('label-large');
+
+      display: inline-flex;
+      align-items: center;
+      box-sizing: border-box;
+      // 40px: the height of a button, the header's other control.
+      min-height: map.get(map.get(material.$button, base), 'container-height');
+      padding: 0 12px;
+      border-radius: map.get($nav, 'active-indicator-shape');
+      color: map.get($nav, 'inactive-label-text-color');
+      // Material 3 does not set labels in capitals; the label shows as it is written.
+      text-transform: none;
+      text-decoration: none;
+
+      @media (hover: hover) {
+        &:hover {
+          --_layer: #{_layer(
+              map.get($nav, 'inactive-hover-state-layer-color'),
+              map.get($nav, 'hover-state-layer-opacity')
+            )};
+
+          color: map.get($nav, 'inactive-hover-label-text-color');
+          text-decoration: none;
+        }
+      }
+
+      &:focus-visible {
+        --_layer: #{_layer(
+            map.get($nav, 'inactive-focus-state-layer-color'),
+            map.get($nav, 'focus-state-layer-opacity')
+          )};
+      }
+
+      @include _pressed(
+        map.get($nav, 'inactive-pressed-state-layer-color'),
+        map.get($nav, 'pressed-state-layer-opacity')
+      );
+
+      // The destination you are on carries the active indicator.
+      &.selected {
+        background-color: map.get($nav, 'active-indicator-color');
+        color: map.get($nav, 'active-label-text-color');
+      }
+    }
+
+    // ---- Which navigation a window gets ----
+    // Material: "Use modal navigation drawers in compact and medium breakpoints"
+    // (m3.material.io, Navigation drawer; read 2026-11-17). Medium ends at 839px.
+    // The Shell changes its header at 768px: up to there the menu button, above it
+    // the links. Between the two an open drawer had no button to close it. These
+    // rules carry the Shell's small-window header on up to 839px, so the menu
+    // button and the drawer serve compact and medium, and the links begin at
+    // Material's expanded breakpoint, 840px.
+    //
+    // They repeat what the Shell's own rule sets below 769px (ui/header.scss,
+    // ui/menu-hamburger.scss), for the widths it does not reach.
+    @media (width > 768px) and (width < 840px) {
+      header#site-header {
+        .site-nav {
+          display: none;
+        }
+
+        #menu_toggle {
+          display: block;
+          opacity: 1;
+          pointer-events: all;
+        }
+
+        .branding {
+          visibility: hidden;
+          pointer-events: none;
+        }
+      }
+    }
+
+    // ---- Icon buttons: the theme toggle and the menu toggle ----
+    .theme-toggle {
+      @include _layered;
+
+      inline-size: map.get($icon, 'container-height');
+      block-size: map.get($icon, 'container-height');
+      margin-inline: 0;
+      border-radius: map.get($icon, 'container-shape-round');
+      color: map.get($icon, 'icon-color');
+
+      svg {
+        inline-size: map.get($icon, 'icon-size');
+        block-size: map.get($icon, 'icon-size');
+      }
+
+      @media (hover: hover) {
+        &:hover {
+          --_layer: #{_layer(
+              map.get($icon, 'hovered-state-layer-color'),
+              map.get($icon, 'hovered-state-layer-opacity')
+            )};
+
+          color: map.get($icon, 'hovered-icon-color');
+        }
+      }
+
+      &:focus-visible {
+        --_layer: #{_layer(
+            map.get($icon, 'focused-state-layer-color'),
+            map.get($icon, 'focused-state-layer-opacity')
+          )};
+      }
+
+      @include _pressed(
+        map.get($icon, 'pressed-state-layer-color'),
+        map.get($icon, 'pressed-state-layer-opacity')
+      );
+    }
+
+    // The menu toggle draws its three bars itself and turns them into a cross, so
+    // its box is left as it is. The state layer is a 40px circle behind it.
+    #menu_toggle {
+      // The Shell places the toggle itself (position: absolute, at the header's
+      // leading edge), and that already makes it the box the circle below is
+      // placed in. Its position is not set here: setting it took the toggle out
+      // of the Shell's placement and to the far end of the header.
+      &::before {
+        content: '';
+        position: absolute;
+        inset: 50% auto auto 50%;
+        inline-size: map.get($icon, 'container-height');
+        block-size: map.get($icon, 'container-height');
+        border-radius: 50%;
+        background: map.get($icon, 'hovered-state-layer-color');
+        opacity: 0;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        transition: opacity 15ms linear;
+      }
+
+      @media (hover: hover) {
+        &:hover::before {
+          opacity: map.get($icon, 'hovered-state-layer-opacity');
+        }
+      }
+
+      &:focus-visible::before {
+        opacity: map.get($icon, 'focused-state-layer-opacity');
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        &:active::before {
+          opacity: map.get($icon, 'pressed-state-layer-opacity');
+        }
+      }
+
+      // The ripple is the same 40px circle as the state layer. The circle is wider
+      // than the toggle's own box, by $over on each side, and the pressed point is
+      // measured from the box: so the starting point is moved by that much, and
+      // with no pressed point it is the middle of the box.
+      @media (prefers-reduced-motion: no-preference) {
+        $box: 30px; // ui/menu-hamburger.scss
+        $circle: map.get($icon, 'container-height');
+        $over: math.div($circle - $box, 2);
+
+        &::after {
+          @include ripple.layer(
+            map.get($icon, 'pressed-state-layer-color'),
+            math.div($box, 2),
+            math.div($box, 2),
+            $over,
+            $over
+          );
+
+          inset: 50% auto auto 50%;
+          inline-size: $circle;
+          block-size: $circle;
+          border-radius: 50%;
+          transform: translate(-50%, -50%);
+        }
+
+        &:active::after {
+          @include ripple.pressed(
+            map.get($icon, 'pressed-state-layer-opacity')
+          );
+        }
+      }
+    }
+
+    // ---- Breadcrumbs and the footer's link: text you can press ----
+    // The layer sits a little outside the text, without moving it.
+    .breadcrumbs .breadcrumb-item a,
+    .footer-credit a {
+      @include _layered;
+
+      margin: -4px -8px;
+      padding: 4px 8px;
+      border-radius: var(--md-sys-shape-corner-small);
+
+      @media (hover: hover) {
+        &:hover {
+          --_layer: #{_layer(
+              var(--md-sys-color-on-surface),
+              map.get($nav, 'hover-state-layer-opacity')
+            )};
+        }
+      }
+
+      &:focus-visible {
+        --_layer: #{_layer(
+            var(--md-sys-color-on-surface),
+            map.get($nav, 'focus-state-layer-opacity')
+          )};
+      }
+
+      &:active {
+        --_layer: #{_layer(
+            var(--md-sys-color-on-surface),
+            map.get($nav, 'pressed-state-layer-opacity')
+          )};
+      }
+    }
+
+    .breadcrumbs .breadcrumb-item a {
+      @include type.style('label-large');
+    }
+  }
+}

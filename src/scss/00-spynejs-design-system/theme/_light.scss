@@ -1,0 +1,18 @@
+// Light theme.
+//
+// Emitted on `main#app` by `theme-vars`. It carries, in this order:
+//   1. the Material system tokens that do not change with the colour scheme
+//      (typeface, type scale, shape, motion, state, elevation),
+//   2. the Material colour roles for the light scheme,
+//   3. the bridge: the Shell's variable names, defined from those roles,
+//   4. the few Shell values that have no Material role.
+// Sources: tokens/_material.scss and theme/_bridge.scss.
+
+@use 'sass:map';
+@use '../tokens/material';
+@use 'bridge';
+
+$light-theme: map.merge(
+  map.merge(material.$sys-static, material.$sys-color-light),
+  map.merge(bridge.$bridge, bridge.$kept-light)
+);

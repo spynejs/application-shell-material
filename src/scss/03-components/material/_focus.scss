@@ -1,0 +1,30 @@
+// One focus indicator.
+//
+// Material marks keyboard focus the same way everywhere: a 3px line in the secondary
+// colour, 2px outside the element. The Shell's links, navigation and icon buttons
+// each drew their own. This rule gives them Material's.
+//
+// Left out, because each already has Material's own indicator for its kind: buttons
+// (.btn), cards that are links, the drawer's links (drawn inside the item) and text
+// fields (a thicker outline in the primary colour).
+
+@use 'sass:map';
+@use '../../00-spynejs-design-system/tokens/material';
+
+$thickness: map.get(material.$focus-ring, 'thickness');
+$offset: map.get(material.$focus-ring, 'outer-offset');
+$color: map.get(map.get(material.$button, base), 'focus-indicator-color');
+
+@mixin styles {
+  main#app {
+    :is(a, button, summary, [tabindex]):not(
+        .btn,
+        .page-card,
+        #menu-drawer *
+      ):focus-visible {
+      outline: $thickness solid $color;
+      outline-offset: $offset;
+      box-shadow: none;
+    }
+  }
+}

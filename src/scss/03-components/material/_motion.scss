@@ -1,0 +1,244 @@
+@use 'sass:map';
+@use '../../00-spynejs-design-system/tokens/material';
+
+// Motion between pages — Material's transitions.
+//
+// Material's page (m3.material.io, Transitions, transition patterns; read 2026-11-17)
+// names the transition by the kind of move:
+//
+//   Top level             between destinations. The screen that is leaving quickly
+//                         fades out, and then the one arriving fades in.
+//   Forward and backward  between consecutive levels: a page to one of its own
+//                         sub-pages, and back. "A horizontal sliding motion", and on
+//                         Android "a fade as screens slide", so that "the screens
+//                         don't have to slide the full width".
+//
+// Which one a move takes is not decided here. The Material channel reads it from the
+// route and names it; the stage writes the name on the element that holds the pages
+// (data-page-transition). Here the name only sets how far a page slides: nothing for
+// top level; a short way for forward and backward, the leaving page out to one side
+// and the arriving page in from the other. The fades are the same for all three.
+//
+// The order is the same for all three as well. A page that is leaving carries
+// .is-leaving (the page view sets it on the route change). It is removed when the
+// Material channel says its time is up, and until then the arriving page, which is
+// already in the document after it, is not displayed. So the two are never seen
+// together, and the arriving page's motion begins when it is first displayed.
+//
+// The wait is the channel's (CHANNEL_MATERIAL, pageExitDuration); nothing here keeps
+// time. The channel counts 120ms from the frame in which the exit below starts, and
+// the exit takes 100ms of it.
+//
+// Reduced motion. Material's page (Transitions, applying transitions): with the
+// setting on, transitions should "use subtle fades instead of intense sliding or
+// scaling animations" and "disable … shape morphing"; and a jump cut, one screen
+// replacing another with nothing between, is to be avoided. So with reduced motion
+// asked for every move keeps its fades and loses the rest: no page slides, and in a
+// container transform no shape moves.
+//
+// Timing and distance: Material's page gives no number. Leaving: 100ms (the short2
+// duration) on the standard accelerate easing, the easing Material uses for things
+// that leave. Arriving: 200ms (short4) on the standard decelerate easing. The slide
+// is 30px.
+
+$slide: 30px;
+
+// ---- The container transform ----
+//
+// Material (same page): an element transforms "to show more detail, like a Card
+// expanding into a details page"; the container's shape connects the start and the
+// end. It is for a move down a level that began on a card.
+//
+// The browser makes this motion, as a view transition: it takes a picture before
+// and after a change, and moves and resizes one named shape into the other. The
+// stage asks for it and makes the change (the class .is-page-swapped on the element
+// that holds the pages). Here:
+//   - before the change, the card that was followed (.is-container-origin, set by
+//     its page) carries the name;
+//   - after it, the arriving page carries the same name, and is displayed in place
+//     of the leaving one;
+//   - the two pages do not animate by themselves; the browser's pictures do.
+// A browser with no view transitions never gets this name: the stage gives the move
+// 'forward' instead.
+//
+// The way back is the same thing reversed ('container-collapse'): the page being
+// left shrinks into the card that leads to it. It is asked for by the arriving page,
+// which is the only one that knows it has that card; with no such card, or no view
+// transitions, the move stays 'backward'.
+//
+// The values below are written out at build time, because the browser's pictures
+// hang from the document's root, above main#app where the tokens are custom
+// properties. Time and easing: Material's page gives none. 400ms (medium4) on the
+// emphasized easing for the shape; the card's content gives way to the page's in the
+// first 100ms (short2), "the fastest part of the transition", as the page asks of a
+// cross fade. The shape's corners are the card's.
+$container-name: material-page-container;
+
+@function _static($token) {
+  $value: map.get(material.$sys-static, $token);
+
+  @if $value == null {
+    @error 'No system token named #{$token}.';
+  }
+
+  @return $value;
+}
+
+@mixin styles {
+  main#app {
+    // How far a page slides, by the kind of move. Forward: the leaving page goes
+    // out toward the start and the arriving page comes in from the end. Backward
+    // is the mirror of it.
+    .page-container {
+      --_page-exit-x: 0px;
+      --_page-enter-x: 0px;
+
+      // With reduced motion asked for, no page slides: these are never set.
+      @media (prefers-reduced-motion: no-preference) {
+        &[data-page-transition='forward'] {
+          --_page-exit-x: #{-$slide};
+          --_page-enter-x: #{$slide};
+        }
+
+        &[data-page-transition='backward'] {
+          --_page-exit-x: #{$slide};
+          --_page-enter-x: #{-$slide};
+        }
+
+        &:dir(rtl) {
+          &[data-page-transition='forward'] {
+            --_page-exit-x: #{$slide};
+            --_page-enter-x: #{-$slide};
+          }
+
+          &[data-page-transition='backward'] {
+            --_page-exit-x: #{-$slide};
+            --_page-enter-x: #{$slide};
+          }
+        }
+      }
+    }
+
+    .page-view,
+    #page-404 {
+      animation: material-page-enter var(--md-sys-motion-duration-short4)
+        var(--md-sys-motion-easing-standard-decelerate) both;
+    }
+
+    :is(.page-view, #page-404).is-leaving {
+      animation: material-page-exit var(--md-sys-motion-duration-short2)
+        var(--md-sys-motion-easing-standard-accelerate) both;
+      // It is on its way out: it takes no clicks.
+      pointer-events: none;
+    }
+
+    // The page arriving after a leaving page waits its turn. In a container
+    // transform its turn comes with the swap, not with the leaving page's removal.
+    .page-container:not(.is-page-swapped)
+      :is(.page-view, #page-404).is-leaving
+      ~ :is(.page-view, #page-404) {
+      display: none;
+    }
+
+    // The way back: the page being left collapses into the card that leads to it.
+    // The same pictures, the other way round. Before the swap the leaving page
+    // carries the name (and a surface, to be a shape); after it, the card the
+    // arriving page has marked (.is-container-target) does.
+    .page-container[data-page-transition='container-collapse'] {
+      :is(.page-view, #page-404),
+      :is(.page-view, #page-404).is-leaving {
+        animation: none;
+      }
+
+      &.is-page-swapped :is(.page-view, #page-404).is-leaving {
+        display: none;
+      }
+
+      @media (prefers-reduced-motion: no-preference) {
+        &:not(.is-page-swapped) > :is(.page-view, #page-404).is-leaving {
+          view-transition-name: $container-name;
+          background: var(--bg-base);
+        }
+
+        &.is-page-swapped .is-container-target {
+          view-transition-name: $container-name;
+        }
+      }
+    }
+
+    .page-container[data-page-transition='container-transform'] {
+      // The browser's pictures move; the pages themselves do not.
+      :is(.page-view, #page-404),
+      :is(.page-view, #page-404).is-leaving {
+        animation: none;
+      }
+
+      &.is-page-swapped :is(.page-view, #page-404).is-leaving {
+        display: none;
+      }
+
+      // The shape is named only where motion is welcome. With reduced motion
+      // asked for nothing carries the name, so the browser has no shape to move,
+      // and its transition is what is left: one screen fading into the next.
+      @media (prefers-reduced-motion: no-preference) {
+        .is-container-origin {
+          view-transition-name: $container-name;
+        }
+
+        // The page is the shape's end, so it needs a surface of its own to be a
+        // shape at all: the one it already stands on.
+        &.is-page-swapped > :is(.page-view, #page-404):not(.is-leaving) {
+          view-transition-name: $container-name;
+          background: var(--bg-base);
+        }
+      }
+    }
+  }
+
+  // The browser's pictures for the container transform. These are not inside
+  // main#app: they hang from the document's root.
+  ::view-transition-group(#{$container-name}) {
+    overflow: clip;
+    border-radius: map.get(material.$outlined-card, 'container-shape');
+    animation-duration: _static('md-sys-motion-duration-medium4');
+    animation-timing-function: _static('md-sys-motion-easing-emphasized');
+  }
+
+  // Each picture keeps the browser's own fit: the shape's width, from its top, at
+  // its own proportion. So neither is stretched as the shape changes proportion,
+  // and more of the page shows as the shape grows.
+  ::view-transition-old(#{$container-name}),
+  ::view-transition-new(#{$container-name}) {
+    animation-duration: _static('md-sys-motion-duration-short2');
+  }
+
+  // Everything around the shape: a quick cross fade.
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: _static('md-sys-motion-duration-short4');
+  }
+
+  @keyframes material-page-exit {
+    from {
+      opacity: 1;
+      transform: none;
+    }
+
+    to {
+      opacity: 0;
+      transform: translateX(var(--_page-exit-x, 0px));
+    }
+  }
+
+  @keyframes material-page-enter {
+    from {
+      opacity: 0;
+      transform: translateX(var(--_page-enter-x, 0px));
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}

@@ -1,0 +1,82 @@
+// Material top app bar (small) — the Shell's header.
+//
+// Values are read at build time from Google's app-bar tokens (@material/web 2.5.0,
+// tokens/versions/latest) through tokens/_material.scss.
+//
+// The bar has two looks: on the page's surface when the page is at its top, and on a
+// higher surface with a shadow once content has scrolled under it. Which one is a
+// class, `is-scrolled`, that the header view sets from the Material channel
+// (CHANNEL_MATERIAL_SCROLL_EVENT). Nothing here listens for scrolling.
+//
+// The header's navigation links and its two icon buttons are styled in
+// _navigation.scss.
+
+@use 'sass:map';
+@use '../../00-spynejs-design-system/tokens/material';
+@use 'type';
+
+$t: material.$app-bar;
+$height: map.get($t, 'container-height');
+
+@mixin styles {
+  main#app {
+    // `header#site-header`, not `#site-header`: the Shell's own rule for the header's
+    // surface and the rule under it is written with the tag, and this has to outweigh
+    // it.
+    header#site-header {
+      height: $height;
+      min-block-size: $height;
+      // Material's bar has no rule under it: the surface change marks its edge.
+      border-block-end: 0;
+      background-color: map.get($t, 'container-color');
+      box-shadow: material.elevation-shadow(map.get($t, 'container-elevation'));
+      // The colour and the shadow change together, on the standard easing. 250ms is
+      // Material's medium1 duration; the tokens name no duration for this change.
+      transition:
+        background-color var(--md-sys-motion-duration-medium1)
+          var(--md-sys-motion-easing-standard),
+        box-shadow var(--md-sys-motion-duration-medium1)
+          var(--md-sys-motion-easing-standard);
+
+      &.is-scrolled {
+        background-color: map.get($t, 'on-scroll-container-color');
+        box-shadow: material.elevation-shadow(
+          map.get($t, 'on-scroll-container-elevation')
+        );
+      }
+
+      // The title. A small top app bar sets it in title-large
+      // (m3.material.io, Top app bar, specs).
+      .branding h1,
+      .site-title h1 {
+        @include type.style('title-large');
+
+        a,
+        a:visited {
+          color: map.get($t, 'title-color');
+        }
+      }
+
+      // The leading button. The Shell places the menu button at the top of the
+      // header (ui/menu-hamburger.scss: top 0, a 30px box), which suited a header
+      // 48px high. In this bar that leaves it high. Material centres a top app
+      // bar's leading button on the bar's height: half-way down, less half the
+      // button's own box.
+      #menu_toggle {
+        inset-block-start: 50%;
+        margin-block-start: -15px;
+      }
+    }
+
+    // The drawer opens under the header, so it starts where the bar ends.
+    #menu-drawer {
+      inset-block-start: $height;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      header#site-header {
+        transition: none;
+      }
+    }
+  }
+}
