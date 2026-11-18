@@ -32,6 +32,20 @@ export const MATERIAL_BUTTON_OPTIONS = {
 // button at the small size (elements/_buttons.scss).
 export const SHELL_BUTTON_LOOK = 'btn-primary';
 
+// The class given to a call to action that has no words. A button carrying it is not
+// drawn (elements/_buttons.scss): a button with nothing on it is not shown.
+export const BUTTON_NO_WORDS = 'btn-no-words';
+
+// Whether a call to action was given words for its button and has none: its `ctaText`
+// is there, and is empty, only spaces, or not text at all. A call to action with no
+// `ctaText` key is not counted. Its button's words may be written in its template, as
+// the contact form's are, and nothing in the data can tell the two apart.
+export const hasNoButtonWords = (item) =>
+  item !== null &&
+  typeof item === 'object' &&
+  'ctaText' in item &&
+  !(typeof item.ctaText === 'string' && item.ctaText.trim() !== '');
+
 // The value given for a key if it is one the key takes, and the key's default if not.
 const valueOf = (key, given) => {
   const { values, default: fallback } = MATERIAL_BUTTON_OPTIONS[key];

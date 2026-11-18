@@ -1,5 +1,9 @@
 import { SpyneTrait, ViewStream, SpyneAppProperties, safeClone } from 'spyne';
-import { materialButtonLook } from 'traits/utils/material-button-options.js';
+import {
+  materialButtonLook,
+  hasNoButtonWords,
+  BUTTON_NO_WORDS,
+} from 'traits/utils/material-button-options.js';
 import { HeroView } from 'components/page-items/hero-view.js';
 import { CardsContainerView } from 'components/page-items/cards-container-view.js';
 import { FormContactUsView } from 'components/page-items/form-contact-us-view.js';
@@ -93,16 +97,24 @@ export class PageItemCoreTraits extends SpyneTrait {
   }
 
   /**
-   * How a call to action's button looks. A model says it with a `button` key
-   * beside the button's words (app.model.json):
+   * A call to action's button: how it looks, and whether it is drawn.
+   *
+   * A model gives a button its words with `ctaText`, and may say how it looks
+   * with a `button` key beside them (app.model.json):
    *
    *   { "ctaText": "Order ahead", "attrCtaHref": "/order",
    *     "button": { "variant": "tonal", "size": "md", "shape": "square" } }
    *
    * A template cannot turn those keys into classes, so this does, before the
    * template renders: it adds `attrButtonClass`, which the Shell's templates
-   * write after `btn`. With no `button` key it is the class the Shell has
-   * always written, so a model without the key renders as it did.
+   * write after `btn`.
+   *
+   *   - With no `button` key it is the class the Shell has always written, so
+   *     a model without the key renders as it did.
+   *   - Where `ctaText` is there and has no words (empty, or only spaces), it
+   *     also carries the class that keeps a button from being drawn: a button
+   *     with nothing on it is not shown. To have no button, give `ctaText` no
+   *     words.
    *
    * It is given to the data itself (a hero's, a page item's), where the hero,
    * the call-to-action banner and the contact form have their button; and to
@@ -119,7 +131,8 @@ export class PageItemCoreTraits extends SpyneTrait {
 
     const shaped = safeClone(data);
 
-    shaped.attrButtonClass = materialButtonLook(shaped.button);
+    shaped.attrButtonClass =
+      PageItemCoreTraits.pageItemCore$ButtonClass(shaped);
 
     Object.values(shaped)
       .filter(Array.isArray)
@@ -127,11 +140,23 @@ export class PageItemCoreTraits extends SpyneTrait {
         list
           .filter((item) => item?.ctaText !== undefined)
           .forEach((item) => {
-            item.attrButtonClass = materialButtonLook(item.button);
+            item.attrButtonClass =
+              PageItemCoreTraits.pageItemCore$ButtonClass(item);
           });
       });
 
     return shaped;
+  }
+
+  /**
+   * The classes one call to action's button carries after `btn`: its look,
+   * and, where it was given no words, the class that keeps it from being
+   * drawn (see pageItemCore$GiveButtonLook).
+   */
+  static pageItemCore$ButtonClass(item) {
+    const look = materialButtonLook(item.button);
+
+    return hasNoButtonWords(item) ? `${look} ${BUTTON_NO_WORDS}` : look;
   }
 
   static pageItemCore$AddPageItems(elementsArr = this.props.data.pageItems) {

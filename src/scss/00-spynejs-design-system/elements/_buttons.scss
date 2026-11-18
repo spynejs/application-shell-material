@@ -19,6 +19,7 @@
 //   .btn-filled  .btn-tonal  .btn-outlined  .btn-elevated  .btn-text
 //   .btn-xs  .btn-sm  .btn-md  .btn-lg  .btn-xl      32, 40, 56, 96, 136px high
 //   .btn-square         the square shape, at any size
+//   .btn-no-words       a call to action given no words: not drawn
 // The Shell's older colour variants keep working: .btn-{name} is filled,
 // .btn-outline-{name} is outlined, .btn-plain-{name} is text.
 //
@@ -420,6 +421,15 @@ $_base: map.get(material.$button, base);
     100% {
       outline-width: $ring-width;
     }
+  }
+
+  // A call to action that was given no words (app.model.json: `ctaText` empty). A
+  // button with nothing on it is not drawn. The class is written by the trait that
+  // writes a button's other classes (pageItemCore$ButtonClass). The templates are as
+  // they were and the element stays in the page, so the CMS keeps its hold on every
+  // button's words.
+  .#{$prefix}btn.#{$prefix}btn-no-words {
+    display: none;
   }
 
   // Kept from the Shell, unchanged: not Material button styles.

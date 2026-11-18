@@ -19,9 +19,9 @@ describe('materialButtonOptions', () => {
   });
 
   it('should give the default for a value a key does not take', () => {
-    expect(materialButtonOptions({ variant: 'ghost', size: 'huge' })).to.include(
-      { variant: 'filled', size: 'sm' },
-    );
+    expect(
+      materialButtonOptions({ variant: 'ghost', size: 'huge' }),
+    ).to.include({ variant: 'filled', size: 'sm' });
   });
 });
 
@@ -101,12 +101,53 @@ describe('pageItemCore$GiveButtonLook', () => {
     expect(shaped.tags).to.deep.eq(['a', 'b']);
   });
 
+  it('should give a call to action with no words the class that keeps its button from being drawn', () => {
+    expect(giveLook({ ctaText: '', attrCtaHref: '' }).attrButtonClass).to.eq(
+      'btn-primary btn-no-words',
+    );
+    expect(giveLook({ ctaText: '   ' }).attrButtonClass).to.eq(
+      'btn-primary btn-no-words',
+    );
+    expect(giveLook({ ctaText: null }).attrButtonClass).to.eq(
+      'btn-primary btn-no-words',
+    );
+    expect(
+      giveLook({ ctaText: '', button: { variant: 'tonal', size: 'md' } })
+        .attrButtonClass,
+    ).to.eq('btn-tonal btn-md btn-no-words');
+  });
+
+  it('should leave a button that has words, or whose words are not in ctaText, to be drawn', () => {
+    expect(giveLook({ ctaText: 'Order ahead' }).attrButtonClass).to.eq(
+      'btn-primary',
+    );
+    // the contact form: its button's words are in its template
+    expect(giveLook({ formFields: [] }).attrButtonClass).to.eq('btn-primary');
+  });
+
+  it('should decide it for each row of a list on its own', () => {
+    const shaped = giveLook({
+      rows: [
+        { headline: 'One', ctaText: 'More', ctaHref: '/one' },
+        { headline: 'Two', ctaText: '' },
+        { headline: 'Three' },
+      ],
+    });
+
+    expect(shaped.rows[0].attrButtonClass).to.eq('btn-primary');
+    expect(shaped.rows[1].attrButtonClass).to.eq('btn-primary btn-no-words');
+    expect(shaped.rows[2]).to.not.have.property('attrButtonClass');
+  });
+
   it('should not change the data it was given', () => {
     const given = { ctaText: 'Explore', rows: [{ ctaText: 'More' }] };
 
     giveLook(given);
 
-    expect(given).to.deep.eq({ ctaText: 'Explore', rows: [{ ctaText: 'More' }] });
+    expect(given).to.deep.eq({
+      ctaText: 'Explore',
+      rows: [{ ctaText: 'More' }],
+    });
   });
 
   it('should give the same result when shaped twice', () => {
