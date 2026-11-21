@@ -5,7 +5,7 @@ export class CardsContainerView extends ViewStream {
   constructor(props = {}) {
     props.tagName = 'ul';
     props.class = 'cards-container card-list';
-    props.ariaLabel = 'cards';
+    props['aria-label'] = 'cards';
     props.template = CardsContainerTmpl;
     super(props);
   }
