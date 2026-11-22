@@ -20,6 +20,7 @@
 //   .btn-xs  .btn-sm  .btn-md  .btn-lg  .btn-xl      32, 40, 56, 96, 136px high
 //   .btn-square         the square shape, at any size
 //   .btn-no-words       a call to action given no words: not drawn
+//   (and a .btn that is a ROUTE anchor with an empty page id: not drawn)
 // The Shell's older colour variants keep working: .btn-{name} is filled,
 // .btn-outline-{name} is outlined, .btn-plain-{name} is text.
 //
@@ -429,6 +430,16 @@ $_base: map.get(material.$button, base);
   // they were and the element stays in the page, so the CMS keeps its hold on every
   // button's words.
   .#{$prefix}btn.#{$prefix}btn-no-words {
+    display: none;
+  }
+
+  // A button that is a link of the app and has nowhere to go is not drawn either. A
+  // ROUTE anchor with an empty page id leads to the start of the site, which no
+  // button with words on it means. The app gives every call to action somewhere to
+  // go before its page is shown (traits/utils/call-to-action-routes.js), so the one
+  // left with nowhere is on the page the others lead to, the one that holds the
+  // contact form, where it is not needed.
+  .#{$prefix}btn[data-channel='ROUTE'][data-page-id=''] {
     display: none;
   }
 

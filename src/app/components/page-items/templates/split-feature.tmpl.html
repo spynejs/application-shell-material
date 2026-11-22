@@ -7,7 +7,14 @@
     <div class="split-copy">
       <h3 class="split-headline">{{headline}}</h3>
       <p class="split-text">{{text}}</p>
-      <a class="split-cta btn {{attrButtonClass}}" href="{{ctaHref}}"
+      <a
+        class="split-cta btn {{attrButtonClass}}"
+        data-channel="ROUTE"
+        data-event-prevent-default="true"
+        data-page-id="{{attrPageId}}"
+        data-topic-id="{{attrTopicId}}"
+        data-end-route="true"
+        href="{{ctaHref}}"
         >{{ctaText}}</a
       >
     </div>

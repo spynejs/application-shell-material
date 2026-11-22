@@ -130,8 +130,8 @@ export class StageContainerTraits extends SpyneTrait {
       .ready.catch(() => undefined);
   }
 
-  // The page that has arrived is shown from its top. The Shell otherwise
-  // leaves the window where it was scrolled to.
+  // The page that has arrived is shown from its top. Which moves arrive so is
+  // the stage's to admit (stage-container.js).
   static stage$ArriveAtTop() {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }

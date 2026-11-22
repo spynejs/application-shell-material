@@ -275,7 +275,13 @@ $sys-static: ();
 // `.shadow::before` and `.shadow::after`). This function does the same arithmetic at
 // build time and returns both layers as one box-shadow value, so a plain element can
 // carry it. The colour stays a reference to --md-sys-color-shadow.
-@function elevation-shadow($elevation) {
+//
+// `$strength` is a share of those two percentages: 1 is Material's own shadow, and
+// what every caller but one asks for. A lower number is a lighter shadow of the same
+// shape. It is how a shadow is made lighter here; the shadow colour is not, because
+// it is one colour for every shadow in both schemes, and anything lighter than black
+// shows as a pale haze on a dark surface.
+@function elevation-shadow($elevation, $strength: 1) {
   $level: elevation-level($elevation);
 
   @if $level <= 0 {
@@ -292,10 +298,14 @@ $sys-static: ();
   $ambient-blur: 3 * math.clamp(0, $level, 2) + 2 * math.clamp(0, $level - 2, 3);
   $ambient-spread: math.clamp(0, $level, 4) + 2 * math.clamp(0, $level - 4, 1);
 
-  $key-color: color-mix(in srgb, var(--md-sys-color-shadow) 30%, transparent);
+  $key-color: color-mix(
+    in srgb,
+    var(--md-sys-color-shadow) #{30% * $strength},
+    transparent
+  );
   $ambient-color: color-mix(
     in srgb,
-    var(--md-sys-color-shadow) 15%,
+    var(--md-sys-color-shadow) #{15% * $strength},
     transparent
   );
 

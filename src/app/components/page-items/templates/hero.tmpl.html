@@ -5,6 +5,11 @@
     <div class="hero__subheadline">{{subheadline}}</div>
     <a
       class="btn {{attrButtonClass}} px-8 hero__cta"
+      data-channel="ROUTE"
+      data-event-prevent-default="true"
+      data-page-id="{{attrPageId}}"
+      data-topic-id="{{attrTopicId}}"
+      data-end-route="true"
       href="{{attrCtaHref}}"
     >
       {{ctaText}}

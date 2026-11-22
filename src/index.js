@@ -52,6 +52,8 @@ const config = {
         'keyup',
         'keydown',
         // Where a press landed, for Material's ripple (MaterialRippleNullView).
+        // The window channel knows the pointer events from spyne 0.26.8: on an
+        // earlier one it delivers this and warns, at every press, that it does not.
         'pointerdown',
       ],
       customEvents: [{ name: 'spyne_cms_item_connected', buffer: 400 }],

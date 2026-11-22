@@ -151,20 +151,20 @@ export class ChannelMaterialTraits extends SpyneTrait {
   }
 
   // A move between pages has begun: the page on screen is leaving.
-  static channelMaterial$SendPageLeavingEvent(transition, from) {
+  static channelMaterial$SendPageLeavingEvent(transition, from, byLink) {
     this.props.pageMoveId += 1;
 
     const { pageMoveId } = this.props;
     const action = 'CHANNEL_MATERIAL_PAGE_LEAVING_EVENT';
 
-    this.sendChannelPayload(action, { pageMoveId, transition, from });
+    this.sendChannelPayload(action, { pageMoveId, transition, from, byLink });
   }
 
   // Its time is up: a page that is leaving removes itself on this. The payload is
   // the one the move began with, so it still names the transition.
-  static channelMaterial$OnPageExitTimeUp({ pageMoveId, transition }) {
+  static channelMaterial$OnPageExitTimeUp({ pageMoveId, transition, byLink }) {
     const action = 'CHANNEL_MATERIAL_PAGE_LEFT_EVENT';
-    this.sendChannelPayload(action, { pageMoveId, transition });
+    this.sendChannelPayload(action, { pageMoveId, transition, byLink });
   }
 
   // A view asked for a snackbar (sendInfoToChannel with the REQUEST action).
@@ -201,10 +201,12 @@ export class ChannelMaterialTraits extends SpyneTrait {
 
     this.channelMaterial$SendDismissEvent('route');
     // srcElement is the link that was followed. A move by the browser's history
-    // has none.
+    // has none, and that is how the two are told apart (`byLink`): the route's
+    // own `isHistory` is false for a Back that lands on the page first loaded.
     this.channelMaterial$SendPageLeavingEvent(
       pageTransitionFromRoute(e.payload, e.srcElement?.el),
       from,
+      e.srcElement?.el !== undefined,
     );
   }
 

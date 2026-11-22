@@ -18,6 +18,13 @@
 $t: material.$app-bar;
 $height: map.get($t, 'container-height');
 
+// How strong the scrolled bar's shadow is, as a share of Material's. The elevation is
+// Google's (the app bar's on-scroll token, level 2), and so is the shadow's shape. At
+// Material's full strength it reads heavier on a bar the width of the page than the
+// same level does on a small element, so it is drawn a little lighter. 1 is
+// Material's own; a card's shadow (level 1) is not changed.
+$on-scroll-shadow-strength: 0.85;
+
 @mixin styles {
   main#app {
     // `header#site-header`, not `#site-header`: the Shell's own rule for the header's
@@ -41,7 +48,8 @@ $height: map.get($t, 'container-height');
       &.is-scrolled {
         background-color: map.get($t, 'on-scroll-container-color');
         box-shadow: material.elevation-shadow(
-          map.get($t, 'on-scroll-container-elevation')
+          map.get($t, 'on-scroll-container-elevation'),
+          $on-scroll-shadow-strength
         );
       }
 

@@ -17,10 +17,16 @@ export class StageContainer extends ViewStream {
   }
 
   addActionListeners() {
-    // A move down a level arrives at the top of the page.
+    // A move arrives at the top of the page: one down a level, and one between
+    // destinations that began on a link. A move between destinations by the
+    // browser's own Back or Forward is left alone: the browser puts the window
+    // back where that page was left. (A move back up a level has its own way,
+    // to the card it came from.)
     const movedDownFilter = new ChannelPayloadFilter({
-      payload: ({ transition }) =>
-        transition === 'forward' || transition === 'container-transform',
+      payload: ({ transition, byLink }) =>
+        transition === 'forward' ||
+        transition === 'container-transform' ||
+        (transition === 'top-level' && byLink === true),
     });
 
     // A move beginning, and a move back up a level that a page has asked to make
