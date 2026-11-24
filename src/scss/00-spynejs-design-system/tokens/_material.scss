@@ -122,6 +122,14 @@
   as latest-secondary-tab;
 @use '@material/web/tokens/versions/latest/sass/md-comp-secondary-navigation-tab-meta'
   as latest-secondary-tab-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-extended-fab-small' as
+  latest-extended-fab-small;
+@use '@material/web/tokens/versions/latest/sass/md-comp-extended-fab-small-meta'
+  as latest-extended-fab-small-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-extended-fab-primary-container'
+  as latest-extended-fab-color;
+@use '@material/web/tokens/versions/latest/sass/md-comp-extended-fab-primary-container-meta'
+  as latest-extended-fab-color-meta;
 @use '@material/web/tokens/versions/latest/sass/md-comp-scrim-meta' as
   latest-scrim-meta;
 @use '@material/web/tokens/versions/latest/sass/md-ref-typeface' as
@@ -486,6 +494,35 @@ $secondary-tab: map.merge(
   ),
   (
     label-type: 'title-small',
+  )
+);
+
+// The extended FAB: a floating action button with words. Two of Google's groups in
+// one map, which share no key: the small size (its height, its corner, its icon's
+// size and the spaces round the icon and the words) and the primary container
+// color set, Material's baseline for a FAB (the container, the icon and the words,
+// the elevation at rest and under the pointer, and the state layer's color and
+// opacity for hover, focus and a press).
+//
+// The medium and large sizes, the other color sets and the FAB with no words are
+// not read: the template draws the one.
+//
+// `label-type` is the type style of the words. The set carries it only as a mixin
+// in the size's module (`label-text`), which a map cannot read, so the name is
+// written here from that mixin.
+$extended-fab: map.merge(
+  map.merge(
+    _component(
+      meta.module-variables(latest-extended-fab-small),
+      meta.module-variables(latest-extended-fab-small-meta)
+    ),
+    _component(
+      meta.module-variables(latest-extended-fab-color),
+      meta.module-variables(latest-extended-fab-color-meta)
+    )
+  ),
+  (
+    label-type: 'title-medium',
   )
 );
 

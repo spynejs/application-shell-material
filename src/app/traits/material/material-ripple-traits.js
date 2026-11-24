@@ -1,10 +1,10 @@
 import { SpyneTrait } from 'spyne';
 
 // What ripples: buttons, cards that are links, the header's and the drawer's
-// navigation links, the two icon buttons, and a tab. The styles of each draw the
-// ripple (elements/_buttons.scss, material/_cards.scss, material/_navigation.scss,
-// ui/menu-drawer.scss, material/_tabs.scss); this list and those styles are kept in
-// step by hand.
+// navigation links, the two icon buttons, a tab, and the FAB. The styles of each
+// draw the ripple (elements/_buttons.scss, material/_cards.scss,
+// material/_navigation.scss, ui/menu-drawer.scss, material/_tabs.scss,
+// material/_fab.scss); this list and those styles are kept in step by hand.
 const RIPPLING = [
   '.btn',
   'a.page-card',
@@ -13,6 +13,7 @@ const RIPPLING = [
   '.theme-toggle',
   '#menu_toggle',
   '.tab',
+  '.fab',
 ].join(', ');
 
 // The element that ripples for an event's target: the target itself, or the

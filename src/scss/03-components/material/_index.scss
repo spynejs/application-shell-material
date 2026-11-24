@@ -8,6 +8,7 @@
 // (elements/_buttons.scss, ui/menu-drawer.scss).
 @use 'app-bar';
 @use 'cards';
+@use 'fab';
 @use 'focus';
 @use 'icon';
 @use 'list';
@@ -40,4 +41,7 @@
   @include navigation-rail.styles;
   // After focus: a tab draws its own focus indicator.
   @include tabs.styles;
+  // After the bar, the snackbar and the footer's own styles: it stands over the
+  // first, lifts the second and makes room in the third.
+  @include fab.styles;
 }

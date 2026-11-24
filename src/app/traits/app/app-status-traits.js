@@ -6,6 +6,7 @@ import {
 } from 'spyne';
 import { routeCallsToAction } from 'traits/utils/call-to-action-routes.js';
 import { navDestinations } from 'traits/utils/nav-icons.js';
+import { fabOf } from 'traits/utils/fab.js';
 
 export class AppStatusTraits extends SpyneTrait {
   constructor(context) {
@@ -41,6 +42,9 @@ export class AppStatusTraits extends SpyneTrait {
       // The top-level links as a navigation bar or rail shows them: each with
       // the label and the icon its page has in the model.
       navDestinations: navDestinations(navLinks, this.props.data?.content),
+      // The app's floating action button, where its model asks for one: what
+      // it says and the page it leads to. null where it asks for none.
+      fab: fabOf(this.props.data, AppStatusTraits.appStatus$HrefOf),
       isDeepLink,
       routeData,
       footer,
@@ -109,17 +113,24 @@ export class AppStatusTraits extends SpyneTrait {
     this.sendChannelPayload(action, payload);
   }
 
+  /**
+   * The address the framework writes for route ids, from the site's root: for
+   * routes written as paths it gives `about`, which a browser would read from
+   * the page it is on. (A click on a route link does not use it; a new tab
+   * would.)
+   */
+  static appStatus$HrefOf(routeIds) {
+    const href = SpyneAppProperties.getHrefFromData(routeIds);
+
+    return /^[/?#]/.test(href) ? href : `/${href}`;
+  }
+
   static appStatus$RouteCallsToAction(pageData, model = this.props.data) {
-    // The address the framework writes for route ids, from the site's root: for
-    // routes written as paths it gives `about`, which a browser would read from
-    // the page it is on. (The click does not use it; a new tab would.)
-    const hrefOf = (routeIds) => {
-      const href = SpyneAppProperties.getHrefFromData(routeIds);
-
-      return /^[/?#]/.test(href) ? href : `/${href}`;
-    };
-
-    return routeCallsToAction(pageData, model, hrefOf);
+    return routeCallsToAction(
+      pageData,
+      model,
+      AppStatusTraits.appStatus$HrefOf,
+    );
   }
 
   /**

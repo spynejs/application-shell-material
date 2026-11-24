@@ -1,0 +1,256 @@
+// Material FAB: the app's floating action button, in front of every page, for the
+// one thing the app most wants done. It is Material's extended FAB, an icon and one
+// or two words, in the small size.
+//
+// Values are read at build time from Google's extended FAB tokens (@material/web
+// 2.5.0, tokens/versions/latest: the small size and the primary container colors)
+// through tokens/_material.scss. What the tokens do not say follows m3.material.io
+// (FAB and Extended FAB, guidelines; Transitions; read 2026-11-24) and is marked
+// where it is used.
+//
+// The markup is two views: #material-fab-host, an empty region that is always
+// there, and .fab, the link, added where the app's model asks for one
+// (traits/utils/fab.js). The host says the moment as two classes, `is-scrolled` and
+// `is-own-page`; nothing here decides them.
+
+@use 'sass:list';
+@use 'sass:map';
+@use 'sass:math';
+@use '../../00-spynejs-design-system/tokens/material';
+@use 'navigation-bar';
+@use 'ripple';
+@use 'type';
+
+$fab: material.$extended-fab;
+$height: map.get($fab, 'container-height');
+
+// How far the FAB stands from the window's edges, and from the navigation bar. Not
+// a token: it is what the guidelines' drawings show.
+$edge: 16px;
+
+// The room a FAB takes at the bottom of the window: itself and the space over it.
+$room: $height + $edge;
+
+// The app's root where it has a navigation bar in a compact window: the counts are
+// the bar's own.
+@function _with-a-bar() {
+  $selectors: ();
+
+  @each $count in navigation-bar.$counts {
+    $selectors: list.append(
+      $selectors,
+      "[data-destinations='#{$count}']",
+      $separator: comma
+    );
+  }
+
+  @return ':is(#{$selectors})';
+}
+
+@function _layer($color, $opacity) {
+  @return color-mix(in srgb, $color math.percentage($opacity), transparent);
+}
+
+@mixin styles {
+  main#app {
+    // ---- Where it stands ----
+    // "At the bottom of the screen ... aligned to the trailing edge of the window",
+    // in every window. The region itself is empty space: it must not take clicks
+    // meant for the page.
+    #material-fab-host {
+      position: fixed;
+      // In front of the page; under the navigation bar and rail (998) and the
+      // drawer and its scrim (999), which cover it while they are open.
+      z-index: 997;
+      inset-inline-end: $edge;
+      inset-block-end: calc(#{$edge} + #{navigation-bar.$safe-area});
+      display: flex;
+      // No wider than the window: the words are not wrapped or cut until they
+      // would leave it.
+      max-inline-size: calc(100vw - #{2 * $edge});
+      pointer-events: none;
+    }
+
+    // Above the navigation bar, where a compact window has one.
+    @media (width < 600px) {
+      &#{_with-a-bar()} #material-fab-host {
+        inset-block-end: calc(
+          #{$edge} + #{navigation-bar.$height} + #{navigation-bar.$safe-area}
+        );
+      }
+    }
+
+    // ---- The FAB ----
+    .fab {
+      --_layer: transparent;
+
+      position: relative;
+      isolation: isolate;
+      display: inline-flex;
+      align-items: center;
+      gap: map.get($fab, 'icon-label-space');
+      box-sizing: border-box;
+      min-inline-size: 0;
+      block-size: $height;
+      padding-inline: map.get($fab, 'leading-space')
+        map.get($fab, 'trailing-space');
+      border-radius: map.get($fab, 'container-shape');
+      background-color: map.get($fab, 'container-color');
+      background-image: linear-gradient(var(--_layer), var(--_layer));
+      box-shadow: material.elevation-shadow(
+        map.get($fab, 'container-elevation')
+      );
+      color: map.get($fab, 'label-text-color');
+      text-decoration: none;
+      pointer-events: auto;
+      // The browser's own flash on a touch: the state layer and the ripple are
+      // the answer to a press here.
+      -webkit-tap-highlight-color: transparent;
+
+      // Not shown until the host says the moment for it (below). Hidden, it is
+      // out of the keyboard's way and takes no press.
+      visibility: hidden;
+      opacity: 0;
+      transform: scale(0);
+
+      &:hover,
+      &:visited {
+        color: map.get($fab, 'label-text-color');
+        text-decoration: none;
+      }
+    }
+
+    .fab__icon {
+      flex: 0 0 auto;
+      inline-size: map.get($fab, 'icon-size');
+      block-size: map.get($fab, 'icon-size');
+      color: map.get($fab, 'icon-color');
+    }
+
+    .fab__label {
+      @include type.style(map.get($fab, 'label-type'));
+
+      // "Avoid wrapping or truncating text": one line. It is cut only where the
+      // words are wider than the window itself.
+      min-inline-size: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: inherit;
+    }
+
+    // ---- When it shows ----
+    // Once the page has left its top, and not on the page it leads to. At the top
+    // of a page the hero's own button is the thing to press ("a FAB shouldn't
+    // contain ... actions found elsewhere on a screen"); and a new page opens at
+    // its top, so the FAB leaves on a change of page and comes back.
+    #material-fab-host.is-scrolled:not(.is-own-page) .fab {
+      visibility: visible;
+      opacity: 1;
+      transform: none;
+    }
+
+    // ---- What makes room for it ----
+    // An app that has a FAB keeps room at the end of its page, so that the last of
+    // the footer is not left under it; and its snackbar shows above the FAB while
+    // the FAB is on screen.
+    &:has(#material-fab-host .fab) #site-footer {
+      padding-block-end: calc(var(--spacing-4) + #{$room});
+    }
+
+    &:has(#material-fab-host.is-scrolled:not(.is-own-page) .fab)
+      #material-snackbar-host {
+      translate: 0 (-1 * $room);
+    }
+
+    // ---- States ----
+    // The tokens give one layer color for hover, focus and a press, an opacity for
+    // each, and a higher elevation under the pointer. Keyboard focus is Material's
+    // one indicator for every control (_focus.scss).
+    @media (hover: hover) {
+      .fab:hover {
+        --_layer: #{_layer(
+            map.get($fab, 'hovered-state-layer-color'),
+            map.get($fab, 'hovered-state-layer-opacity')
+          )};
+
+        box-shadow: material.elevation-shadow(
+          map.get($fab, 'hovered-container-elevation')
+        );
+      }
+    }
+
+    .fab:focus-visible {
+      --_layer: #{_layer(
+          map.get($fab, 'focused-state-layer-color'),
+          map.get($fab, 'focused-state-layer-opacity')
+        )};
+    }
+
+    // Its coming and going, and a press. Where motion is welcome it "expands
+    // outward from a central point" as it comes, and a press is Material's ripple,
+    // from the point pressed. The tokens name no times for it: these are
+    // Material's for a thing entering and leaving the screen (Transitions). With
+    // reduced motion asked for it does not grow; it fades, quickly, and a press is
+    // a flat layer.
+    @media (prefers-reduced-motion: reduce) {
+      .fab {
+        transform: none;
+        transition:
+          opacity var(--md-sys-motion-duration-short2) linear,
+          visibility 0s linear var(--md-sys-motion-duration-short2);
+      }
+
+      #material-fab-host.is-scrolled:not(.is-own-page) .fab {
+        transition: opacity var(--md-sys-motion-duration-short2) linear;
+      }
+
+      .fab:active {
+        --_layer: #{_layer(
+            map.get($fab, 'pressed-state-layer-color'),
+            map.get($fab, 'pressed-state-layer-opacity')
+          )};
+      }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      // Leaving.
+      .fab {
+        transition:
+          transform var(--md-sys-motion-duration-short4)
+            var(--md-sys-motion-easing-emphasized-accelerate),
+          opacity var(--md-sys-motion-duration-short4) linear,
+          visibility 0s linear var(--md-sys-motion-duration-short4),
+          box-shadow var(--md-sys-motion-duration-short4)
+            var(--md-sys-motion-easing-standard);
+      }
+
+      // Coming.
+      #material-fab-host.is-scrolled:not(.is-own-page) .fab {
+        transition:
+          transform var(--md-sys-motion-duration-medium2)
+            var(--md-sys-motion-easing-emphasized-decelerate),
+          opacity var(--md-sys-motion-duration-short4) linear,
+          box-shadow var(--md-sys-motion-duration-short4)
+            var(--md-sys-motion-easing-standard);
+      }
+
+      .fab::after {
+        @include ripple.layer(map.get($fab, 'pressed-state-layer-color'));
+
+        z-index: -1;
+      }
+
+      .fab:active::after {
+        @include ripple.pressed(map.get($fab, 'pressed-state-layer-opacity'));
+      }
+    }
+
+    // Printed, there is nothing to press.
+    @media print {
+      #material-fab-host {
+        display: none;
+      }
+    }
+  }
+}

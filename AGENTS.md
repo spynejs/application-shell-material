@@ -24,6 +24,7 @@ This app is on the Material template: Google's Material Design 3 for the SpyneJS
 | Tabs | lists of one kind (price lists, or timetables) that are next to each other on a page and give the same `tabGroup` (below): a row of tabs over them, and one list shown at a time | `src/app/components/page-items/tabs-view.js`, `src/app/traits/utils/tab-sets.js`, `src/scss/03-components/material/_tabs.scss` |
 | Icon | an `icon` key beside an item's words, in a page item drawn from `icon-grid.tmpl.html` (below) | `src/app/traits/utils/icon-shapes.js`, `src/scss/03-components/material/_icon.scss` |
 | Snackbar | a view sends `CHANNEL_MATERIAL_SNACKBAR_REQUEST` with `{ message }` | `src/app/components/material/material-snackbar-host-view.js` |
+| FAB | the key `fab` at the root of the model (below): one floating action button, at the bottom of every page once the page is scrolled, leading to the app's contact page | `src/app/components/material/material-fab-host-view.js`, `src/app/traits/utils/fab.js`, `src/scss/03-components/material/_fab.scss` |
 | Top app bar | it is the app's header; its title is the model's `text.header`; under 840px it holds the menu button, the title and the light and dark switch | `src/app/components/ui-elements/ui-header-view.js` |
 | Navigation drawer | its links are the routes in `src/index.js`; it is there in a window under 840px | `src/app/components/ui-elements/ui-menu-drawer-view.js` |
 | Navigation bar | its destinations are the top-level routes in `src/index.js`; it is there in a window under 600px, for an app with three to five of them; a top-level page gives its destination an icon and a label with `navIcon` and `navLabel` (below) | `src/app/components/nav/nav-destinations-view.js`, `src/scss/03-components/material/_navigation-bar.scss` |
@@ -91,6 +92,20 @@ A price list or a timetable takes two keys for tabs, in its `props.data` beside 
 
 A set is two or more lists of one kind, next to each other in a page's `pageItems`, with the same word: a price list and a timetable do not make one, and neither do two lists with another item between them. The first list is shown when the page opens. Under its tab a list does not repeat its title. To take a list out of its set, remove its `tabGroup`; to have two lists one under another, give them none. Material advises no more than four tabs; with more, or with long labels, the row scrolls sideways and no label is cut. `TAB_TEMPLATES` in `src/app/traits/utils/tab-sets.js` names the templates that may be a set.
 
+An app takes one key, at the root of its model, for a floating action button. It can be left out, and so can every key of it but its words:
+
+| Key of `fab` | Value | Left out |
+|---|---|---|
+| `ctaText` | the FAB's words, one or two | no FAB |
+| `icon` | a name in `src/app/traits/utils/icon-shapes.js` | `mail` |
+| `attrPageId`, `attrTopicId` | the page it leads to, by the route's ids | the page that holds the contact form |
+
+```json
+{ "fab": { "ctaText": "Book", "icon": "calendar_month" } }
+```
+
+The FAB is a call to action, and its keys are a call to action's: with no page named it leads where a hero's button leads, to the page that holds the contact form (`src/app/traits/utils/call-to-action-routes.js`). It is Material's extended FAB: an icon, drawn filled, and words. It is not shown at the top of a page, where the hero's own button is, and comes in once the page is scrolled; it is never shown on the page it leads to. An app has one, or none: an app with no `fab`, or with no contact form and no page named, has none. To take it away, remove the key.
+
 ### In a view
 
 Material's events go through one channel, `CHANNEL_MATERIAL`. Its file, `src/app/channels/channel-material.js`, says at its head what every action carries.
@@ -103,7 +118,7 @@ Material's events go through one channel, `CHANNEL_MATERIAL`. Its file, `src/app
 
 ### Adding a Material component the template does not have
 
-The template builds a component when a page uses it. It has no chips, dialog, switch, checkbox, radio button, slider, menu, search, FAB, badge, tooltip, sheet, progress indicator, carousel or data table. Google's values for every one of them are already installed: `@material/web` is a dependency for its design tokens, and `node_modules/@material/web/tokens/versions/latest/sass/` holds a file for each, such as `_md-comp-filter-chip.scss` and `_md-comp-switch.scss`. Do not import Google's web components from that package: a component here is plain markup and SpyneJS code, drawn from Google's values.
+The template builds a component when a page uses it. It has no chips, dialog, switch, checkbox, radio button, slider, menu, search, badge, tooltip, sheet, progress indicator, carousel or data table. Google's values for every one of them are already installed: `@material/web` is a dependency for its design tokens, and `node_modules/@material/web/tokens/versions/latest/sass/` holds a file for each, such as `_md-comp-filter-chip.scss` and `_md-comp-switch.scss`. Do not import Google's web components from that package: a component here is plain markup and SpyneJS code, drawn from Google's values.
 
 A component is four parts, and each has one place:
 
