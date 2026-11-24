@@ -64,6 +64,20 @@
   as latest-drawer-meta;
 @use '@material/web/tokens/versions/latest/sass/md-comp-nav-rail-collapsed' as
   latest-nav-rail-collapsed;
+@use '@material/web/tokens/versions/latest/sass/md-comp-nav-rail-collapsed-meta'
+  as latest-nav-rail-collapsed-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-nav-rail-item' as
+  latest-nav-rail-item;
+@use '@material/web/tokens/versions/latest/sass/md-comp-nav-rail-item-meta' as
+  latest-nav-rail-item-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-nav-rail-item-vertical'
+  as latest-nav-rail-item-vertical;
+@use '@material/web/tokens/versions/latest/sass/md-comp-nav-bar' as
+  latest-nav-bar;
+@use '@material/web/tokens/versions/latest/sass/md-comp-nav-bar-meta' as
+  latest-nav-bar-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-nav-bar-item-vertical'
+  as latest-nav-bar-item-vertical;
 @use '@material/web/tokens/versions/latest/sass/md-comp-scrim' as latest-scrim;
 @use '@material/web/tokens/versions/latest/sass/md-comp-elevated-card' as
   latest-elevated-card;
@@ -406,11 +420,50 @@ $navigation-drawer: _component(
   meta.module-variables(latest-drawer-meta)
 );
 
-// The collapsed navigation rail. The template has no rail; one value is read from
-// here, the space Google puts between a rail's items, which the drawer borrows
-// (ui/menu-drawer.scss).
+// The collapsed navigation rail: its width, the space above its first item and
+// between its items, and its surface. The drawer borrows one value from here, the
+// space between a rail's items (ui/menu-drawer.scss).
 $navigation-rail-collapsed: _component(
-  meta.module-variables(latest-nav-rail-collapsed)
+  meta.module-variables(latest-nav-rail-collapsed),
+  meta.module-variables(latest-nav-rail-collapsed-meta)
+);
+
+// A destination of the rail: its height, its icon's size, and the active
+// indicator's size and shape. `vertical` is the icon over its label, which is how
+// a collapsed rail sets a destination.
+//
+// Google's rail tokens give a destination no colors of its own. The bar's are the
+// same roles for the same job (`item-active-*`, `item-inactive-*` in
+// $navigation-bar), and the rail reads those.
+$navigation-rail-item: map.merge(
+  _component(
+    meta.module-variables(latest-nav-rail-item),
+    meta.module-variables(latest-nav-rail-item-meta)
+  ),
+  (
+    vertical: _component(meta.module-variables(latest-nav-rail-item-vertical)),
+  )
+);
+
+// The navigation bar: its height and surface, and a destination's colors, selected
+// and not. `item-vertical` is the icon over its label, the layout for a compact
+// window: the active indicator's size and the spaces around it.
+//
+// `label-type` is the type style of a destination's label, in the bar and in the
+// rail. The newer set carries it only as a mixin in each item module
+// (`label-text-font`), which a map cannot read, so the name is written here from
+// those mixins.
+$navigation-bar: map.merge(
+  _component(
+    meta.module-variables(latest-nav-bar),
+    meta.module-variables(latest-nav-bar-meta)
+  ),
+  (
+    item-vertical: _component(
+        meta.module-variables(latest-nav-bar-item-vertical)
+      ),
+    label-type: 'label-medium',
+  )
 );
 
 // The scrim behind a modal surface: the `scrim` colour role and its opacity.

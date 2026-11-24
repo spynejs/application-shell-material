@@ -1,0 +1,266 @@
+// Material navigation bar: the app's destinations along the bottom of a compact
+// window (under 600px), each an icon over a label.
+//
+// Values are read at build time from Google's navigation-bar tokens (@material/web
+// 2.5.0, tokens/versions/latest: the Material 3 Expressive set) through
+// tokens/_material.scss. What the tokens do not say follows m3.material.io
+// (Navigation bar, guidelines; read 2026-11-24) and is marked where it is used.
+//
+// The markup is one view, NavDestinationsView (`nav#nav-destinations`): a link for
+// each top-level page. It is in every window; these styles show it as a bar where
+// Material gives a bar:
+//   - in a compact window. Wider windows keep the navigation they had.
+//   - for three to five destinations, the count Material gives a bar. An app with
+//     more, or with two, keeps the menu button and the drawer and has no bar.
+// The app says how many destinations it has on its root, `main#app`, as
+// `data-destinations`. Nothing here, and no script, listens to the window: the
+// width is a media query and the count is an attribute.
+//
+// The menu button and the drawer stay beside the bar: the drawer lists the pages
+// under each destination, which the bar does not.
+//
+// Which destination is selected is a class, `selected`, that the view sets.
+
+@use 'sass:list';
+@use 'sass:map';
+@use 'sass:math';
+@use '../../00-spynejs-design-system/tokens/material';
+@use 'ripple';
+@use 'type';
+
+$bar: material.$navigation-bar;
+$item: map.get($bar, 'item-vertical');
+$height: map.get($bar, 'container-height');
+
+// How many destinations a bar takes.
+$counts: (3, 4, 5);
+
+// A phone may keep a strip at the bottom of the window for its own gesture. The bar's
+// surface runs under it and the destinations stay above it. It is 0 where the page
+// is not drawn under that strip.
+$safe-area: env(safe-area-inset-bottom, 0px);
+
+// The app's root where it has a count of destinations a bar takes.
+@function _with-a-bar() {
+  $selectors: ();
+
+  @each $count in $counts {
+    $selectors: list.append(
+      $selectors,
+      "[data-destinations='#{$count}']",
+      $separator: comma
+    );
+  }
+
+  @return ':is(#{$selectors})';
+}
+
+@function _layer($color, $opacity) {
+  @return color-mix(in srgb, $color math.percentage($opacity), transparent);
+}
+
+@mixin styles {
+  main#app {
+    // Not a bar until the rules below say so.
+    #nav-destinations {
+      display: none;
+    }
+
+    @media (width < 600px) {
+      &#{_with-a-bar()} {
+        // Room for the bar: the end of the page is not left under it.
+        padding-block-end: calc(#{$height} + #{$safe-area});
+
+        // The snackbar sits above the bar, not over it: a bar may be covered for a
+        // moment by what a task needs, and is not to be left covered.
+        #material-snackbar-host {
+          inset-block-end: calc(16px + #{$height} + #{$safe-area});
+        }
+
+        #nav-destinations {
+          position: fixed;
+          // Under the drawer and its scrim (999), which cover it while they are open.
+          z-index: 998;
+          inset-inline: 0;
+          inset-block-end: 0;
+          display: flex;
+          box-sizing: border-box;
+          block-size: calc(#{$height} + #{$safe-area});
+          padding-block-end: $safe-area;
+          background-color: map.get($bar, 'container-color');
+          box-shadow: material.elevation-shadow(
+            map.get($bar, 'container-elevation')
+          );
+        }
+      }
+    }
+
+    // ---- A destination ----
+    // "The navigation bar is divided into equal-width segments": every destination
+    // takes the same share of the bar, and the whole segment is the link.
+    .nav-destination {
+      flex: 1 1 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: map.get($item, 'active-indicator-icon-label-space');
+      min-inline-size: 0;
+      color: map.get($bar, 'item-inactive-label-text-color');
+      text-decoration: none;
+      // The browser's own flash on a touch: the indicator's state layer and ripple
+      // are the answer to a press here.
+      -webkit-tap-highlight-color: transparent;
+
+      &:hover {
+        text-decoration: none;
+      }
+
+      &:visited {
+        color: map.get($bar, 'item-inactive-label-text-color');
+      }
+
+      &.selected,
+      &.selected:visited {
+        color: map.get($bar, 'item-active-label-text-color');
+      }
+    }
+
+    // The pill behind the icon: the active indicator. It is there for every
+    // destination and filled for the selected one, so the state layer and the
+    // ripple have the same shape whether a destination is selected or not.
+    .nav-destination__indicator {
+      --_layer: transparent;
+
+      position: relative;
+      isolation: isolate;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      inline-size: map.get($item, 'active-indicator-width');
+      block-size: map.get($item, 'active-indicator-height');
+      border-radius: map.get($bar, 'item-active-indicator-shape');
+      background-image: linear-gradient(var(--_layer), var(--_layer));
+      color: map.get($bar, 'item-inactive-icon-color');
+      // The tokens name no duration for the change of destination. 200ms is
+      // Material's short4, on the standard easing.
+      transition:
+        background-color var(--md-sys-motion-duration-short4)
+          var(--md-sys-motion-easing-standard),
+        color var(--md-sys-motion-duration-short4)
+          var(--md-sys-motion-easing-standard);
+
+      .icon {
+        inline-size: map.get($bar, 'item-icon-size');
+        block-size: map.get($bar, 'item-icon-size');
+      }
+    }
+
+    // The selected destination's icon is filled and the others are outlined. Both
+    // drawings are in the markup; one is shown.
+    .nav-destination__icon--selected {
+      display: none;
+    }
+
+    .nav-destination.selected {
+      .nav-destination__indicator {
+        background-color: map.get($bar, 'item-active-indicator-color');
+        color: map.get($bar, 'item-active-icon-color');
+      }
+
+      .nav-destination__icon {
+        display: none;
+      }
+
+      .nav-destination__icon--selected {
+        display: block;
+      }
+    }
+
+    .nav-destination__label {
+      @include type.style(map.get($bar, 'label-type'));
+
+      // A label may use the whole width of its segment: with five destinations in a
+      // window 375px wide a segment is 75px, and a word of ten letters ("Membership")
+      // is 68px. A longer one ends in an ellipsis.
+      max-inline-size: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: inherit;
+    }
+
+    // ---- States ----
+    // The state layer is the indicator's, in the pressed thing's own shape. The
+    // tokens give its color for a destination selected and not, and its opacities
+    // once (they are Material's for every component).
+    @media (hover: hover) {
+      .nav-destination:hover .nav-destination__indicator {
+        --_layer: #{_layer(
+            map.get($bar, 'item-inactive-hovered-state-layer-color'),
+            map.get($bar, 'item-active-hovered-state-layer-opacity')
+          )};
+      }
+
+      .nav-destination.selected:hover .nav-destination__indicator {
+        --_layer: #{_layer(
+            map.get($bar, 'item-active-hovered-state-layer-color'),
+            map.get($bar, 'item-active-hovered-state-layer-opacity')
+          )};
+      }
+    }
+
+    .nav-destination:focus-visible .nav-destination__indicator {
+      --_layer: #{_layer(
+          map.get($bar, 'item-active-focused-state-layer-color'),
+          map.get($bar, 'item-active-focused-state-layer-opacity')
+        )};
+    }
+
+    // Keyboard focus is Material's one indicator (_focus.scss), drawn round the
+    // pill, not round the whole segment. `#nav-destinations` is in the selector so
+    // that this outweighs that file's rule for every link.
+    #nav-destinations .nav-destination:focus-visible {
+      outline: none;
+
+      .nav-destination__indicator {
+        outline: map.get(material.$focus-ring, 'thickness') solid
+          map.get(map.get(material.$button, base), 'focus-indicator-color');
+        outline-offset: map.get(material.$focus-ring, 'outer-offset');
+      }
+    }
+
+    // A press. Where motion is welcome it is Material's ripple, on a pseudo-element
+    // under the icon; it starts from the middle of the pill, which is smaller than
+    // the segment that was pressed. With reduced motion asked for it is a flat
+    // layer.
+    @media (prefers-reduced-motion: reduce) {
+      .nav-destination:active .nav-destination__indicator {
+        --_layer: #{_layer(
+            map.get($bar, 'item-active-pressed-state-layer-color'),
+            map.get($bar, 'item-active-pressed-state-layer-opacity')
+          )};
+      }
+
+      .nav-destination__indicator {
+        transition: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .nav-destination__indicator::after {
+        @include ripple.layer(
+          map.get($bar, 'item-active-pressed-state-layer-color')
+        );
+
+        z-index: -1;
+      }
+
+      .nav-destination:active .nav-destination__indicator::after {
+        @include ripple.pressed(
+          map.get($bar, 'item-active-pressed-state-layer-opacity')
+        );
+      }
+    }
+  }
+}

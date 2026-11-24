@@ -116,28 +116,58 @@ $icon: material.$icon-button;
     // Material: "Use modal navigation drawers in compact and medium breakpoints"
     // (m3.material.io, Navigation drawer; read 2026-11-17). Medium ends at 839px.
     // The Shell changes its header at 768px: up to there the menu button, above it
-    // the links. Between the two an open drawer had no button to close it. These
-    // rules carry the Shell's small-window header on up to 839px, so the menu
-    // button and the drawer serve compact and medium, and the links begin at
+    // the links. Between the two an open drawer had no button to close it. So the
+    // menu button and the drawer serve compact and medium, and the links begin at
     // Material's expanded breakpoint, 840px.
     //
-    // They repeat what the Shell's own rule sets below 769px (ui/header.scss,
-    // ui/menu-hamburger.scss), for the widths it does not reach.
-    @media (width > 768px) and (width < 840px) {
+    // Under 840px the bar across the top is Material's small top app bar: the
+    // menu button at its leading edge, then the title, and at its trailing edge
+    // an action, the light and dark switch. The Shell's small-window header
+    // (ui/header.scss, ui/menu-hamburger.scss, both for 768px and under) shows the
+    // menu button alone: it hides the title, which the button would sit on, and
+    // hides the navigation whole, the switch with its links. These rules are for
+    // every width under 840px and outweigh those.
+    @media (width < 840px) {
       header#site-header {
-        .site-nav {
-          display: none;
-        }
-
         #menu_toggle {
           display: block;
           opacity: 1;
           pointer-events: all;
         }
 
+        // The title starts after the menu button: the button's 24px mark is 16px
+        // from the edge, and the title 16px after it.
+        .header-content {
+          padding-inline-start: 56px;
+        }
+
+        // The title is shown, and gives way before the switch does: a name too
+        // long for the bar ends in an ellipsis.
         .branding {
-          visibility: hidden;
-          pointer-events: none;
+          flex: 0 1 auto;
+          min-inline-size: 0;
+          visibility: visible;
+          pointer-events: auto;
+        }
+
+        .site-title {
+          min-inline-size: 0;
+
+          h1 {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+        }
+
+        // The links go; the switch stays.
+        .site-nav {
+          display: flex;
+          flex: 0 0 auto;
+
+          a.nav {
+            display: none;
+          }
         }
       }
     }

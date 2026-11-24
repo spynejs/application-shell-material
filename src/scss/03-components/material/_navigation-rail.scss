@@ -1,0 +1,117 @@
+// Material navigation rail (collapsed): the app's destinations down the leading
+// edge of a medium window (600 to 839px), each an icon over a label.
+//
+// Values are read at build time from Google's navigation-rail tokens (@material/web
+// 2.5.0, tokens/versions/latest: the Material 3 Expressive set) through
+// tokens/_material.scss. What the tokens do not say follows m3.material.io
+// (Navigation rail, guidelines; read 2026-11-24) and is marked where it is used.
+//
+// It is the same view as the navigation bar, NavDestinationsView
+// (`nav#nav-destinations`), laid out another way. A destination itself (its
+// indicator, its two icons, its label, its colors and its states) is styled once,
+// in _navigation-bar.scss: Google's rail tokens give a destination no colors of its
+// own, and the bar's are the same roles for the same job. This file is the rail:
+// where it is, how wide, how its destinations are spaced, and the room made for it.
+//
+// A rail is shown where Material gives one:
+//   - in a medium window. A compact window has the bar; from 840px the header has
+//     its links, and a rail is not shown beside other navigation.
+//   - for three to seven destinations, the count Material gives a rail. An app with
+//     more, or with two, keeps the menu button and the drawer and has no rail.
+// The count is `data-destinations` on the app's root; the width is a media query.
+//
+// The rail starts under the top app bar, which stays across the whole window with
+// the menu button, the title and the switch, as it is in a compact window. The menu
+// button and the drawer stay: the drawer lists the pages under each destination,
+// and it opens over the rail.
+
+@use 'sass:list';
+@use 'sass:map';
+@use '../../00-spynejs-design-system/tokens/material';
+
+$rail: material.$navigation-rail-collapsed;
+$item: material.$navigation-rail-item;
+$item-vertical: map.get($item, 'vertical');
+$width: map.get($rail, 'container-width');
+$app-bar-height: map.get(material.$app-bar, 'container-height');
+
+// How many destinations a rail takes.
+$counts: (3, 4, 5, 6, 7);
+
+// The app's root where it has a count of destinations a rail takes.
+@function _with-a-rail() {
+  $selectors: ();
+
+  @each $count in $counts {
+    $selectors: list.append(
+      $selectors,
+      "[data-destinations='#{$count}']",
+      $separator: comma
+    );
+  }
+
+  @return ':is(#{$selectors})';
+}
+
+@mixin styles {
+  main#app {
+    @media (600px <= width < 840px) {
+      &#{_with-a-rail()} {
+        // Room for the rail: the page and the footer begin where it ends. The top
+        // app bar does not move; it is across the window.
+        #stage-view,
+        #site-footer {
+          margin-inline-start: $width;
+        }
+
+        // The snackbar is centred on what is left of the window.
+        #material-snackbar-host {
+          inset-inline-start: calc(16px + #{$width});
+        }
+
+        #nav-destinations {
+          position: fixed;
+          // Under the drawer and its scrim (999), which cover it while they are open.
+          z-index: 998;
+          inset-block: $app-bar-height 0;
+          inset-inline-start: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: stretch;
+          // "On tablets, use center alignment to make it easier to reach items": the
+          // destinations are a group in the middle of the rail's height. `safe`: in a
+          // window too short for them all, they start at the top and the rail
+          // scrolls, so that none is out of reach above it.
+          justify-content: safe center;
+          gap: map.get($rail, 'item-vertical-space');
+          box-sizing: border-box;
+          inline-size: $width;
+          overflow-y: auto;
+          background-color: map.get($rail, 'container-color');
+          box-shadow: material.elevation-shadow(
+            map.get($rail, 'container-elevation')
+          );
+        }
+
+        // A destination: the rail's width across, Google's height, and not
+        // stretched or shrunk to fill the rail as a bar's segments are.
+        .nav-destination {
+          flex: 0 0 auto;
+          block-size: map.get($item, 'container-height');
+          gap: map.get($item-vertical, 'icon-label-space');
+        }
+
+        .nav-destination__indicator {
+          inline-size: map.get($item-vertical, 'active-indicator-width');
+          block-size: map.get($item-vertical, 'active-indicator-height');
+          border-radius: map.get($item, 'active-indicator-shape');
+
+          .icon {
+            inline-size: map.get($item, 'icon-size');
+            block-size: map.get($item, 'icon-size');
+          }
+        }
+      }
+    }
+  }
+}

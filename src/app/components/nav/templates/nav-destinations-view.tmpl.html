@@ -1,0 +1,21 @@
+{{#}}
+<a
+  class="nav-destination"
+  data-channel="ROUTE"
+  data-event-prevent-default="true"
+  data-page-id="{{pageId}}"
+  data-end-route="true"
+  href="{{href}}"
+>
+  <!-- The pill behind the icon. Two drawings of the icon: outlined, and filled for the destination you are on; the styles show one. -->
+  <span class="nav-destination__indicator">
+    <svg class="icon nav-destination__icon" viewBox="0 -960 960 960" aria-hidden="true">
+      <path d="{{attrIconPath}}" />
+    </svg>
+    <svg class="icon nav-destination__icon nav-destination__icon--selected" viewBox="0 -960 960 960" aria-hidden="true">
+      <path d="{{attrIconPathFilled}}" />
+    </svg>
+  </span>
+  <span class="nav-destination__label">{{label}}</span>
+</a>
+{{/}}

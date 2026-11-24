@@ -13,6 +13,8 @@
 @use 'list';
 @use 'motion';
 @use 'navigation';
+@use 'navigation-bar';
+@use 'navigation-rail';
 @use 'ripple';
 @use 'snackbar';
 @use 'text-fields';
@@ -30,4 +32,9 @@
   @include focus.styles;
   @include motion.styles;
   @include snackbar.styles;
+  // After focus and snackbar: it draws its own focus indicator and moves the
+  // snackbar up, by the same weight of selector, so it has to come later.
+  @include navigation-bar.styles;
+  // After the bar: a destination is styled there, and the rail lays it out.
+  @include navigation-rail.styles;
 }

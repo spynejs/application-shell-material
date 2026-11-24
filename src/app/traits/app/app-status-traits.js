@@ -5,6 +5,7 @@ import {
   safeClone,
 } from 'spyne';
 import { routeCallsToAction } from 'traits/utils/call-to-action-routes.js';
+import { navDestinations } from 'traits/utils/nav-icons.js';
 
 export class AppStatusTraits extends SpyneTrait {
   constructor(context) {
@@ -37,6 +38,9 @@ export class AppStatusTraits extends SpyneTrait {
     const { photoCredit } = e['CHANNEL_FETCH_MODEL'].payload;
     this.props.initData = {
       navLinks,
+      // The top-level links as a navigation bar or rail shows them: each with
+      // the label and the icon its page has in the model.
+      navDestinations: navDestinations(navLinks, this.props.data?.content),
       isDeepLink,
       routeData,
       footer,

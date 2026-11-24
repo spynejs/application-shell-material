@@ -19,6 +19,7 @@ export class AppContainer extends ViewStream {
         'app$OnLocalStorageEvent',
       ],
       ['CHANNEL_APP_SETTING_EVENT', 'app$OnSettingsEvent'],
+      ['CHANNEL_APP_INIT_EVENT', 'app$OnAppInitEvent'],
     ];
   }
 

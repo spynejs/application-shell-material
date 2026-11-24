@@ -23,8 +23,10 @@ This app is on the Material template: Google's Material Design 3 for the SpyneJS
 | List, divider | a page item drawn from `timetable.tmpl.html` or `price-list.tmpl.html`: each of its `rows` or `items` is a list item; no keys of its own | `src/scss/03-components/material/_list.scss` |
 | Icon | an `icon` key beside an item's words, in a page item drawn from `icon-grid.tmpl.html` (below) | `src/app/traits/utils/icon-shapes.js`, `src/scss/03-components/material/_icon.scss` |
 | Snackbar | a view sends `CHANNEL_MATERIAL_SNACKBAR_REQUEST` with `{ message }` | `src/app/components/material/material-snackbar-host-view.js` |
-| Top app bar | it is the app's header; its title is the model's `text.header` | `src/app/components/ui-elements/ui-header-view.js` |
+| Top app bar | it is the app's header; its title is the model's `text.header`; under 840px it holds the menu button, the title and the light and dark switch | `src/app/components/ui-elements/ui-header-view.js` |
 | Navigation drawer | its links are the routes in `src/index.js`; it is there in a window under 840px | `src/app/components/ui-elements/ui-menu-drawer-view.js` |
+| Navigation bar | its destinations are the top-level routes in `src/index.js`; it is there in a window under 600px, for an app with three to five of them; a top-level page gives its destination an icon and a label with `navIcon` and `navLabel` (below) | `src/app/components/nav/nav-destinations-view.js`, `src/scss/03-components/material/_navigation-bar.scss` |
+| Navigation rail | the same destinations, down the leading edge of a window from 600 to 839px, for an app with three to seven of them; it has no keys of its own | `src/app/components/nav/nav-destinations-view.js`, `src/scss/03-components/material/_navigation-rail.scss` |
 | Page transitions | named from the route: `top-level`, `forward`, `backward`, `container-transform` | `src/app/traits/channel/channel-material-traits.js` |
 | Ripple, reduced motion, breakpoints | every app has them; nothing asks for them | `src/app/traits/material/material-ripple-traits.js`, `src/scss/03-components/material/_motion.scss` |
 
@@ -62,6 +64,19 @@ An item of an icon grid names its icon with an `icon` key. The value is one of t
 
 The shape is put beside the name before the item renders, as `attrIconPath` (`pageItemCore$PlaceIcons` in `src/app/traits/page/page-item-core-traits.js`), and a template draws it as `<svg class="icon" viewBox="0 -960 960 960" aria-hidden="true"><path d="{{attrIconPath}}" /></svg>`. A model writes `icon` and never `attrIconPath`.
 
+A top-level page takes two keys for its destination in the navigation bar and rail, both of which can be left out:
+
+| Key of a top-level page | Value | Left out |
+|---|---|---|
+| `navIcon` | a name in `src/app/traits/utils/icon-shapes.js` | the icon of the page's `pageType` (`NAV_ICON_OF_KIND` in `src/app/traits/utils/nav-icons.js`), or `info` |
+| `navLabel` | the destination's words, one or two | the route's key, as a sentence: `page-view` reads "Page view" |
+
+```json
+{ "pageId": "classes", "pageType": "list", "navIcon": "fitness_center", "navLabel": "Classes" }
+```
+
+The destination you are on draws the icon's filled shape, where the app has one (`src/app/traits/utils/icon-shapes-filled.js`). An app with two top-level pages, or more than five, has no bar, and one with two, or more than seven, has no rail: Material gives a bar to three to five destinations and a rail to three to seven. The menu button and the drawer are there at every width under 840px.
+
 ### In a view
 
 Material's events go through one channel, `CHANNEL_MATERIAL`. Its file, `src/app/channels/channel-material.js`, says at its head what every action carries.
@@ -71,6 +86,26 @@ Material's events go through one channel, `CHANNEL_MATERIAL`. Its file, `src/app
 - `CHANNEL_MATERIAL_BREAKPOINT_EVENT`, `{ breakpoint }`: the window entered `compact`, `medium`, `expanded`, `large` or `extra-large`.
 - `CHANNEL_MATERIAL_DISMISS_EVENT`, `{ reason }`: whatever is open is to close.
 - `CHANNEL_MATERIAL_PAGE_LEAVING_EVENT` and `CHANNEL_MATERIAL_PAGE_LEFT_EVENT`: a move between pages beginning and ending, with its transition.
+
+### Adding a Material component the template does not have
+
+The template builds a component when a page uses it. It has no chips, tabs, dialog, switch, checkbox, radio button, slider, menu, search, FAB, badge, tooltip, sheet, progress indicator, carousel or data table. Google's values for every one of them are already installed: `@material/web` is a dependency for its design tokens, and `node_modules/@material/web/tokens/versions/latest/sass/` holds a file for each, such as `_md-comp-filter-chip.scss` and `_md-comp-switch.scss`. Do not import Google's web components from that package: a component here is plain markup and SpyneJS code, drawn from Google's values.
+
+A component is four parts, and each has one place:
+
+1. **Its values**, in `src/scss/00-spynejs-design-system/tokens/_material.scss`. `@use` the component's token file and the `-meta` file beside it, and add a map made with `_component(...)`, as `$navigation-bar` is. A size comes out as a number, and a color or a type style as a reference to the theme's custom property, so the component follows the theme and dark without a line of its own.
+2. **Its styles**, in a file of its own in `src/scss/03-components/material/`: one mixin, `styles`, with every rule under `main#app`, included in `_index.scss` beside it. Read every size and color from the map. Where the tokens say nothing, follow the component's guidelines at m3.material.io and say so in a comment. The three states are a layer in the content's color: under the pointer, in focus, pressed. `_ripple.scss` draws the press and `_focus.scss` the keyboard's ring; with reduced motion asked for, nothing moves.
+3. **Its markup and behavior**, written by the Grammar. Content a model writes is a page item: a template in `src/app/components/page-items/templates/`, which an entry of a page's `pageItems` names in `props.template` (`icon-grid.tmpl.html`). It needs no class of its own: its `viewClass` is `ViewStream`. A part of the app's frame is a ViewStream with a trait, as the navigation bar is. Clicks are declared in `broadcastEvents`, and what must be heard elsewhere goes through a channel.
+4. **Its record**: a row in the table above, the keys a model writes for it, and a test for anything it works out.
+
+The navigation bar, part by part: `$navigation-bar` in the tokens file; `src/scss/03-components/material/_navigation-bar.scss`; `src/app/components/nav/nav-destinations-view.js` with `src/app/traits/nav/nav-destinations-view-traits.js` and the data shaped in `src/app/traits/utils/nav-icons.js`; its row, the keys `navIcon` and `navLabel`, and `src/tests/unit-tests/traits/nav-icons.test.js`.
+
+Four things that are not obvious:
+
+- **A template is cleaned before it is drawn.** An SVG `<use>` does not survive, so an icon is its shape in place: `<svg class="icon" viewBox="0 -960 960 960" aria-hidden="true"><path d="{{attrIconPath}}" /></svg>`. A new icon is a new entry in `src/app/traits/utils/icon-shapes.js`; its head says how to add one.
+- **A `<button>` written in a template string inside `app.model.json` does not survive either.** Put markup that has one in a template file.
+- **Which layout a window gets is a media query**, and a count or a state the styles need is an attribute on an element. The bar is a bar, a rail, or not there, with no script listening to the window.
+- **Check it in light and in dark, at 375px, 700px and 1200px**, then run `npm run lint`, `npm test` and `npm run build`.
 
 ### The rest: material.spynejs.com
 
