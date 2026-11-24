@@ -479,3 +479,11 @@ $divider: _component(
   meta.module-variables(latest-divider),
   meta.module-variables(latest-divider-meta)
 );
+
+// The icon: its size. Google's token also names its icon font; this template
+// loads no icon font and draws its icons as SVG (traits/utils/icon-shapes.js),
+// so only `size` is read. The token is not in tokens/versions/latest; it is read
+// from the package's own token file.
+$icon: tokens.md-comp-icon-values(
+  $exclude-custom-properties: true,
+);

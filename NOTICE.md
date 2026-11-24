@@ -18,6 +18,12 @@ implementation, and is not affiliated with or endorsed by Google.
   code runs in the built application.
 - **Typeface.** Roboto is served from `src/static/fonts/` under the SIL Open Font
   License 1.1. The license is in `src/static/fonts/licenses/Roboto.OFL.txt`.
+- **Icons.** The shapes in `src/app/traits/utils/icon-shapes.js` are Google's
+  [Material Symbols](https://fonts.google.com/icons), copyright Google LLC, under the
+  [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). Each is taken
+  unchanged from the SVG of its name in
+  [`google/material-design-icons`](https://github.com/google/material-design-icons)
+  at commit `10ecc14`. The shapes are compiled into the application's script.
 
 ## Photographs
 

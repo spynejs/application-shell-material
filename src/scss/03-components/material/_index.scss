@@ -9,6 +9,7 @@
 @use 'app-bar';
 @use 'cards';
 @use 'focus';
+@use 'icon';
 @use 'list';
 @use 'motion';
 @use 'navigation';
@@ -22,6 +23,7 @@
   @include type.styles;
   @include cards.styles;
   @include list.styles;
+  @include icon.styles;
   @include app-bar.styles;
   @include navigation.styles;
   @include text-fields.styles;

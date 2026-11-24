@@ -21,6 +21,7 @@ This app is on the Material template: Google's Material Design 3 for the SpyneJS
 | Card | a page's sub-pages are drawn as cards; a card has no keys of its own | `src/app/components/page-items/cards-container-view.js` |
 | Text field | an entry of the contact form's `formFields` (below) | `src/app/traits/form/form-contact-us-traits.js` |
 | List, divider | a page item drawn from `timetable.tmpl.html` or `price-list.tmpl.html`: each of its `rows` or `items` is a list item; no keys of its own | `src/scss/03-components/material/_list.scss` |
+| Icon | an `icon` key beside an item's words, in a page item drawn from `icon-grid.tmpl.html` (below) | `src/app/traits/utils/icon-shapes.js`, `src/scss/03-components/material/_icon.scss` |
 | Snackbar | a view sends `CHANNEL_MATERIAL_SNACKBAR_REQUEST` with `{ message }` | `src/app/components/material/material-snackbar-host-view.js` |
 | Top app bar | it is the app's header; its title is the model's `text.header` | `src/app/components/ui-elements/ui-header-view.js` |
 | Navigation drawer | its links are the routes in `src/index.js`; it is there in a window under 840px | `src/app/components/ui-elements/ui-menu-drawer-view.js` |
@@ -52,6 +53,14 @@ An entry of the contact form's `formFields` takes three keys of Material's, each
 | `attrRequired` | the field must be filled in |
 | `attrDisabled` | the field is shown, but not to be used |
 | `multiline` | several lines, a `<textarea>` |
+
+An item of an icon grid names its icon with an `icon` key. The value is one of the names in `src/app/traits/utils/icon-shapes.js`: they are Google's Material Symbols names, such as `schedule`, `location_on` and `verified`. A name that is not there draws nothing.
+
+```json
+{ "icon": "schedule", "name": "Open late", "text": "Until 8pm on weekdays." }
+```
+
+The shape is put beside the name before the item renders, as `attrIconPath` (`pageItemCore$PlaceIcons` in `src/app/traits/page/page-item-core-traits.js`), and a template draws it as `<svg class="icon" viewBox="0 -960 960 960" aria-hidden="true"><path d="{{attrIconPath}}" /></svg>`. A model writes `icon` and never `attrIconPath`.
 
 ### In a view
 

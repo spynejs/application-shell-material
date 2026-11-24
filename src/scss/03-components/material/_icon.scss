@@ -1,0 +1,77 @@
+// Material icons.
+//
+// An icon is an SVG with the class `icon`. Its shape is one of this app's set
+// (traits/utils/icon-shapes.js), placed beside the icon's name in a page item's data
+// by the page-item core (pageItemCore$PlaceIcons):
+//
+//   <svg class="icon" viewBox="0 -960 960 960" aria-hidden="true">
+//     <path d="{{attrIconPath}}" />
+//   </svg>
+//
+// Its size is Google's icon token (@material/web 2.5.0, tokens/_md-comp-icon.scss)
+// through tokens/_material.scss: 24px. The Shell's own rule (elements/_icons.scss)
+// gives the same size as a number; this one, loaded after it, reads the token.
+//
+// Its color is its surroundings': the shape is filled with the text color of where
+// it is put. A component gives its icon a color by giving it `color`, as Google's
+// component tokens do (a list item's leading icon is on-surface-variant).
+//
+// An icon is decoration beside words that say the same thing, so it carries
+// aria-hidden="true". Where an icon stands alone, the button or link around it is
+// what is named (aria-label), not the icon.
+//
+// A component that sizes its own icon overrides this with a selector of its own: a
+// button's leading icon takes the size its button's tokens give it
+// (elements/_buttons.scss).
+//
+// Which of the Shell's page items draw icons:
+//   the icon grid   each item is an icon, a name and a line. The name and the line
+//                   are a list item's label text and supporting text, as a price
+//                   list's name and description are (_list.scss), so the two page
+//                   items read as one family. The icon is in the primary color: it
+//                   is the item's mark, not a list item's leading icon.
+//
+// What is the Shell's and stays: the grid's columns, the spaces between an icon, a
+// name and a line, between rows and columns, and around the heading and the button.
+// They were set by eye in the Shell.
+//
+// The selectors repeat the Shell's own (main#app .page-item--icon-grid ...), and this
+// file is loaded after them, so the cascade does the work.
+
+@use 'sass:map';
+@use '../../00-spynejs-design-system/tokens/material';
+@use 'list';
+@use 'type';
+
+$icon: material.$icon;
+$list: material.$list;
+
+@mixin styles {
+  main#app {
+    .icon {
+      inline-size: map.get($icon, 'size');
+      block-size: map.get($icon, 'size');
+    }
+
+    // ---- The icon grid ----
+    .page-item--icon-grid .icon-grid-icon {
+      color: var(--md-sys-color-primary);
+    }
+
+    // Label text: what the item is.
+    .page-item--icon-grid .icon-grid-name {
+      @include type.style('body-large', $emphasized: true);
+
+      color: map.get($list, 'list-item-label-text-color');
+    }
+
+    // Supporting text: what is said about it.
+    .page-item--icon-grid .icon-grid-text {
+      @include list.text('supporting-text');
+    }
+
+    .page-item--icon-grid .icon-grid-subtitle {
+      color: map.get($list, 'list-item-supporting-text-color');
+    }
+  }
+}
