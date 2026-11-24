@@ -4,23 +4,24 @@
 
   .faq-title {
     text-align: center;
-    margin-block-end: 2rem;
   }
 
   .faq-list {
     margin: 0;
     display: grid;
-    gap: 1.25rem;
   }
 
+  // A row keeps the steps the other titled lists keep: --spacing-3 (12px) above
+  // and below its words and a rule under it, so two questions are 24px apart, the
+  // same as the title is over the list. A question and its answer are one thing
+  // and sit on their leading, with nothing between.
   .faq-item {
-    padding-block-end: 1.25rem;
+    padding-block: var(--spacing-3);
     border-block-end: 1px solid #8882;
   }
 
   .faq-q {
     font-weight: 600;
-    margin-block-end: 0.4rem;
   }
 
   .faq-a {
@@ -30,7 +31,11 @@
   }
 
   // variant: two-column Q&A grid
-  &.faq--two-column {
+  //
+  // The variant's class is the item's own (props.class), so it is on the element
+  // around this one, the item's <section>, not on this root. It was looked for
+  // here, beside .page-item--faq, where it never is, and the variant did nothing.
+  .faq--two-column > & {
     max-inline-size: 1024px;
 
     .faq-list {
@@ -44,4 +49,13 @@
       }
     }
   }
+}
+
+/* House gotcha: main#app h2 typography (ID specificity) overrides a class-level
+   margin — the title asked for 2rem under it and got the h2's 12px, so it sat on
+   its own content. The space between a heading and what it heads is the same in
+   every page item that is a titled list: --spacing-6 (24px), the space
+   Material's own components keep between a headline and its content. */
+main#app .page-item--faq .faq-title {
+  margin-block-end: var(--spacing-6);
 }

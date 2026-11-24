@@ -1,0 +1,135 @@
+// Material lists and dividers.
+//
+// Values are read at build time from Google's list and divider tokens (@material/web
+// 2.5.0, tokens/versions/latest) through tokens/_material.scss.
+//
+// Which of the Shell's page items are lists:
+//   the timetable and the price list   every row is a Material list item: its
+//                                      spaces, its least height, the type and color
+//                                      of its words, the divider between rows
+//   the FAQ and the post list          a row keeps the list item's space above and
+//                                      below its words and the divider under it;
+//                                      its type is left as it is until it is ported
+//
+// A list item's words are of three kinds, and each of a row's words is one of them:
+//   label text                 what the row is: a name, a time, a price
+//   supporting text            what is said about it: a detail, a description
+//   trailing supporting text   the small print: a note, a unit
+// A name is a heading (an h3) and a price answers it, so both take the emphasized
+// form of the label's type style, as every heading in this template does (_type.scss).
+//
+// What is the Shell's and stays: where the rows' rules are (above the first row and
+// under each), the two columns and their widths, and the space between a heading, a
+// list and a button. Material's own lists rule only between items and keep 8px above
+// and below the list; neither is taken up: the page item's card is this list's
+// surface, and its rules were set by eye in the Shell.
+//
+// Not taken up: the two- and three-line heights (72 and 88px). A row is never less
+// than the one-line height (56px) and grows from there by its words.
+//
+// The selectors repeat the Shell's own (main#app .page-item--timetable ...), and this
+// file is loaded after them, so the cascade does the work.
+
+@use 'sass:map';
+@use '../../00-spynejs-design-system/tokens/material';
+@use 'type';
+
+$list: material.$list;
+$divider: material.$divider;
+
+// One of the three kinds of a list item's text, as Google's tokens give it:
+// 'label-text', 'supporting-text' or 'trailing-supporting-text'.
+@mixin text($kind) {
+  $prefix: 'list-item-#{$kind}';
+
+  font-family: map.get($list, '#{$prefix}-font'), system-ui, sans-serif;
+  font-size: map.get($list, '#{$prefix}-size');
+  line-height: map.get($list, '#{$prefix}-line-height');
+  font-weight: map.get($list, '#{$prefix}-weight');
+  letter-spacing: map.get($list, '#{$prefix}-tracking');
+  color: map.get($list, '#{$prefix}-color');
+}
+
+// The divider, as the color and thickness of a rule the Shell already draws.
+@mixin divider($side: 'end') {
+  border-block-#{$side}: map.get($divider, 'thickness') solid
+    map.get($divider, 'color');
+}
+
+// The space a list item keeps above and below its words.
+@mixin item-space {
+  padding-block: map.get($list, 'list-item-top-space')
+    map.get($list, 'list-item-bottom-space');
+}
+
+@mixin styles {
+  main#app {
+    // ---- The rows ----
+    .page-item--timetable .timetable-rows,
+    .page-item--price-list .price-list-items {
+      @include divider('start');
+    }
+
+    .page-item--timetable .timetable-row,
+    .page-item--price-list .price-list-item {
+      @include item-space;
+      @include divider;
+
+      // A row of one line is the one-line height, its words in the middle of it.
+      min-block-size: map.get($list, 'list-item-one-line-container-height');
+      align-content: center;
+      column-gap: map.get($list, 'list-item-between-space');
+    }
+
+    .page-item--faq .faq-item,
+    .page-item--post-list .post-row {
+      @include item-space;
+      @include divider;
+    }
+
+    // ---- Label text: what the row is ----
+    .page-item--timetable .timetable-when,
+    .page-item--price-list .price-list-cost {
+      @include text('label-text');
+    }
+
+    .page-item--timetable .timetable-name,
+    .page-item--price-list .price-list-name,
+    .page-item--price-list .price-list-price {
+      @include type.style('body-large', $emphasized: true);
+
+      color: map.get($list, 'list-item-label-text-color');
+    }
+
+    // ---- Supporting text: what is said about it ----
+    .page-item--timetable .timetable-detail,
+    .page-item--price-list .price-list-desc {
+      @include text('supporting-text');
+    }
+
+    // ---- Trailing supporting text: the small print ----
+    .page-item--timetable .timetable-note,
+    .page-item--price-list .price-list-unit {
+      @include text('trailing-supporting-text');
+    }
+
+    // A unit shares a line with the description beside it, so it sits on the
+    // description's leading.
+    .page-item--price-list .price-list-unit {
+      line-height: map.get($list, 'list-item-supporting-text-line-height');
+    }
+
+    // ---- Around the list ----
+    .page-item--timetable .timetable-subtitle,
+    .page-item--price-list .price-list-subtitle {
+      color: map.get($list, 'list-item-supporting-text-color');
+    }
+
+    .page-item--timetable .timetable-footnote,
+    .page-item--price-list .price-list-footnote {
+      @include type.style('body-small');
+
+      color: map.get($list, 'list-item-supporting-text-color');
+    }
+  }
+}

@@ -97,6 +97,13 @@
   latest-snackbar;
 @use '@material/web/tokens/versions/latest/sass/md-comp-snackbar-meta' as
   latest-snackbar-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-list' as latest-list;
+@use '@material/web/tokens/versions/latest/sass/md-comp-list-meta' as
+  latest-list-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-divider' as
+  latest-divider;
+@use '@material/web/tokens/versions/latest/sass/md-comp-divider-meta' as
+  latest-divider-meta;
 @use '@material/web/tokens/versions/latest/sass/md-comp-scrim-meta' as
   latest-scrim-meta;
 @use '@material/web/tokens/versions/latest/sass/md-ref-typeface' as
@@ -458,4 +465,17 @@ $app-bar: map.merge(
 $snackbar: _component(
   meta.module-variables(latest-snackbar),
   meta.module-variables(latest-snackbar-meta)
+);
+
+// The list: an item's spaces and heights, and the type and color of its label, its
+// supporting text and the supporting text at its end.
+$list: _component(
+  meta.module-variables(latest-list),
+  meta.module-variables(latest-list-meta)
+);
+
+// The divider: the thin rule between two things in a list.
+$divider: _component(
+  meta.module-variables(latest-divider),
+  meta.module-variables(latest-divider-meta)
 );

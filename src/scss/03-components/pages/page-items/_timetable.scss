@@ -1,0 +1,150 @@
+// Timetable: a titled list of sessions. Each row says when and what, with an
+// optional line of detail and an optional short note under the name. No photographs.
+//
+// HOW IT IS ORGANIZED
+//
+// Three units, top to bottom: the heading, the list, the button. Space says which
+// words belong together, and it only ever grows as the units get larger. The steps
+// are the ones Material's own components keep (a list item 12 above and below its
+// words; a dialog 24 between its headline, its content and its actions; 8 between
+// things that are one thing), and none is larger than 24: what sets the units apart
+// is the rules and the title's size as much as the space.
+//
+//   inside a unit      none: a title's words, a row's lines, sit on their leading
+//   title to subtitle  --spacing-2 (8)   the subtitle is the title's
+//   list to footnote   --spacing-2 (8)   the footnote is the list's
+//   a row              --spacing-3 (12)  above and below its words, a rule between
+//   unit to unit       --spacing-6 (24)  heading to list, and list to button
+//
+// The list is ruled above its first row and below its last, so it starts and ends
+// somewhere: it is one block, apart from the heading above it and the button below.
+//
+// Two columns, and both are always full: "when" in a column of one fixed width,
+// "what" in the rest. Every name starts at the same place, in every row and in
+// every timetable on the page, whatever the words are. The note is a line of the
+// row, not a column of its own: most rows have none, and a column that is mostly
+// empty is not a column.
+//
+// TYPE is the page items' own, as the FAQ beside it draws it: the title is the
+// app's h2, a row's name is the body size in semibold, every other word the body
+// size in regular; only the note and the footnote are at the small size.
+//
+// Words a row may leave out (detail, note) have no margin of their own, so a row
+// without them is simply shorter. The subtitle and the footnote have space of
+// their own and are not drawn when empty. With the editing tools on, an empty one
+// keeps its place: that is where an author fills it in.
+//
+// Surface (background / radius / elevation) comes from the .page-item container
+// contract; this partial only lays out the content.
+.page-item--timetable {
+  display: flex;
+  flex-direction: column;
+  max-inline-size: 720px;
+  margin: 0 auto;
+
+  .timetable-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-block-end: var(--spacing-6);
+  }
+
+  .timetable-subtitle {
+    max-inline-size: 560px;
+
+    &:empty {
+      display: none;
+    }
+  }
+
+  .timetable-rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-block-start: 1px solid #8882;
+  }
+
+  .timetable-row {
+    display: grid;
+    grid-template-columns: 15rem minmax(0, 1fr);
+    column-gap: var(--spacing-8);
+    align-items: baseline;
+    padding-block: var(--spacing-3);
+    border-block-end: 1px solid #8882;
+  }
+
+  .timetable-when {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .timetable-footnote {
+    &:empty {
+      display: none;
+    }
+  }
+
+  // The button is a standard design-system button; only spacing lives here.
+  .timetable-cta {
+    align-self: center;
+    margin-block-start: var(--spacing-6);
+    text-decoration: none;
+  }
+
+  // Under this width "what" is too narrow beside "when", so a row stacks.
+  @media (max-width: 560px) {
+    .timetable-row {
+      display: block;
+    }
+  }
+}
+
+/* House gotcha: main#app h2/h3/p typography (ID specificity) overrides the
+   class-level type treatment — the text and margin rules must match that scope.
+   The quieter words take --text-secondary, as the app's own p does, not
+   --text-muted: on a page item's surface in the dark theme --text-muted is under
+   3:1, too faint for small text. */
+main#app .page-item--timetable {
+  .timetable-title {
+    margin: 0;
+  }
+
+  .timetable-subtitle {
+    margin: var(--spacing-2) 0 0;
+  }
+
+  .timetable-when,
+  .timetable-name,
+  .timetable-detail,
+  .timetable-note {
+    margin: 0;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-normal);
+    line-height: var(--line-height-normal);
+  }
+
+  .timetable-when {
+    color: var(--text-primary);
+  }
+
+  .timetable-name {
+    color: var(--text-primary);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .timetable-detail,
+  .timetable-note,
+  .timetable-footnote {
+    color: var(--text-secondary);
+  }
+
+  .timetable-note,
+  .timetable-footnote {
+    font-size: var(--font-size-sm);
+  }
+
+  .timetable-footnote {
+    margin: var(--spacing-2) 0 0;
+    line-height: var(--line-height-normal);
+  }
+}

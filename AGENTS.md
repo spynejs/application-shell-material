@@ -20,6 +20,7 @@ This app is on the Material template: Google's Material Design 3 for the SpyneJS
 | Button | a `button` key beside a call to action's `ctaText` (below) | `src/app/traits/utils/material-button-options.js` |
 | Card | a page's sub-pages are drawn as cards; a card has no keys of its own | `src/app/components/page-items/cards-container-view.js` |
 | Text field | an entry of the contact form's `formFields` (below) | `src/app/traits/form/form-contact-us-traits.js` |
+| List, divider | a page item drawn from `timetable.tmpl.html` or `price-list.tmpl.html`: each of its `rows` or `items` is a list item; no keys of its own | `src/scss/03-components/material/_list.scss` |
 | Snackbar | a view sends `CHANNEL_MATERIAL_SNACKBAR_REQUEST` with `{ message }` | `src/app/components/material/material-snackbar-host-view.js` |
 | Top app bar | it is the app's header; its title is the model's `text.header` | `src/app/components/ui-elements/ui-header-view.js` |
 | Navigation drawer | its links are the routes in `src/index.js`; it is there in a window under 840px | `src/app/components/ui-elements/ui-menu-drawer-view.js` |

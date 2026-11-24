@@ -9,6 +9,7 @@
 @use 'app-bar';
 @use 'cards';
 @use 'focus';
+@use 'list';
 @use 'motion';
 @use 'navigation';
 @use 'ripple';
@@ -20,6 +21,7 @@
   @include ripple.properties;
   @include type.styles;
   @include cards.styles;
+  @include list.styles;
   @include app-bar.styles;
   @include navigation.styles;
   @include text-fields.styles;
