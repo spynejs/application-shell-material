@@ -96,16 +96,26 @@ $safe-area: env(safe-area-inset-bottom, 0px);
     }
 
     // ---- A destination ----
-    // "The navigation bar is divided into equal-width segments": every destination
-    // takes the same share of the bar, and the whole segment is the link.
+    // A segment is as wide as its label needs and no narrower than the indicator,
+    // and what is left of the bar is shared equally among the segments. The whole
+    // segment is the link.
+    //
+    // Material says two things of a bar that a long label sets against each other:
+    // "The navigation bar is divided into equal-width segments", and "Don't wrap or
+    // truncate text as it can make the label hard to understand". The label's rule
+    // is the one kept. Where no label is wider than the indicator the segments are
+    // equal; a longer label widens its own segment by what it needs, and the
+    // others are equal among themselves.
     .nav-destination {
-      flex: 1 1 0;
+      flex: 1 1 auto;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       gap: map.get($item, 'active-indicator-icon-label-space');
-      min-inline-size: 0;
+      // Stated, so that a segment may be narrower than its label when the labels
+      // together are wider than the bar (below), and never narrower than its pill.
+      min-inline-size: map.get($item, 'active-indicator-width');
       color: map.get($bar, 'item-inactive-label-text-color');
       text-decoration: none;
       // The browser's own flash on a touch: the indicator's state layer and ripple
@@ -180,9 +190,12 @@ $safe-area: env(safe-area-inset-bottom, 0px);
     .nav-destination__label {
       @include type.style(map.get($bar, 'label-type'));
 
-      // A label may use the whole width of its segment: with five destinations in a
-      // window 375px wide a segment is 75px, and a word of ten letters ("Membership")
-      // is 68px. A longer one ends in an ellipsis.
+      // A label is whole wherever the labels fit the bar side by side: five of them
+      // have 360px in the narrowest phone in common use, and "Home", "Listings",
+      // "Neighborhoods", "Selling" and "Agents" take 313px of it. Where they do not
+      // fit, the segments wider than the indicator give up width in proportion and
+      // their labels end in an ellipsis; nothing leaves the bar. Only shorter
+      // labels answer that: `navLabel` in the model.
       max-inline-size: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
