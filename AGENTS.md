@@ -21,6 +21,7 @@ This app is on the Material template: Google's Material Design 3 for the SpyneJS
 | Card | a page's sub-pages are drawn as cards; a card has no keys of its own | `src/app/components/page-items/cards-container-view.js` |
 | Text field | an entry of the contact form's `formFields` (below) | `src/app/traits/form/form-contact-us-traits.js` |
 | List, divider | a page item drawn from `timetable.tmpl.html` or `price-list.tmpl.html`: each of its `rows` or `items` is a list item; no keys of its own | `src/scss/03-components/material/_list.scss` |
+| Tabs | lists of one kind (price lists, or timetables) that are next to each other on a page and give the same `tabGroup` (below): a row of tabs over them, and one list shown at a time | `src/app/components/page-items/tabs-view.js`, `src/app/traits/utils/tab-sets.js`, `src/scss/03-components/material/_tabs.scss` |
 | Icon | an `icon` key beside an item's words, in a page item drawn from `icon-grid.tmpl.html` (below) | `src/app/traits/utils/icon-shapes.js`, `src/scss/03-components/material/_icon.scss` |
 | Snackbar | a view sends `CHANNEL_MATERIAL_SNACKBAR_REQUEST` with `{ message }` | `src/app/components/material/material-snackbar-host-view.js` |
 | Top app bar | it is the app's header; its title is the model's `text.header`; under 840px it holds the menu button, the title and the light and dark switch | `src/app/components/ui-elements/ui-header-view.js` |
@@ -77,6 +78,19 @@ A top-level page takes two keys for its destination in the navigation bar and ra
 
 The destination you are on draws the icon's filled shape, where the app has one (`src/app/traits/utils/icon-shapes-filled.js`). An app with two top-level pages, or more than five, has no bar, and one with two, or more than seven, has no rail: Material gives a bar to three to five destinations and a rail to three to seven. The menu button and the drawer are there at every width under 840px.
 
+A price list or a timetable takes two keys for tabs, in its `props.data` beside its `title`. Both can be left out:
+
+| Key of a list's data | Value | Left out |
+|---|---|---|
+| `tabGroup` | a word, the same on every list of the set | the list is drawn by itself, as a page item is |
+| `tabLabel` | the words on the list's tab, one or two | the list's `title` |
+
+```json
+{ "template": "price-list.tmpl.html", "data": { "title": "Coffee and drinks", "tabLabel": "Drinks", "tabGroup": "menu", "items": [] } }
+```
+
+A set is two or more lists of one kind, next to each other in a page's `pageItems`, with the same word: a price list and a timetable do not make one, and neither do two lists with another item between them. The first list is shown when the page opens. Under its tab a list does not repeat its title. To take a list out of its set, remove its `tabGroup`; to have two lists one under another, give them none. Material advises no more than four tabs; with more, or with long labels, the row scrolls sideways and no label is cut. `TAB_TEMPLATES` in `src/app/traits/utils/tab-sets.js` names the templates that may be a set.
+
 ### In a view
 
 Material's events go through one channel, `CHANNEL_MATERIAL`. Its file, `src/app/channels/channel-material.js`, says at its head what every action carries.
@@ -89,7 +103,7 @@ Material's events go through one channel, `CHANNEL_MATERIAL`. Its file, `src/app
 
 ### Adding a Material component the template does not have
 
-The template builds a component when a page uses it. It has no chips, tabs, dialog, switch, checkbox, radio button, slider, menu, search, FAB, badge, tooltip, sheet, progress indicator, carousel or data table. Google's values for every one of them are already installed: `@material/web` is a dependency for its design tokens, and `node_modules/@material/web/tokens/versions/latest/sass/` holds a file for each, such as `_md-comp-filter-chip.scss` and `_md-comp-switch.scss`. Do not import Google's web components from that package: a component here is plain markup and SpyneJS code, drawn from Google's values.
+The template builds a component when a page uses it. It has no chips, dialog, switch, checkbox, radio button, slider, menu, search, FAB, badge, tooltip, sheet, progress indicator, carousel or data table. Google's values for every one of them are already installed: `@material/web` is a dependency for its design tokens, and `node_modules/@material/web/tokens/versions/latest/sass/` holds a file for each, such as `_md-comp-filter-chip.scss` and `_md-comp-switch.scss`. Do not import Google's web components from that package: a component here is plain markup and SpyneJS code, drawn from Google's values.
 
 A component is four parts, and each has one place:
 

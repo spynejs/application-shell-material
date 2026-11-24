@@ -17,6 +17,7 @@
 @use 'navigation-rail';
 @use 'ripple';
 @use 'snackbar';
+@use 'tabs';
 @use 'text-fields';
 @use 'type';
 
@@ -37,4 +38,6 @@
   @include navigation-bar.styles;
   // After the bar: a destination is styled there, and the rail lays it out.
   @include navigation-rail.styles;
+  // After focus: a tab draws its own focus indicator.
+  @include tabs.styles;
 }

@@ -1,0 +1,277 @@
+// Material tabs: a page's lists of one kind under a row of tabs, one shown at a
+// time. They are Material's secondary tabs, the ones for inside a content area.
+//
+// Values are read at build time from Google's secondary tab tokens (@material/web
+// 2.5.0, tokens/versions/latest) through tokens/_material.scss. What the tokens do
+// not say follows m3.material.io (Tabs, guidelines and specs; read 2026-11-24) or
+// Google's own tab component in the same package, and is marked where it is used.
+//
+// The markup is one view, TabsView (`.tabs`): a row of tabs (`role="tablist"`) and
+// a panel for each. Which tab is selected is a class, `selected`, that the view
+// sets on the tab and on its panel. The page makes a set where the model asks for
+// one (traits/utils/tab-sets.js).
+
+@use 'sass:map';
+@use 'sass:math';
+@use '../../00-spynejs-design-system/tokens/material';
+@use 'ripple';
+@use 'type';
+
+$tab: material.$secondary-tab;
+
+// The space each side of a tab's label. Not a token: it is what Google's own tab
+// component gives a tab (@material/web, tabs/internal/_tab.scss).
+$label-space: 16px;
+
+@function _layer($color, $opacity) {
+  @return color-mix(in srgb, $color math.percentage($opacity), transparent);
+}
+
+@mixin styles {
+  // The underline of the tab just selected starts where the last one was and runs
+  // to its own place. The view says where that was (tabsView$StartIndicatorFrom);
+  // with nothing said it starts where it is, and does not move.
+  @keyframes material-tab-indicator {
+    from {
+      transform: translateX(var(--_indicator-from, 0px))
+        scaleX(var(--_indicator-scale, 1));
+    }
+  }
+
+  main#app {
+    // ---- The set ----
+    // As wide as the lists it holds and in the middle of its page item, as they
+    // are, so that the row of tabs is the width of the list under it. A price list
+    // is 600px at most and a timetable 720px (pages/page-items/_price-list.scss,
+    // _timetable.scss); these are kept in step with them by hand.
+    .tabs {
+      margin-inline: auto;
+
+      &:has(.page-item--price-list) {
+        max-inline-size: 600px;
+      }
+
+      &:has(.page-item--timetable) {
+        max-inline-size: 720px;
+      }
+    }
+
+    // ---- The row ----
+    // As wide as its page item. "Divided into equal sections, one for each tab":
+    // the tabs share the row equally. A tab is never narrower than its label, so
+    // one with a long label takes what it needs and the others share the rest;
+    // and when the labels are together wider than the row, the row scrolls
+    // sideways ("when a set of tabs cannot fit on screen, use scrollable tabs")
+    // and no label is cut.
+    .tabs__row {
+      display: flex;
+      overflow-x: auto;
+      // The row scrolls by a finger, by the arrow keys and by a selection; it
+      // shows no scrollbar, as Google's own does not.
+      scrollbar-width: none;
+      block-size: map.get($tab, 'container-height');
+      // No fill, where Google's token gives the row `surface`: a page item is a
+      // card of another tone, and a filled row is a band across it. The card's own
+      // tone is behind the tabs.
+      background-color: transparent;
+      // "The divider is included in the height, placed inside the container."
+      box-shadow: inset 0 (-1 * map.get($tab, 'divider-height')) 0
+        map.get($tab, 'divider-color');
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+
+    // In a compact window the row runs to the edges of its card, over the card's
+    // own padding, which a page item says in `--pi-padding`: a phone has no width
+    // to give away, and three tabs that fit the card do not all fit inside its
+    // padding. A page item with no padding (`page-item--flush`) has none to run
+    // over.
+    @media (width < 600px) {
+      .tabs__row {
+        margin-inline: calc(-1 * var(--pi-padding, 0px));
+      }
+
+      .page-item--flush .tabs__row {
+        margin-inline: 0;
+      }
+    }
+
+    // ---- A tab ----
+    .tab {
+      --_layer: transparent;
+
+      position: relative;
+      isolation: isolate;
+      flex: 1 0 0;
+      // Stated: it is what keeps a tab from being narrower than its words.
+      min-inline-size: max-content;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      block-size: 100%;
+      margin: 0;
+      padding: 0 $label-space;
+      border: 0;
+      border-radius: map.get($tab, 'container-shape');
+      background-color: transparent;
+      background-image: linear-gradient(var(--_layer), var(--_layer));
+      color: map.get($tab, 'inactive-label-text-color');
+      white-space: nowrap;
+      cursor: pointer;
+      // The browser's own flash on a touch: the state layer and the ripple are
+      // the answer to a press here.
+      -webkit-tap-highlight-color: transparent;
+
+      &.selected {
+        color: map.get($tab, 'active-label-text-color');
+      }
+    }
+
+    .tab__label {
+      @include type.style(map.get($tab, 'label-type'));
+
+      color: inherit;
+    }
+
+    // The underline: each tab has its own, and the selected tab's is shown.
+    .tab__indicator {
+      position: absolute;
+      inset-inline: 0;
+      inset-block-end: 0;
+      block-size: map.get($tab, 'active-indicator-height');
+      background-color: map.get($tab, 'active-indicator-color');
+      opacity: 0;
+      // Where it is said to start from is measured from the tab's left edge.
+      transform-origin: left center;
+    }
+
+    .tab.selected .tab__indicator {
+      opacity: 1;
+    }
+
+    // ---- States ----
+    // The tokens give one layer color for hover, focus and a press, and an opacity
+    // for each.
+    @media (hover: hover) {
+      .tab:hover {
+        --_layer: #{_layer(
+            map.get($tab, 'hover-state-layer-color'),
+            map.get($tab, 'hover-state-layer-opacity')
+          )};
+
+        color: map.get($tab, 'hover-label-text-color');
+      }
+    }
+
+    // `.tabs` is in the selector so that this outweighs Material's one focus
+    // indicator for every control (_focus.scss): a tab's is drawn inside it, where
+    // the tokens put it, so that the row does not cut it off.
+    .tabs .tab:focus-visible {
+      --_layer: #{_layer(
+          map.get($tab, 'focus-state-layer-color'),
+          map.get($tab, 'focus-state-layer-opacity')
+        )};
+
+      color: map.get($tab, 'focus-label-text-color');
+      outline: map.get($tab, 'focus-indicator-thickness') solid
+        map.get($tab, 'focus-indicator-color');
+      outline-offset: map.get($tab, 'focus-indicator-outline-offset');
+    }
+
+    // A press, and the underline's move. Where motion is welcome the press is
+    // Material's ripple, from the point pressed, and the underline runs to its
+    // place. With reduced motion asked for the press is a flat layer and the
+    // underline is where it belongs at once.
+    @media (prefers-reduced-motion: reduce) {
+      .tab:active {
+        --_layer: #{_layer(
+            map.get($tab, 'pressed-state-layer-color'),
+            map.get($tab, 'pressed-state-layer-opacity')
+          )};
+      }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .tabs__row {
+        scroll-behavior: smooth;
+      }
+
+      .tab::after {
+        @include ripple.layer(map.get($tab, 'pressed-state-layer-color'));
+
+        z-index: -1;
+      }
+
+      .tab:active::after {
+        @include ripple.pressed(map.get($tab, 'pressed-state-layer-opacity'));
+      }
+
+      // The tokens name no duration for the underline's move. 250ms on the
+      // emphasized easing is what Google's own tab component uses.
+      .tab.selected .tab__indicator {
+        animation: material-tab-indicator var(--md-sys-motion-duration-medium1)
+          var(--md-sys-motion-easing-emphasized);
+      }
+    }
+
+    // ---- The panels ----
+    // Every list of the set is in the page; the selected tab's is shown.
+    .tab-panel {
+      display: none;
+      padding-block-start: var(--spacing-6);
+
+      &.selected {
+        display: block;
+      }
+    }
+
+    // The tab says the list's title, so the panel does not say it again. A list's
+    // header that then has nothing in it (no subtitle) takes no room.
+    .tab-panel :is(.price-list-title, .timetable-title) {
+      display: none;
+    }
+
+    .tab-panel
+      :is(.price-list-header, .timetable-header):has(
+        > :is(.price-list-subtitle, .timetable-subtitle):empty
+      ) {
+      display: none;
+    }
+
+    // With the editing tools on, a list's title is shown in its panel all the same:
+    // that is where an author changes it, and its tab says the new words the next
+    // time the page is drawn.
+    @at-root body.spyne-plugin-cms-mode
+        #{&}
+        .tab-panel
+        :is(.price-list-title, .timetable-title) {
+      display: block;
+    }
+
+    // Printed, there is nothing to press: the lists are one under another, each
+    // with its title.
+    @media print {
+      .tabs__row {
+        display: none;
+      }
+
+      .tab-panel {
+        display: block;
+      }
+
+      .tab-panel :is(.price-list-title, .timetable-title) {
+        display: block;
+      }
+
+      .tab-panel
+        :is(.price-list-header, .timetable-header):has(
+          > :is(.price-list-subtitle, .timetable-subtitle):empty
+        ) {
+        display: flex;
+      }
+    }
+  }
+}

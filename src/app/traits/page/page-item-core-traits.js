@@ -5,9 +5,11 @@ import {
   BUTTON_NO_WORDS,
 } from 'traits/utils/material-button-options.js';
 import { iconPath } from 'traits/utils/icons.js';
+import { tabSets, tabsData } from 'traits/utils/tab-sets.js';
 import { HeroView } from 'components/page-items/hero-view.js';
 import { CardsContainerView } from 'components/page-items/cards-container-view.js';
 import { FormContactUsView } from 'components/page-items/form-contact-us-view.js';
+import { TabsView } from 'components/page-items/tabs-view.js';
 
 export class PageItemCoreTraits extends SpyneTrait {
   constructor(context) {
@@ -206,29 +208,62 @@ export class PageItemCoreTraits extends SpyneTrait {
     return shaped;
   }
 
+  /**
+   * Adds one page item: its view, in its container, or where `container.selector`
+   * says.
+   */
+  static pageItemCore$AddPageItem(obj) {
+    const { props, container, viewClass, isPrototype } = obj;
+    props.template = this.pageItemCore$GetTemplate(props, isPrototype);
+    props.data = PageItemCoreTraits.pageItemCore$PlaceIcons(
+      PageItemCoreTraits.pageItemCore$GiveButtonLook(props.data),
+    );
+
+    const ViewClass = this.pageItemCore$GetViewClass(viewClass);
+
+    const appendElSelector =
+      this.pageItemCore$CheckToAddPageTraitContainer(container);
+
+    const view = new ViewClass(props);
+
+    this.appendView(view, appendElSelector);
+
+    if (props?.styles) {
+      PageItemCoreTraits.pageItemCore$AddStyles(view.props.el, props.styles);
+    }
+  }
+
+  /**
+   * Adds a set of tabs where the model asks for one: lists of one kind, next to
+   * each other, that give the same `tabGroup` (traits/utils/tab-sets.js). The set
+   * takes one container on the page, the first list's, and puts each list into a
+   * panel of its own.
+   *
+   * `setId` is the set's name on this page.
+   */
+  static pageItemCore$AddTabSet({ items, labels }, setId) {
+    const appendElSelector = this.pageItemCore$CheckToAddPageTraitContainer(
+      items[0].container,
+    );
+
+    this.appendView(
+      new TabsView({ data: tabsData(setId, labels), pageItems: items }),
+      appendElSelector,
+    );
+  }
+
+  /**
+   * Adds the page's items in the order the model has them: each by itself, or
+   * as a set of tabs.
+   */
   static pageItemCore$AddPageItems(elementsArr = this.props.data.pageItems) {
-    const addElement = (obj) => {
-      const { props, container, viewClass, isPrototype } = obj;
-      props.template = this.pageItemCore$GetTemplate(props, isPrototype);
-      props.data = PageItemCoreTraits.pageItemCore$PlaceIcons(
-        PageItemCoreTraits.pageItemCore$GiveButtonLook(props.data),
-      );
-
-      const ViewClass = this.pageItemCore$GetViewClass(viewClass);
-
-      const appendElSelector =
-        this.pageItemCore$CheckToAddPageTraitContainer(container);
-
-      const view = new ViewClass(props);
-
-      this.appendView(view, appendElSelector);
-
-      if (props?.styles) {
-        PageItemCoreTraits.pageItemCore$AddStyles(view.props.el, props.styles);
+    tabSets(elementsArr).forEach((part, index) => {
+      if (part.tabGroup === '') {
+        this.pageItemCore$AddPageItem(part.items[0]);
+      } else {
+        this.pageItemCore$AddTabSet(part, `tabs-${index}`);
       }
-    };
-
-    elementsArr.forEach(addElement);
+    });
   }
 
   static pageItemCore$onRendered(props = this.props) {

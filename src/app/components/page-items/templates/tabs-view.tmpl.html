@@ -1,0 +1,30 @@
+<div class="tabs__row" role="tablist">
+  {{#tabs}}
+  <button
+    class="tab {{selectedClass}}"
+    type="button"
+    role="tab"
+    id="{{attrTabId}}"
+    aria-controls="{{attrPanelId}}"
+    aria-selected="{{attrSelected}}"
+    tabindex="{{attrTabindex}}"
+    data-tab-set="{{attrSetId}}"
+    data-tab-index="{{attrIndex}}"
+  >
+    <span class="tab__label">{{label}}</span>
+    <span class="tab__indicator"></span>
+  </button>
+  {{/tabs}}
+</div>
+<!-- A panel for each tab. The page item of that tab is put into it once this is rendered; the styles show the selected one. -->
+<div class="tabs__panels">
+  {{#tabs}}
+  <div
+    class="tab-panel {{selectedClass}}"
+    role="tabpanel"
+    id="{{attrPanelId}}"
+    aria-labelledby="{{attrTabId}}"
+    data-tab-index="{{attrIndex}}"
+  ></div>
+  {{/tabs}}
+</div>

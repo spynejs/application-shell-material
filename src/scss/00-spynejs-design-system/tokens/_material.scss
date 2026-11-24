@@ -118,6 +118,10 @@
   latest-divider;
 @use '@material/web/tokens/versions/latest/sass/md-comp-divider-meta' as
   latest-divider-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-secondary-navigation-tab'
+  as latest-secondary-tab;
+@use '@material/web/tokens/versions/latest/sass/md-comp-secondary-navigation-tab-meta'
+  as latest-secondary-tab-meta;
 @use '@material/web/tokens/versions/latest/sass/md-comp-scrim-meta' as
   latest-scrim-meta;
 @use '@material/web/tokens/versions/latest/sass/md-ref-typeface' as
@@ -463,6 +467,25 @@ $navigation-bar: map.merge(
         meta.module-variables(latest-nav-bar-item-vertical)
       ),
     label-type: 'label-medium',
+  )
+);
+
+// Secondary tabs: the row's height and surface, the divider under it, the underline
+// of the selected tab, and a tab's label colors, selected and not, with the state
+// layer's color and opacity for hover, focus and a press. They are Material's tabs
+// for inside a content area; primary tabs, which sit under the app bar, are not
+// read.
+//
+// `label-type` is the type style of a tab's label. The set gives it part by part
+// (`label-text-size`, `label-text-weight` and so on, each from title-small); the
+// stylesheets take a type style by its name, so the name is written here.
+$secondary-tab: map.merge(
+  _component(
+    meta.module-variables(latest-secondary-tab),
+    meta.module-variables(latest-secondary-tab-meta)
+  ),
+  (
+    label-type: 'title-small',
   )
 );
 
