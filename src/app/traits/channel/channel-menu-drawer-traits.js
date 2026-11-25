@@ -7,10 +7,11 @@ export class ChannelMenuDrawerTraits extends SpyneTrait {
   }
 
   static channelMenuDrawer$OnRegistered() {
+    // A click, and only a click: the toggle also says when the pointer and the
+    // focus come and go, for its tooltip, and those must not move the drawer.
     const menuDrawerBtnFilter = new ChannelPayloadFilter({
-      propFilters: {
-        eventType: 'menuDrawer',
-      },
+      eventType: 'menuDrawer',
+      action: 'CHANNEL_UI_CLICK_EVENT',
     });
 
     const appInitFilter = new ChannelPayloadFilter({

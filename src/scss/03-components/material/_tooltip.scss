@@ -1,0 +1,153 @@
+// Material tooltip: the plain tooltip, the name of a control that shows no words.
+//
+// Values are read at build time from Google's plain tooltip tokens (@material/web
+// 2.5.0, tokens/versions/latest) through tokens/_material.scss. What the tokens do
+// not say follows m3.material.io (Tooltips: specs, guidelines and accessibility;
+// read 2026-11-24) and is marked where it is used.
+//
+// The markup is one view: #material-tooltip-host, a region that is always there,
+// holding the one .tooltip. The region says the moment as classes, `is-shown`,
+// `is-by-keyboard` and `is-lingering`, and writes what it measured as three custom
+// properties: where the control is and how wide the words are
+// (traits/material/material-tooltip-traits.js). Where the tooltip stands and how
+// long it waits are decided here.
+
+@use 'sass:map';
+@use '../../00-spynejs-design-system/tokens/material';
+
+$t: material.$plain-tooltip;
+
+// From the specs: the container's height, and the space each side of the words.
+$height: 24px;
+$side: 8px;
+
+// From the guidelines: "the plain tooltip appears below the element", 4dp from it,
+// where the element is in an app bar. Both controls that have one are.
+$gap: 4px;
+
+// How near the window's edge it may come. Material gives no number.
+$edge: 8px;
+
+// How long the pointer rests before it shows. Material gives no number: half a
+// second, long enough that a pointer passing over shows nothing.
+$rest: 500ms;
+
+// "Tooltips remain visible for 1.5 seconds after the cursor leaves."
+$linger: 1500ms;
+
+@mixin styles {
+  main#app {
+    // ---- Where it stands ----
+    // The region is a line across the top of the window, with no height: the
+    // tooltip is placed from it. It is empty space and takes no press.
+    #material-tooltip-host {
+      position: fixed;
+      // In front of the app bar (1000), which it hangs below; under a snackbar
+      // (1100).
+      z-index: 1050;
+      inset-block-start: 0;
+      inset-inline: 0;
+      block-size: 0;
+      pointer-events: none;
+    }
+
+    // ---- The tooltip ----
+    .tooltip {
+      position: absolute;
+      // Below the control. The measures are the window's own, so the sides are
+      // named left and top, in either direction of reading.
+      top: calc(var(--tooltip-control-bottom, 0px) + #{$gap});
+      // Centered on the control, and moved in from the window's edge where the
+      // control is too near it for that.
+      left: clamp(
+        #{$edge},
+        calc(
+          var(--tooltip-control-center, 0px) - var(--tooltip-width, 0px) / 2
+        ),
+        calc(100% - var(--tooltip-width, 0px) - #{$edge})
+      );
+      // On a whole pixel, where the browser can round: words drawn between two
+      // pixels are soft.
+      left: round(
+        down,
+        clamp(
+          #{$edge},
+          calc(
+            var(--tooltip-control-center, 0px) - var(--tooltip-width, 0px) / 2
+          ),
+          calc(100% - var(--tooltip-width, 0px) - #{$edge})
+        ),
+        1px
+      );
+      box-sizing: border-box;
+      max-inline-size: calc(100% - #{2 * $edge});
+      min-block-size: $height;
+      padding: 4px $side;
+      border-radius: map.get($t, 'container-shape');
+      background: map.get($t, 'container-color');
+      color: map.get($t, 'supporting-text-color');
+      font-family: map.get($t, 'supporting-text-font'), system-ui, sans-serif;
+      font-size: map.get($t, 'supporting-text-size');
+      line-height: map.get($t, 'supporting-text-line-height');
+      font-weight: map.get($t, 'supporting-text-weight');
+      letter-spacing: map.get($t, 'supporting-text-tracking');
+      // Its words are brief and on one line.
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+      // Not shown until the region says the moment for it (below). Going at once:
+      // a press on the control, Escape, or the focus moving on.
+      visibility: hidden;
+      opacity: 0;
+      transition:
+        opacity var(--md-sys-motion-duration-short1) linear,
+        visibility 0s linear var(--md-sys-motion-duration-short1);
+    }
+
+    // A control with no name gets no tooltip.
+    .tooltip:empty {
+      display: none;
+    }
+
+    // ---- When it shows ----
+    // Once the pointer has rested on the control. The tokens name no motion for
+    // it: it fades, as Material asks of anything that arrives over other content,
+    // and the fade is short enough to keep where reduced motion is asked for.
+    #material-tooltip-host.is-shown .tooltip {
+      visibility: visible;
+      opacity: 1;
+      transition:
+        opacity var(--md-sys-motion-duration-short3) linear $rest,
+        visibility 0s linear $rest;
+    }
+
+    // The keyboard's focus does not wait.
+    #material-tooltip-host.is-shown.is-by-keyboard .tooltip {
+      transition-delay: 0s;
+    }
+
+    // The pointer has left: it stays as it is for a moment, and then goes. One
+    // that had not yet shown is not shown.
+    #material-tooltip-host.is-lingering .tooltip {
+      transition:
+        opacity var(--md-sys-motion-duration-short1) linear $linger,
+        visibility 0s linear ($linger + 50ms);
+    }
+
+    // Where colors are forced the container's own color is gone: an outline keeps
+    // its edge.
+    @media (forced-colors: active) {
+      .tooltip {
+        outline: 1px solid CanvasText;
+      }
+    }
+
+    // Printed, there is nothing to point at.
+    @media print {
+      #material-tooltip-host {
+        display: none;
+      }
+    }
+  }
+}

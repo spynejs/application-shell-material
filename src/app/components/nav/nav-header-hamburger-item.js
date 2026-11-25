@@ -11,9 +11,12 @@ export class NavHeaderHamburgerItem extends ViewStream {
     props['aria-label'] = 'Menu';
     props['aria-controls'] = 'menu-drawer';
     props['aria-expanded'] = 'false';
+    // `tooltip`: it shows no words, so its name is shown as a tooltip
+    // (material/material-tooltip-host-view.js).
     props.dataset = {
       eventType: 'menuDrawer',
       isHamburger: 'true',
+      tooltip: 'true',
     };
     props.channels = ['CHANNEL_MENU_DRAWER'];
     props.traits = [NavHeaderHamburgerItemTraits];
@@ -31,7 +34,15 @@ export class NavHeaderHamburgerItem extends ViewStream {
   }
 
   broadcastEvents() {
-    return [['#menu_toggle', 'click']];
+    // The click opens and closes the drawer. The other four are for the
+    // tooltip: when the pointer and the focus come and go.
+    return [
+      ['#menu_toggle', 'click'],
+      ['#menu_toggle', 'pointerenter'],
+      ['#menu_toggle', 'pointerleave'],
+      ['#menu_toggle', 'focus'],
+      ['#menu_toggle', 'blur'],
+    ];
   }
 
   onRendered() {}

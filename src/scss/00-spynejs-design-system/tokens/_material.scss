@@ -130,6 +130,10 @@
   as latest-extended-fab-color;
 @use '@material/web/tokens/versions/latest/sass/md-comp-extended-fab-primary-container-meta'
   as latest-extended-fab-color-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-plain-tooltip' as
+  latest-plain-tooltip;
+@use '@material/web/tokens/versions/latest/sass/md-comp-plain-tooltip-meta' as
+  latest-plain-tooltip-meta;
 @use '@material/web/tokens/versions/latest/sass/md-comp-scrim-meta' as
   latest-scrim-meta;
 @use '@material/web/tokens/versions/latest/sass/md-ref-typeface' as
@@ -524,6 +528,17 @@ $extended-fab: map.merge(
   (
     label-type: 'title-medium',
   )
+);
+
+// The plain tooltip: the few words that name a control which shows none. Its
+// container's color and corner, and its words' color and type, part by part (each
+// from body-small). The set gives it no height and no space round its words: those
+// are in Material's specs, and the stylesheet that draws a tooltip says them.
+//
+// The rich tooltip is not read: the template draws none.
+$plain-tooltip: _component(
+  meta.module-variables(latest-plain-tooltip),
+  meta.module-variables(latest-plain-tooltip-meta)
 );
 
 // The scrim behind a modal surface: the `scrim` colour role and its opacity.

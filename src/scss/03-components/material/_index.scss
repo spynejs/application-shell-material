@@ -20,6 +20,7 @@
 @use 'snackbar';
 @use 'tabs';
 @use 'text-fields';
+@use 'tooltip';
 @use 'type';
 
 @mixin styles {
@@ -44,4 +45,5 @@
   // After the bar, the snackbar and the footer's own styles: it stands over the
   // first, lifts the second and makes room in the third.
   @include fab.styles;
+  @include tooltip.styles;
 }

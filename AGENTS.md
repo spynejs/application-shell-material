@@ -25,6 +25,7 @@ This app is on the Material template: Google's Material Design 3 for the SpyneJS
 | Icon | an `icon` key beside an item's words, in a page item drawn from `icon-grid.tmpl.html` (below) | `src/app/traits/utils/icon-shapes.js`, `src/scss/03-components/material/_icon.scss` |
 | Snackbar | a view sends `CHANNEL_MATERIAL_SNACKBAR_REQUEST` with `{ message }` | `src/app/components/material/material-snackbar-host-view.js` |
 | FAB | the key `fab` at the root of the model (below): one floating action button, at the bottom of every page once the page is scrolled, leading to the app's contact page | `src/app/components/material/material-fab-host-view.js`, `src/app/traits/utils/fab.js`, `src/scss/03-components/material/_fab.scss` |
+| Tooltip | a control that shows no words asks for one in its markup, with `data-tooltip="true"` beside its `aria-label` (below): the label is shown under the control, to a pointer that rests on it and to the keyboard's focus; the menu button and the light and dark switch have one | `src/app/components/material/material-tooltip-host-view.js`, `src/app/traits/material/material-tooltip-traits.js`, `src/scss/03-components/material/_tooltip.scss` |
 | Top app bar | it is the app's header; its title is the model's `text.header`; under 840px it holds the menu button, the title and the light and dark switch | `src/app/components/ui-elements/ui-header-view.js` |
 | Navigation drawer | its links are the routes in `src/index.js`; it is there in a window under 840px | `src/app/components/ui-elements/ui-menu-drawer-view.js` |
 | Navigation bar | its destinations are the top-level routes in `src/index.js`; it is there in a window under 600px, for an app with three to five of them; a top-level page gives its destination an icon and a label with `navIcon` and `navLabel` (below) | `src/app/components/nav/nav-destinations-view.js`, `src/scss/03-components/material/_navigation-bar.scss` |
@@ -116,9 +117,31 @@ Material's events go through one channel, `CHANNEL_MATERIAL`. Its file, `src/app
 - `CHANNEL_MATERIAL_DISMISS_EVENT`, `{ reason }`: whatever is open is to close.
 - `CHANNEL_MATERIAL_PAGE_LEAVING_EVENT` and `CHANNEL_MATERIAL_PAGE_LEFT_EVENT`: a move between pages beginning and ending, with its transition.
 
+A control that shows no words, only an icon, gets a tooltip in its own markup. No key in a model asks for one. Two things are written, both in the view that holds the control:
+
+```html
+<button id="share" aria-label="Share" data-tooltip="true">…</button>
+```
+
+```js
+broadcastEvents() {
+  return [
+    ['#share', 'click'],
+    ['[data-tooltip]', 'pointerenter'],
+    ['[data-tooltip]', 'pointerleave'],
+    ['[data-tooltip]', 'focus'],
+    ['[data-tooltip]', 'blur'],
+  ];
+}
+```
+
+The tooltip's words are the control's `aria-label`, so the name is written once. The four events are how the tooltip's region hears the pointer and the focus come and go: a control in a view that does not broadcast them gets no tooltip. Do not add a `title` as well, and do not give a tooltip to a control that already shows its words. It is Material's plain tooltip: it shows after the pointer has rested half a second, or at once for the keyboard's focus, stays 1.5 seconds after the pointer leaves, and stands under the control, which is where Material puts it in an app bar; above a control is not built. It is placed when the pointer or the focus arrives and does not follow a control that then moves, as one in a page does when the page is scrolled: the two that have one are in the app bar, which stays where it is. A finger's touch shows none.
+
+A control with a tooltip sends more than clicks on `CHANNEL_UI`. Anything that listens for that control there must name the click: a listener on `CHANNEL_UI_CLICK_EVENT`, or a `ChannelPayloadFilter` with `action: 'CHANNEL_UI_CLICK_EVENT'`. One that takes every event from the control would act when the pointer only comes to rest on it.
+
 ### Adding a Material component the template does not have
 
-The template builds a component when a page uses it. It has no chips, dialog, switch, checkbox, radio button, slider, menu, search, badge, tooltip, sheet, progress indicator, carousel or data table. Google's values for every one of them are already installed: `@material/web` is a dependency for its design tokens, and `node_modules/@material/web/tokens/versions/latest/sass/` holds a file for each, such as `_md-comp-filter-chip.scss` and `_md-comp-switch.scss`. Do not import Google's web components from that package: a component here is plain markup and SpyneJS code, drawn from Google's values.
+The template builds a component when a page uses it. It has no chips, dialog, switch, checkbox, radio button, slider, menu, search, badge, sheet, progress indicator, carousel or data table. Google's values for every one of them are already installed: `@material/web` is a dependency for its design tokens, and `node_modules/@material/web/tokens/versions/latest/sass/` holds a file for each, such as `_md-comp-filter-chip.scss` and `_md-comp-switch.scss`. Do not import Google's web components from that package: a component here is plain markup and SpyneJS code, drawn from Google's values.
 
 A component is four parts, and each has one place:
 

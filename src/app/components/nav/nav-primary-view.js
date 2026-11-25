@@ -30,10 +30,16 @@ export class NavPrimaryView extends ViewStream {
   }
 
   broadcastEvents() {
-    // return nested array(s)
+    // The clicks are the links' and the switch's. The other four are for the
+    // tooltip of a control that asks for one (the switch): when the pointer and
+    // the focus come and go.
     return [
       ['a', 'click'],
       ['button', 'click'],
+      ['[data-tooltip]', 'pointerenter'],
+      ['[data-tooltip]', 'pointerleave'],
+      ['[data-tooltip]', 'focus'],
+      ['[data-tooltip]', 'blur'],
     ];
   }
 
