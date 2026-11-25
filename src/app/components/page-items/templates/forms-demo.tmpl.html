@@ -164,3 +164,86 @@
     </label>
   </div>
 </section>
+
+<section class="forms-demo__kind" aria-labelledby="forms-demo-slider">
+  <h3 id="forms-demo-slider">{{sliderName}}</h3>
+  <p class="forms-demo__note">{{sliderNote}}</p>
+  <div class="forms-demo__fields">
+    <div class="slider-field">
+      <label for="forms-demo-slider-a">{{sliderLabel}}</label>
+      <input
+        id="forms-demo-slider-a"
+        type="range"
+        name="demo-slider"
+        min="0"
+        max="100"
+        value="30"
+      />
+    </div>
+    <div class="slider-field">
+      <label for="forms-demo-slider-b">{{disabled}}</label>
+      <input
+        id="forms-demo-slider-b"
+        type="range"
+        name="demo-slider-disabled"
+        min="0"
+        max="100"
+        value="60"
+        disabled
+      />
+    </div>
+  </div>
+</section>
+
+<section class="forms-demo__kind" aria-labelledby="forms-demo-filled">
+  <h3 id="forms-demo-filled">{{filledName}}</h3>
+  <p class="forms-demo__note">{{filledNote}}</p>
+  <div class="forms-demo__fields fields-filled">
+    <div class="contact-us__field">
+      <label for="forms-demo-filled-a">{{filledLabel}}</label>
+      <input
+        id="forms-demo-filled-a"
+        type="text"
+        name="demo-filled"
+        placeholder="{{attrFilledPlaceholder}}"
+      />
+    </div>
+    <div class="contact-us__field">
+      <label for="forms-demo-filled-b">{{filledIconLabel}}</label>
+      <svg
+        class="icon contact-us__field-icon contact-us__field-icon--leading"
+        viewBox="0 -960 960 960"
+        aria-hidden="true"
+      >
+        <path d="{{attrIconPath}}" />
+      </svg>
+      <input
+        id="forms-demo-filled-b"
+        type="email"
+        name="demo-filled-icon"
+        placeholder="{{attrFilledPlaceholder}}"
+        value="you@example.com"
+      />
+      <p class="contact-us__field-support">{{filledSupport}}</p>
+    </div>
+    <div class="contact-us__field">
+      <label for="forms-demo-filled-c">{{filledSelectLabel}}</label>
+      <select id="forms-demo-filled-c" name="demo-filled-select">
+        <option value=""></option>
+        <option value="one">{{%radioOne%}}</option>
+        <option value="two">{{%radioTwo%}}</option>
+        <option value="three">{{%radioThree%}}</option>
+      </select>
+    </div>
+    <div class="contact-us__field">
+      <label for="forms-demo-filled-d">{{disabled}}</label>
+      <input
+        id="forms-demo-filled-d"
+        type="text"
+        name="demo-filled-disabled"
+        placeholder="{{attrFilledPlaceholder}}"
+        disabled
+      />
+    </div>
+  </div>
+</section>

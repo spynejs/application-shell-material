@@ -1,0 +1,215 @@
+// Material slider, for a plain <input type="range">.
+//
+// Values are read at build time from Google's slider tokens (@material/web 2.5.0,
+// tokens/versions/latest) through tokens/_material.scss. What the tokens do not
+// carry is marked where it is used.
+//
+// The control is the browser's own: the arrow keys move it, it takes a finger's
+// drag, and the browser holds its value. Its two parts are the browser's too, and
+// each browser names them its own way, so each rule below is written twice.
+//
+//   the track    16px tall, with round ends: filled in the primary color up to the
+//                handle, and in the secondary-container color after it, with 6px of
+//                space on each side of the handle and a dot at the far end
+//   the handle   4px wide and 44px tall; 2px wide in focus and under a press
+//
+// One thing a stylesheet cannot know is where the handle is. The view that holds a
+// slider says so, as a number from 0 to 1 in the custom property
+// --slider-fraction on the control (MaterialSliderTraits). Without it the track is
+// filled to its middle, which is where a slider with no value starts.
+//
+// Not drawn: the label that shows the value while it is dragged, the tick marks,
+// the 2px corners the track has beside the handle, and a slider with two handles.
+
+@use 'sass:map';
+@use 'sass:math';
+@use '../../00-spynejs-design-system/tokens/material';
+@use 'type';
+
+$s: material.$slider;
+$track: map.get($s, 'active-track-height');
+$handle-width: map.get($s, 'handle-width');
+$handle-height: map.get($s, 'handle-height');
+$handle-narrow: map.get($s, 'focus-handle-width');
+$gap: map.get($s, 'active-handle-leading-space');
+$stop: map.get($s, 'stop-indicator-size');
+$stop-space: map.get($s, 'stop-indicator-trailing-space');
+// Where the handle's middle is along the track: the browser moves it from half its
+// width inside one end to half its width inside the other.
+$at: calc(
+  #{math.div($handle-width, 2)} + var(--slider-fraction, 0.5) *
+    (100% - #{$handle-width})
+);
+// The space kept clear on each side of the handle's middle.
+$clear: $gap + math.div($handle-width, 2);
+// The dot at the track's far end is there while the track after the handle is long
+// enough to hold it, and is not once the handle has come up to it: its width is
+// whatever is left, held between nothing and its own size.
+$stop-room: calc(100% - #{$stop + 2 * $stop-space + $clear} - #{$at});
+
+@function _dimmed($color, $opacity) {
+  @return color-mix(in srgb, $color math.percentage($opacity), transparent);
+}
+
+@mixin _track($active, $inactive, $dot, $to: right) {
+  block-size: $track;
+  border: 0;
+  border-radius: map.get($s, 'active-track-shape');
+  background:
+    radial-gradient(
+        circle,
+        #{$dot} #{math.div($stop, 2)},
+        transparent #{math.div($stop, 2) + 0.5px}
+      )
+      #{$to} $stop-space center / clamp(0px, #{$stop-room} * 1000, #{$stop})
+      #{$stop} no-repeat,
+    linear-gradient(
+      to #{$to},
+      #{$active} 0 calc(#{$at} - #{$clear}),
+      transparent calc(#{$at} - #{$clear}) calc(#{$at} + #{$clear}),
+      #{$inactive} calc(#{$at} + #{$clear}) 100%
+    );
+}
+
+@mixin _handle($color) {
+  box-sizing: border-box;
+  inline-size: $handle-width;
+  block-size: $handle-height;
+  border: 0;
+  border-radius: map.get($s, 'handle-shape');
+  background: $color;
+  box-shadow: none;
+  appearance: none;
+  // 150ms: the handle narrows as fast as a state layer comes. Chosen here.
+  transition: inline-size 150ms var(--md-sys-motion-easing-standard);
+}
+
+@mixin _colors($active, $inactive, $dot, $handle, $to: right) {
+  &::-webkit-slider-runnable-track {
+    @include _track($active, $inactive, $dot, $to);
+  }
+
+  &::-moz-range-track {
+    @include _track($active, $inactive, $dot, $to);
+  }
+
+  &::-webkit-slider-thumb {
+    background: $handle;
+  }
+
+  &::-moz-range-thumb {
+    background: $handle;
+  }
+}
+
+@mixin styles {
+  main#app {
+    input[type='range'] {
+      @include _colors(
+        map.get($s, 'active-track-color'),
+        map.get($s, 'inactive-track-color'),
+        map.get($s, 'stop-indicator-color'),
+        map.get($s, 'handle-color')
+      );
+
+      display: block;
+      box-sizing: border-box;
+      inline-size: 100%;
+      // As tall as the handle, which stands above and below the track.
+      block-size: $handle-height;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      appearance: none;
+      cursor: pointer;
+
+      &::-webkit-slider-thumb {
+        @include _handle(map.get($s, 'handle-color'));
+
+        // The browser hangs the handle from the track's top.
+        margin-block-start: math.div($track - $handle-height, 2);
+      }
+
+      &::-moz-range-thumb {
+        @include _handle(map.get($s, 'handle-color'));
+      }
+
+      &:dir(rtl) {
+        @include _colors(
+          map.get($s, 'active-track-color'),
+          map.get($s, 'inactive-track-color'),
+          map.get($s, 'stop-indicator-color'),
+          map.get($s, 'handle-color'),
+          left
+        );
+      }
+
+      // In focus and under a press the handle narrows, and the keyboard's focus
+      // has Material's ring round it.
+      &:focus-visible,
+      &:active {
+        &::-webkit-slider-thumb {
+          inline-size: $handle-narrow;
+        }
+
+        &::-moz-range-thumb {
+          inline-size: $handle-narrow;
+        }
+      }
+
+      &:focus-visible {
+        &::-webkit-slider-thumb {
+          outline: map.get(material.$focus-ring, 'thickness') solid
+            map.get(material.$checkbox, 'focus-indicator-color');
+          outline-offset: map.get(material.$focus-ring, 'outer-offset');
+        }
+
+        &::-moz-range-thumb {
+          outline: map.get(material.$focus-ring, 'thickness') solid
+            map.get(material.$checkbox, 'focus-indicator-color');
+          outline-offset: map.get(material.$focus-ring, 'outer-offset');
+        }
+      }
+
+      &:disabled {
+        @include _colors(
+          _dimmed(
+            map.get($s, 'disabled-active-track-color'),
+            map.get($s, 'disabled-active-track-opacity')
+          ),
+          _dimmed(
+            map.get($s, 'disabled-inactive-track-color'),
+            map.get($s, 'disabled-inactive-track-opacity')
+          ),
+          _dimmed(
+            map.get($s, 'disabled-stop-indicator-color'),
+            map.get($s, 'disabled-stop-indicator-container-opacity')
+          ),
+          _dimmed(
+            map.get($s, 'disabled-handle-color'),
+            map.get($s, 'disabled-handle-opacity')
+          )
+        );
+
+        cursor: default;
+      }
+    }
+
+    // ---- In a form ----
+    // A field that is a slider: its label over it, as a set's is.
+    .slider-field {
+      display: flex;
+      flex-direction: column;
+
+      > label:first-child {
+        @include type.style('body-large');
+
+        margin: 0;
+        padding: 0 0 4px;
+        color: var(--md-sys-color-on-surface-variant);
+      }
+    }
+  }
+}

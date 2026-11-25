@@ -1,0 +1,18 @@
+<!--
+  A select's options, one for each entry of `options`. The option is there once
+  for each case (plain, chosen), each inside a section of its own, and the
+  form's trait gives every entry exactly one (contactUs$ShapeOptions).
+
+  An option's words are written with the percent signs: an option holds text
+  and nothing else, so the CMS must not wrap its words to make them editable.
+  They are changed in the model. Not formatted by Prettier, which runs the
+  sections together.
+-->
+{{#options}}
+{{#option}}
+<option value="{{attrValue}}">{{%label%}}</option>
+{{/option}}
+{{#optionChecked}}
+<option value="{{attrValue}}" selected>{{%label%}}</option>
+{{/optionChecked}}
+{{/options}}

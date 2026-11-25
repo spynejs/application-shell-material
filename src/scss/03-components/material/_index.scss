@@ -10,6 +10,8 @@
 @use 'cards';
 @use 'checkbox';
 @use 'fab';
+@use 'field-extras';
+@use 'filled-text-field';
 @use 'focus';
 @use 'icon';
 @use 'list';
@@ -19,7 +21,9 @@
 @use 'navigation-rail';
 @use 'radio';
 @use 'ripple';
+@use 'select';
 @use 'selection';
+@use 'slider';
 @use 'snackbar';
 @use 'switch';
 @use 'tabs';
@@ -36,11 +40,18 @@
   @include app-bar.styles;
   @include navigation.styles;
   @include text-fields.styles;
+  // After the text fields, each adding to the field they draw: what a field may
+  // hold beside its control; the select's arrow; then the filled field, which
+  // changes the outlined one where something round it asks.
+  @include field-extras.styles;
+  @include select.styles;
+  @include filled-text-field.styles;
   // After the text fields: a choice in a form shows the field's own error line.
   @include checkbox.styles;
   @include radio.styles;
   @include switch.styles;
   @include selection.styles;
+  @include slider.styles;
   @include focus.styles;
   @include motion.styles;
   @include snackbar.styles;

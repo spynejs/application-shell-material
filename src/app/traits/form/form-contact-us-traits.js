@@ -1,5 +1,14 @@
-import { ChannelFetchUtil, DomElement, SpyneTrait, safeClone } from 'spyne';
+import {
+  ChannelFetchUtil,
+  DomElement,
+  DomElementTemplate,
+  SpyneTrait,
+  safeClone,
+} from 'spyne';
 import OptionsTmpl from 'components/page-items/templates/contact-us-options.tmpl.html';
+import SelectOptionsTmpl from 'components/page-items/templates/contact-us-select-options.tmpl.html';
+import { MaterialSliderTraits } from 'traits/material/material-slider-traits.js';
+import { hasIcon, iconPath } from 'traits/utils/icons.js';
 
 // A switch in a field's entry is on when it is true. A model written by hand may
 // carry the word; anything else, and a key left out, is off.
@@ -16,6 +25,9 @@ export class FormContactUsTraits extends SpyneTrait {
    *
    *   kind left out        a text field
    *     multiline: true      several lines, a <textarea>; left out, an <input>
+   *   kind: 'select'       a select, with one option for each entry of the
+   *                        field's `options`, after an empty one
+   *   kind: 'slider'       a slider under the field's label
    *   kind: 'checkbox'     a checkbox beside the field's label
    *   kind: 'switch'       a switch beside the field's label
    *   kind: 'radio'        a set of radio buttons under the field's label, one for
@@ -25,7 +37,8 @@ export class FormContactUsTraits extends SpyneTrait {
    *                        not be. A switch is never required: off is an answer.
    *   attrDisabled: true   shown, but not to be used
    *   attrChecked: true    a checkbox or a switch that starts on; on an entry of
-   *                        `options`, the radio button that starts chosen
+   *                        `options`, the radio button or the option that starts
+   *                        chosen
    *
    * Required, disabled and checked are attributes that are there or not there,
    * and a template cannot write half of one. So the template has the control
@@ -44,6 +57,18 @@ export class FormContactUsTraits extends SpyneTrait {
   }) {
     if (kind === 'radio') {
       return 'controlRadioGroup';
+    }
+
+    if (kind === 'slider') {
+      return isOn(attrDisabled) ? 'controlSliderDisabled' : 'controlSlider';
+    }
+
+    if (kind === 'select') {
+      if (isOn(attrDisabled)) {
+        return 'controlSelectDisabled';
+      }
+
+      return isOn(attrRequired) ? 'controlSelectRequired' : 'controlSelect';
     }
 
     if (kind === 'checkbox' || kind === 'switch') {
@@ -87,11 +112,16 @@ export class FormContactUsTraits extends SpyneTrait {
 
   /**
    * The class of the element that holds a field: a text field's, or a choice's.
-   * A choice is laid out as a row (one control and its label) or as a set.
+   * A choice is laid out as a row (one control and its label), as a set, or as
+   * a slider under its label. A select is a text field with an arrow.
    */
   static contactUs$FieldClassFor({ kind }) {
     if (kind === 'radio') {
       return 'contact-us__choice selection-group';
+    }
+
+    if (kind === 'slider') {
+      return 'contact-us__choice slider-field';
     }
 
     return kind === 'checkbox' || kind === 'switch'
@@ -100,10 +130,12 @@ export class FormContactUsTraits extends SpyneTrait {
   }
 
   /**
-   * A set of radio buttons as its template needs it: each entry of `options`
-   * given the one section that holds its button. A loop sees its own entry and
-   * nothing outside it, so what a button takes from its field (the name they
-   * share, the error line they describe themselves by) is put on each.
+   * A field's `options` as their template needs them: each entry given the one
+   * section that holds its control. A loop sees its own entry and nothing
+   * outside it, so what a radio button takes from its field (the name they
+   * share, the error line they describe themselves by) is put on each. An
+   * option of a select takes nothing from its field: required and disabled are
+   * the select's own.
    *
    * The entries are the form's own copy of the data, and each is given its keys
    * in place, as a field is. An entry made anew would hold the same words, and
@@ -111,9 +143,17 @@ export class FormContactUsTraits extends SpyneTrait {
    * on the entry it was given.
    */
   static contactUs$ShapeOptions(field) {
-    const { attrId, attrName, options = [] } = field;
+    const { kind, attrId, attrName, options = [] } = field;
 
     options.forEach((option, index) => {
+      if (kind === 'select') {
+        const chosen = isOn(option.attrChecked) ? 'optionChecked' : 'option';
+
+        option[chosen] = { attrValue: option.attrValue, label: option.label };
+
+        return;
+      }
+
       const attrOptionId = `${attrId}-${index + 1}`;
       const button = FormContactUsTraits.contactUs$OptionFor(option, field);
 
@@ -130,8 +170,35 @@ export class FormContactUsTraits extends SpyneTrait {
   }
 
   /**
+   * A slider's ends, its step and where it starts, as numbers its control can
+   * take: 0 to 100 by ones, starting in the middle, where the field says
+   * nothing.
+   */
+  static contactUs$SliderData({
+    attrId,
+    attrName,
+    attrMin,
+    attrMax,
+    attrStep,
+    attrValue,
+  }) {
+    const min = Number(attrMin ?? 0);
+    const max = Number(attrMax ?? 100);
+
+    return {
+      attrId,
+      attrName,
+      attrMin: min,
+      attrMax: max,
+      attrStep: Number(attrStep ?? 1),
+      attrValue: Number(attrValue ?? (min + max) / 2),
+    };
+  }
+
+  /**
    * What a field's control takes: a text field its type and placeholder, a
-   * checkbox or a switch its value, a set of radio buttons its options.
+   * checkbox or a switch its value, a set of radio buttons and a select their
+   * options, a slider its ends.
    */
   static contactUs$ControlData(field) {
     const { kind, attrId, attrName, attrType, attrPlaceholder, attrValue } =
@@ -144,6 +211,18 @@ export class FormContactUsTraits extends SpyneTrait {
       };
     }
 
+    if (kind === 'select') {
+      return {
+        attrId,
+        attrName,
+        options: FormContactUsTraits.contactUs$ShapeOptions(field),
+      };
+    }
+
+    if (kind === 'slider') {
+      return FormContactUsTraits.contactUs$SliderData(field);
+    }
+
     if (kind === 'checkbox' || kind === 'switch') {
       // with no value of its own it sends the browser's word for one: on
       return { attrId, attrName, attrValue: attrValue ?? 'on' };
@@ -153,36 +232,68 @@ export class FormContactUsTraits extends SpyneTrait {
   }
 
   /**
+   * The icon a field names at its start or its end (`leadingIcon`,
+   * `trailingIcon`: a name in icon-shapes.js), as a section its template draws.
+   * A name that is not an icon's draws nothing.
+   */
+  static contactUs$IconFor(name) {
+    return hasIcon(name) ? { attrIconPath: iconPath(name) } : undefined;
+  }
+
+  /**
    * The form's data as its template needs it: every field given the one
    * section that holds its control, carrying the attributes the control takes,
-   * and the class of the element that holds it. The authored keys are left as
-   * they are. safeClone keeps what the CMS has put on the data.
+   * the class of the element that holds it, and its icons. The form itself is
+   * given the class that makes its text fields filled, where its `fieldStyle`
+   * says so. The authored keys are left as they are. safeClone keeps what the
+   * CMS has put on the data.
    */
   static contactUs$ShapeData(data) {
     const shaped = safeClone(data);
 
+    if (shaped.fieldStyle === 'filled') {
+      shaped.attrFieldsClass = 'fields-filled';
+    }
+
     (shaped.formFields ?? []).forEach((field) => {
       const control = FormContactUsTraits.contactUs$ControlFor(field);
+      const leading = FormContactUsTraits.contactUs$IconFor(field.leadingIcon);
+      const trailing = FormContactUsTraits.contactUs$IconFor(
+        field.trailingIcon,
+      );
 
       field.attrFieldClass = FormContactUsTraits.contactUs$FieldClassFor(field);
       field[control] = FormContactUsTraits.contactUs$ControlData(field);
+
+      if (leading !== undefined) {
+        field.iconLeading = leading;
+      }
+
+      if (trailing !== undefined) {
+        field.iconTrailing = trailing;
+      }
     });
 
     return shaped;
   }
 
   /**
-   * Puts each set's radio buttons in its region, once the form has rendered. A
-   * set is a loop of its own, and its field is already one entry of the
-   * fields' loop, with the set inside a section of that: deeper than one
-   * template goes. The buttons are plain markup with no behavior of their own,
-   * so they are a DomElement and not a view; the form broadcasts their input
-   * as it does every control's.
+   * Puts each field's options in, once the form has rendered: a set's radio
+   * buttons in its region, and a select's options in the select. Options are a
+   * loop of their own, and their field is already one entry of the fields'
+   * loop, with its control inside a section of that: deeper than one template
+   * goes. They are plain markup with no behavior of their own, so neither is a
+   * view; the form broadcasts their input as it does every control's.
    */
-  static contactUs$AddRadioSets(props = this.props) {
-    (props.data.formFields ?? [])
-      .filter((field) => field.controlRadioGroup !== undefined)
-      .forEach(({ attrId, controlRadioGroup }) => {
+  static contactUs$AddOptions(props = this.props) {
+    (props.data.formFields ?? []).forEach((field) => {
+      const { attrId, controlRadioGroup } = field;
+      const select =
+        field.controlSelect ??
+        field.controlSelectRequired ??
+        field.controlSelectDisabled;
+
+      if (controlRadioGroup !== undefined) {
         const set = new DomElement({
           class: 'selection-group__options',
           template: OptionsTmpl,
@@ -190,7 +301,26 @@ export class FormContactUsTraits extends SpyneTrait {
         });
 
         this.props.el$(`#${attrId}`).el.appendChild(set.render());
-      });
+      }
+
+      if (select !== undefined) {
+        const options = new DomElementTemplate(SelectOptionsTmpl, select);
+
+        this.props.el$(`#${attrId}`).el.appendChild(options.renderDocFrag());
+      }
+    });
+  }
+
+  /**
+   * Fills each slider's track up to where it starts. A stylesheet cannot know
+   * where a slider's handle is; MaterialSliderTraits says so on the control.
+   */
+  static contactUs$FillSliders() {
+    this.props
+      .el$('input[type="range"]')
+      .els.forEach((slider) =>
+        MaterialSliderTraits.materialSlider$Fill(slider),
+      );
   }
 
   static contactUs$SendFormData(e, props = this.props) {
@@ -231,13 +361,24 @@ export class FormContactUsTraits extends SpyneTrait {
    * the same :user-invalid state that colours the field.
    */
   static contactUs$OnFieldInput(e) {
-    this.contactUs$MirrorFieldError(e.srcElement.el);
+    const control = e.srcElement.el;
+
+    // A slider has no error to mirror: any place along it is an answer. What it
+    // has is a track to fill up to its handle. A view takes one listener for an
+    // action, so the two kinds of control part here and not at a filter.
+    if (control.type === 'range') {
+      MaterialSliderTraits.materialSlider$Fill(control);
+
+      return;
+    }
+
+    this.contactUs$MirrorFieldError(control);
   }
 
   static contactUs$MirrorFieldError(control) {
-    const errorEl = this.props.el$(
-      `#${control.getAttribute('aria-describedby')}`,
-    ).el;
+    // a control is described by its error line first, then its supporting text
+    const [errorId] = control.getAttribute('aria-describedby').split(' ');
+    const errorEl = this.props.el$(`#${errorId}`).el;
 
     if (errorEl !== null) {
       errorEl.innerText = control.validationMessage;
@@ -250,7 +391,10 @@ export class FormContactUsTraits extends SpyneTrait {
    * Returns false when the form is not ready to send.
    */
   static contactUs$ShowFieldErrors() {
-    const controls = this.props.el$(':is(input, textarea)').els;
+    // every control that has an error line: a slider has none
+    const controls = this.props.el$(
+      ':is(input, textarea, select)[aria-describedby]',
+    ).els;
 
     controls.forEach((control) => this.contactUs$MirrorFieldError(control));
 

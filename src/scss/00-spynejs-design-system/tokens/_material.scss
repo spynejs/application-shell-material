@@ -145,6 +145,17 @@
 @use '@material/web/tokens/versions/latest/sass/md-comp-switch' as latest-switch;
 @use '@material/web/tokens/versions/latest/sass/md-comp-switch-meta' as
   latest-switch-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-filled-text-field' as
+  latest-filled-text-field;
+@use '@material/web/tokens/versions/latest/sass/md-comp-filled-text-field-meta'
+  as latest-filled-text-field-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-outlined-select' as
+  latest-outlined-select;
+@use '@material/web/tokens/versions/latest/sass/md-comp-outlined-select-meta' as
+  latest-outlined-select-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-slider' as latest-slider;
+@use '@material/web/tokens/versions/latest/sass/md-comp-slider-meta' as
+  latest-slider-meta;
 @use '@material/web/tokens/versions/latest/sass/md-comp-scrim-meta' as
   latest-scrim-meta;
 @use '@material/web/tokens/versions/latest/sass/md-ref-typeface' as
@@ -572,6 +583,32 @@ $radio-button: _component(
 $switch: _component(
   meta.module-variables(latest-switch),
   meta.module-variables(latest-switch-meta)
+);
+
+// The filled text field: the second of Material's two. Its container's color and
+// its top corners, the line under it at rest and in focus, and the colors of its
+// label, its text, its icons and its supporting text in each state.
+$filled-text-field: _component(
+  meta.module-variables(latest-filled-text-field),
+  meta.module-variables(latest-filled-text-field-meta)
+);
+
+// The outlined select. Its field is a text field's, and the set says so in its
+// names: every token of the field begins `text-field-`. The rest of the set is the
+// menu Google's own select opens, which is not read: the list a select opens here
+// is the device's own.
+$outlined-select: _component(
+  meta.module-variables(latest-outlined-select),
+  meta.module-variables(latest-outlined-select-meta)
+);
+
+// The slider: its track's height and its two colors, its handle's size at rest and
+// under a press, the space between the handle and the track, the dot that marks
+// the track's far end, and the disabled values. The label that shows the value
+// while dragging and the tick marks are in the set and are not drawn.
+$slider: _component(
+  meta.module-variables(latest-slider),
+  meta.module-variables(latest-slider-meta)
 );
 
 // The scrim behind a modal surface: the `scrim` colour role and its opacity.

@@ -36,11 +36,12 @@ export class FormContactUsView extends ViewStream {
   broadcastEvents() {
     return [
       ['form', 'submit'],
-      ['input, textarea', 'input'],
+      ['input, textarea, select', 'input'],
     ];
   }
 
   onRendered() {
-    this.contactUs$AddRadioSets();
+    this.contactUs$AddOptions();
+    this.contactUs$FillSliders();
   }
 }

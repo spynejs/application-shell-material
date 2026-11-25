@@ -1,0 +1,175 @@
+// Material filled text field: the second of Material's two text fields.
+//
+// Values are read at build time from Google's filled text field tokens
+// (@material/web 2.5.0, tokens/versions/latest) through tokens/_material.scss. What
+// the tokens do not carry is marked where it is used.
+//
+// The outlined field is what every text control in the app is (_text-fields.scss).
+// A field is filled where something round it says so: the class `fields-filled` on
+// a form, or on anything that holds fields. Material advises one of the two styles
+// to a form, not a mix, so the class is on what holds the fields and not on a
+// field.
+//
+// What changes from the outlined field: a container in place of an outline, with a
+// line under it; and the label, which rises inside the container and not onto its
+// edge. The states, the error line, the supporting text and the icons are the same
+// rules, read from the same states.
+
+@use 'sass:map';
+@use 'sass:math';
+@use '../../00-spynejs-design-system/tokens/material';
+
+$f: material.$filled-text-field;
+$height: map.get($f, 'container-height');
+// 16px each side; the label 8px from the top when risen, and the text 8px from
+// the bottom: stable field/internal/_filled-field.scss.
+$space: 16px;
+$top: 8px;
+$bottom: 8px;
+// The label's line when risen (body-small) and the text's (body-large).
+$label-line: 16px;
+$move: 150ms var(--md-sys-motion-easing-standard);
+$controls: "input:is([type='text'], [type='email'], [type='password'], [type='number'], [type='tel'], [type='url'], [type='search'], [type='date'], [type='time'], [type='datetime-local'], [type='month'], [type='week']), textarea, select";
+
+@function _dimmed($color, $opacity) {
+  @return color-mix(in srgb, $color math.percentage($opacity), transparent);
+}
+
+// The line under the container, drawn inside the control so that its height can
+// change without moving anything.
+@mixin _line($height, $color) {
+  box-shadow: inset 0 (-$height) 0 $color;
+}
+
+@mixin styles {
+  main#app .fields-filled {
+    // ---- 1. The field ----
+    #{$controls} {
+      @include _line(
+        map.get($f, 'active-indicator-height'),
+        map.get($f, 'active-indicator-color')
+      );
+
+      padding-block: ($top + $label-line) $bottom;
+      border-radius: map.get($f, 'container-shape');
+      background-color: map.get($f, 'container-color');
+      color: map.get($f, 'input-text-color');
+      caret-color: map.get($f, 'caret-color');
+
+      @media (hover: hover) {
+        &:hover {
+          @include _line(
+            map.get($f, 'hover-active-indicator-height'),
+            map.get($f, 'hover-active-indicator-color')
+          );
+
+          // The state layer, laid on the container's color.
+          background-color: color-mix(
+            in srgb,
+            map.get($f, 'hover-state-layer-color')
+              math.percentage(map.get($f, 'hover-state-layer-opacity')),
+            map.get($f, 'container-color')
+          );
+        }
+      }
+
+      // Focus: a thicker line in the primary color. The set gives the line two
+      // values in focus, a height of 2px and the thickness of Material's focus
+      // indicator; the second is taken, as the outlined field takes it. Chosen
+      // here.
+      &:focus {
+        @include _line(
+          map.get($f, 'focus-active-indicator-thickness'),
+          map.get($f, 'focus-active-indicator-color')
+        );
+
+        background-color: map.get($f, 'container-color');
+      }
+
+      &:user-invalid,
+      &[aria-invalid='true'] {
+        @include _line(
+          map.get($f, 'active-indicator-height'),
+          map.get($f, 'error-active-indicator-color')
+        );
+
+        caret-color: map.get($f, 'error-focus-caret-color');
+
+        @media (hover: hover) {
+          &:hover {
+            @include _line(
+              map.get($f, 'hover-active-indicator-height'),
+              map.get($f, 'error-hover-active-indicator-color')
+            );
+          }
+        }
+
+        &:focus {
+          @include _line(
+            map.get($f, 'focus-active-indicator-thickness'),
+            map.get($f, 'error-focus-active-indicator-color')
+          );
+        }
+      }
+
+      &:disabled {
+        @include _line(
+          map.get($f, 'disabled-active-indicator-height'),
+          _dimmed(
+            map.get($f, 'disabled-active-indicator-color'),
+            map.get($f, 'disabled-active-indicator-opacity')
+          )
+        );
+
+        background-color: _dimmed(
+          map.get($f, 'disabled-container-color'),
+          map.get($f, 'disabled-container-opacity')
+        );
+        color: _dimmed(
+          map.get($f, 'disabled-input-text-color'),
+          map.get($f, 'disabled-input-text-opacity')
+        );
+      }
+    }
+
+    // ---- 2. The label ----
+    // It rests in the middle of the container and rises to its top, inside it:
+    // there is no outline to mask, so it has no background of its own.
+    .contact-us__field {
+      label {
+        top: math.div($height - 24px, 2);
+        inset-inline-start: $space;
+        padding-inline: 0;
+        color: map.get($f, 'label-text-color');
+      }
+
+      &:has(:is(input, textarea, select):focus) label,
+      &:has(:is(input, textarea):not(:placeholder-shown)) label,
+      &:has(select option:checked:not([value=''])) label {
+        top: $top;
+        background: transparent;
+      }
+
+      &:has(:is(input, textarea, select):focus) label {
+        color: map.get($f, 'focus-label-text-color');
+      }
+
+      &:has(:is(input, textarea, select):user-invalid) label {
+        color: map.get($f, 'error-label-text-color');
+      }
+
+      &:has(:is(input, textarea, select):disabled) label {
+        color: _dimmed(
+          map.get($f, 'disabled-label-text-color'),
+          map.get($f, 'disabled-label-text-opacity')
+        );
+      }
+
+      // With an icon at its start the label stays in line with the text, at rest
+      // and risen.
+      &:has(.contact-us__field-icon--leading) label {
+        inset-inline-start: 12px + map.get($f, 'leading-icon-size') + 16px;
+      }
+    }
+  }
+}

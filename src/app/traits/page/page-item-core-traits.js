@@ -9,6 +9,7 @@ import { tabSets, tabsData } from 'traits/utils/tab-sets.js';
 import { HeroView } from 'components/page-items/hero-view.js';
 import { CardsContainerView } from 'components/page-items/cards-container-view.js';
 import { FormContactUsView } from 'components/page-items/form-contact-us-view.js';
+import { SlidersView } from 'components/page-items/sliders-view.js';
 import { TabsView } from 'components/page-items/tabs-view.js';
 
 export class PageItemCoreTraits extends SpyneTrait {
@@ -307,6 +308,7 @@ export class PageItemCoreTraits extends SpyneTrait {
   static pageItemCore$GetViewClass(viewClass = 'ViewStream') {
     const classLookup = {
       ContactUsView: FormContactUsView,
+      SlidersView,
     };
     return classLookup[viewClass] || ViewStream;
   }

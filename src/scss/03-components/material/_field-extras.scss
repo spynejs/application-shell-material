@@ -1,0 +1,163 @@
+// What a field may have besides its control and its label: supporting text under
+// it, and an icon at its start or its end.
+//
+// Values are read at build time from Google's outlined text field tokens
+// (@material/web 2.5.0, tokens/versions/latest) through tokens/_material.scss. What
+// the tokens do not carry is marked where it is used.
+//
+// A field's wrapper (.contact-us__field) holds them beside its control:
+//
+//   .contact-us__field-icon--leading    an icon at the field's start
+//   .contact-us__field-icon--trailing   an icon at its end
+//   .contact-us__field-support          a line of words under the field
+//
+// A field knows it has one by holding it: no class is added to the wrapper.
+//
+// Also here: the browser's own picker for a date, a time and a select is told
+// which theme the app is in, so that what it draws in the field can be seen.
+
+@use 'sass:map';
+@use 'sass:math';
+@use '../../00-spynejs-design-system/tokens/material';
+
+$t: material.$outlined-text-field;
+$height: map.get($t, 'container-height');
+$icon: map.get($t, 'leading-icon-size');
+// 12px from the field's edge to an icon, 16px from an icon to the text: stable
+// field/internal/_outlined-field.scss and _shared.scss (with-leading-content,
+// with-trailing-content).
+$edge: 12px;
+$gap: 16px;
+$inset: $edge + $icon + $gap;
+$pickers: "input:is([type='date'], [type='time'], [type='datetime-local'], [type='month'], [type='week']), select";
+
+@function _dimmed($color, $opacity) {
+  @return color-mix(in srgb, $color math.percentage($opacity), transparent);
+}
+
+@mixin styles {
+  main#app {
+    // ---- 1. An icon ----
+    .contact-us__field-icon {
+      position: absolute;
+      z-index: 1;
+      top: math.div($height - $icon, 2);
+      inline-size: $icon;
+      block-size: $icon;
+      fill: currentColor;
+      pointer-events: none;
+    }
+
+    .contact-us__field-icon--leading {
+      inset-inline-start: $edge;
+      color: map.get($t, 'leading-icon-color');
+    }
+
+    .contact-us__field-icon--trailing {
+      inset-inline-end: $edge;
+      color: map.get($t, 'trailing-icon-color');
+    }
+
+    // The text makes room for the icon, and so does the label while it rests.
+    .contact-us__field:has(.contact-us__field-icon--leading) {
+      :is(input, textarea, select) {
+        padding-inline-start: $inset;
+      }
+
+      &:not(
+          :has(:is(input, textarea, select):focus),
+          :has(:is(input, textarea):not(:placeholder-shown)),
+          :has(select option:checked:not([value='']))
+        )
+        label {
+        inset-inline-start: $inset - 4px;
+        max-inline-size: calc(100% - #{$inset + $gap});
+      }
+    }
+
+    .contact-us__field:has(.contact-us__field-icon--trailing) {
+      :is(input, textarea, select) {
+        padding-inline-end: $inset;
+      }
+    }
+
+    .contact-us__field:has(:is(input, textarea, select):user-invalid)
+      .contact-us__field-icon--trailing {
+      color: map.get($t, 'error-trailing-icon-color');
+    }
+
+    .contact-us__field:has(:is(input, textarea, select):disabled)
+      .contact-us__field-icon {
+      color: _dimmed(
+        map.get($t, 'disabled-leading-icon-color'),
+        map.get($t, 'disabled-leading-icon-opacity')
+      );
+    }
+
+    // ---- 2. Supporting text ----
+    // Body-small in the on-surface-variant color, 4px under the field and in line
+    // with the text in it (16px each side: stable field/internal/_shared.scss). It
+    // takes the room the error line takes, and gives it up to the error.
+    .contact-us__field-support {
+      display: none;
+      margin: 4px 0 0;
+      padding-inline: 16px;
+      color: map.get($t, 'supporting-text-color');
+      font-family: map.get($t, 'supporting-text-font'), system-ui, sans-serif;
+      font-size: map.get($t, 'supporting-text-size');
+      line-height: map.get($t, 'supporting-text-line-height');
+      font-weight: map.get($t, 'supporting-text-weight');
+      letter-spacing: map.get($t, 'supporting-text-tracking');
+    }
+
+    .contact-us__field:has(.contact-us__field-support:not(:empty)) {
+      margin-block-end: 20px;
+
+      :is(input, textarea, select) {
+        margin-block-end: 0;
+      }
+
+      .contact-us__field-support {
+        display: block;
+      }
+
+      &:has(:is(input, textarea, select):user-invalid)
+        .contact-us__field-support {
+        display: none;
+      }
+
+      &:has(:is(input, textarea, select):disabled) .contact-us__field-support {
+        color: _dimmed(
+          map.get($t, 'disabled-supporting-text-color'),
+          map.get($t, 'disabled-supporting-text-opacity')
+        );
+      }
+    }
+
+    // ---- 3. The browser's own pickers ----
+    // The app's theme is the app's own switch, which the browser does not know of.
+    #{$pickers} {
+      color-scheme: light dark;
+    }
+
+    // A date and a time are held to the field's height: the parts a browser puts
+    // in one to be typed in would make it a little taller than its neighbors.
+    input:is(
+      [type='date'],
+      [type='time'],
+      [type='datetime-local'],
+      [type='month'],
+      [type='week']
+    ) {
+      block-size: $height;
+    }
+
+    &[data-theme='light'] #{$pickers} {
+      color-scheme: light;
+    }
+
+    &[data-theme='dark'] #{$pickers} {
+      color-scheme: dark;
+    }
+  }
+}

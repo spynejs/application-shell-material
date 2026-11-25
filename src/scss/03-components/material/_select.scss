@@ -1,0 +1,117 @@
+// Material outlined select, for a plain <select>.
+//
+// The field is _text-fields.scss's: a select is among the controls it draws, and
+// Google's select tokens say the same by their names (every token of the field
+// begins `text-field-`). This adds what a select has and a text field does not: the
+// arrow at its end, and room for it.
+//
+// What opens from it is the device's own list, not Material's menu: on a phone it
+// is the wheel or the sheet a visitor already knows, and it needs no script. Where
+// a browser draws the list itself, it is given the theme's colors.
+//
+// A select's label rests in the field while its first, empty option is the one
+// chosen, and rises when another is (_text-fields.scss). So a select that is to
+// start with nothing chosen has an empty option first: <option value=""></option>.
+
+@use 'sass:map';
+@use 'sass:math';
+@use '../../00-spynejs-design-system/tokens/material';
+
+$s: material.$outlined-select;
+$t: material.$outlined-text-field;
+$icon: map.get($s, 'text-field-trailing-icon-size');
+// 12px from the field's edge to the arrow's box, 16px from it to the text: stable
+// field/internal/_outlined-field.scss (with-trailing-content).
+$edge: 12px;
+$gap: 16px;
+// Google's arrow_drop_down in its 24px box is a triangle 10px wide and 5px tall,
+// its top 10px down and 7px in (M7 10l5 5 5-5z). It is drawn as two squares of 5px,
+// each half filled, so that it takes a color of the theme.
+$arrow: 5px;
+$arrow-top: math.div(map.get($t, 'container-height') - $icon, 2) + 10px;
+$arrow-end: $edge + 7px;
+
+// The field's values are the text field's. If Google's two sets ever part, this
+// stops the build and the select gets a field of its own.
+@each $key
+  in (
+    'outline-color',
+    'outline-width',
+    'container-shape',
+    'container-height',
+    'focus-outline-color',
+    'input-text-color'
+  )
+{
+  @if map.get($s, 'text-field-#{$key}') != map.get($t, $key) {
+    @error "The select's #{$key} is no longer the text field's.";
+  }
+}
+
+@function _dimmed($color, $opacity) {
+  @return color-mix(in srgb, $color math.percentage($opacity), transparent);
+}
+
+@mixin _arrow($color) {
+  background-image:
+    linear-gradient(to top right, transparent 50%, #{$color} 50%),
+    linear-gradient(to top left, transparent 50%, #{$color} 50%);
+}
+
+@mixin styles {
+  main#app {
+    select {
+      @include _arrow(map.get($s, 'text-field-trailing-icon-color'));
+
+      padding-inline-end: $edge + $icon + $gap;
+      background-repeat: no-repeat;
+      background-position:
+        right #{$arrow-end + $arrow} top $arrow-top,
+        right $arrow-end top $arrow-top;
+      background-size: $arrow $arrow;
+      appearance: none;
+      cursor: pointer;
+
+      &:dir(rtl) {
+        background-position:
+          left $arrow-end top $arrow-top,
+          left #{$arrow-end + $arrow} top $arrow-top;
+      }
+
+      // The field's own focus rule clears the background; the arrow is put back,
+      // in the color it takes in focus.
+      &:focus {
+        @include _arrow(map.get($s, 'text-field-focus-trailing-icon-color'));
+
+        background-repeat: no-repeat;
+        background-position:
+          right #{$arrow-end + $arrow} top $arrow-top,
+          right $arrow-end top $arrow-top;
+        background-size: $arrow $arrow;
+
+        &:dir(rtl) {
+          background-position:
+            left $arrow-end top $arrow-top,
+            left #{$arrow-end + $arrow} top $arrow-top;
+        }
+      }
+
+      &:disabled {
+        @include _arrow(
+          _dimmed(
+            map.get($s, 'text-field-disabled-trailing-icon-color'),
+            map.get($s, 'text-field-disabled-trailing-icon-opacity')
+          )
+        );
+
+        cursor: default;
+      }
+
+      // Where the browser draws the list itself.
+      option {
+        background: var(--md-sys-color-surface-container);
+        color: var(--md-sys-color-on-surface);
+      }
+    }
+  }
+}

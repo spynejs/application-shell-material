@@ -8,11 +8,15 @@
 
   <p class="contact-subtitle">{{subtitle}}</p>
 
-  <form class="contact-us__form" data-event-prevent-default="true" novalidate>
+  <form
+    class="contact-us__form {{attrFieldsClass}}"
+    data-event-prevent-default="true"
+    novalidate
+  >
     <!--
       A field's control, once for each case: a text field of one line or
-      several, a checkbox, a switch or a set of radio buttons; and plain,
-      required, disabled or checked. An attribute such as "required" is there
+      several, a select, a slider, a checkbox, a switch or a set of radio
+      buttons; and plain, required, disabled or checked. An attribute such as "required" is there
       or not there, so each case is an element of its own inside a section, and
       the form's trait gives every field exactly one section, and the class of
       the element that holds it (contactUs$ShapeData).
@@ -20,13 +24,22 @@
     {{#formFields}}
     <div class="{{attrFieldClass}}">
       <label id="{{attrId}}-label" for="{{attrId}}">{{label}}</label>
+      {{#iconLeading}}
+      <svg
+        class="icon contact-us__field-icon contact-us__field-icon--leading"
+        viewBox="0 -960 960 960"
+        aria-hidden="true"
+      >
+        <path d="{{attrIconPath}}" />
+      </svg>
+      {{/iconLeading}}
       {{#controlInput}}
       <input
         id="{{attrId}}"
         name="{{attrName}}"
         type="{{attrType}}"
         placeholder="{{attrPlaceholder}}"
-        aria-describedby="{{attrId}}-error"
+        aria-describedby="{{attrId}}-error {{attrId}}-support"
       />
       {{/controlInput}}
       {{#controlInputRequired}}
@@ -36,7 +49,7 @@
         type="{{attrType}}"
         placeholder="{{attrPlaceholder}}"
         required
-        aria-describedby="{{attrId}}-error"
+        aria-describedby="{{attrId}}-error {{attrId}}-support"
       />
       {{/controlInputRequired}}
       {{#controlInputDisabled}}
@@ -46,7 +59,7 @@
         type="{{attrType}}"
         placeholder="{{attrPlaceholder}}"
         disabled
-        aria-describedby="{{attrId}}-error"
+        aria-describedby="{{attrId}}-error {{attrId}}-support"
       />
       {{/controlInputDisabled}}
       {{#controlTextarea}}
@@ -55,7 +68,7 @@
         name="{{attrName}}"
         rows="5"
         placeholder="{{attrPlaceholder}}"
-        aria-describedby="{{attrId}}-error"
+        aria-describedby="{{attrId}}-error {{attrId}}-support"
       ></textarea>
       {{/controlTextarea}}
       {{#controlTextareaRequired}}
@@ -65,7 +78,7 @@
         rows="5"
         placeholder="{{attrPlaceholder}}"
         required
-        aria-describedby="{{attrId}}-error"
+        aria-describedby="{{attrId}}-error {{attrId}}-support"
       ></textarea>
       {{/controlTextareaRequired}}
       {{#controlTextareaDisabled}}
@@ -75,9 +88,66 @@
         rows="5"
         placeholder="{{attrPlaceholder}}"
         disabled
-        aria-describedby="{{attrId}}-error"
+        aria-describedby="{{attrId}}-error {{attrId}}-support"
       ></textarea>
       {{/controlTextareaDisabled}}
+      <!--
+        A select's options are put in once the form has rendered
+        (contactUs$AddOptions), after the empty one written here: while that
+        one is chosen, the label rests in the field.
+      -->
+      {{#controlSelect}}
+      <select
+        id="{{attrId}}"
+        name="{{attrName}}"
+        aria-describedby="{{attrId}}-error {{attrId}}-support"
+      >
+        <option value=""></option>
+      </select>
+      {{/controlSelect}}
+      {{#controlSelectRequired}}
+      <select
+        id="{{attrId}}"
+        name="{{attrName}}"
+        required
+        aria-describedby="{{attrId}}-error {{attrId}}-support"
+      >
+        <option value=""></option>
+      </select>
+      {{/controlSelectRequired}}
+      {{#controlSelectDisabled}}
+      <select
+        id="{{attrId}}"
+        name="{{attrName}}"
+        disabled
+        aria-describedby="{{attrId}}-error {{attrId}}-support"
+      >
+        <option value=""></option>
+      </select>
+      {{/controlSelectDisabled}}
+      {{#controlSlider}}
+      <input
+        id="{{attrId}}"
+        name="{{attrName}}"
+        type="range"
+        min="{{attrMin}}"
+        max="{{attrMax}}"
+        step="{{attrStep}}"
+        value="{{attrValue}}"
+      />
+      {{/controlSlider}}
+      {{#controlSliderDisabled}}
+      <input
+        id="{{attrId}}"
+        name="{{attrName}}"
+        type="range"
+        min="{{attrMin}}"
+        max="{{attrMax}}"
+        step="{{attrStep}}"
+        value="{{attrValue}}"
+        disabled
+      />
+      {{/controlSliderDisabled}}
       {{#controlCheckbox}}
       <input
         id="{{attrId}}"
@@ -175,7 +245,7 @@
       {{#controlRadioGroup}}
       <!--
         The set's region. Its radio buttons are put in once the form has
-        rendered (contactUs$AddRadioSets), from contact-us-options.tmpl.html: a
+        rendered (contactUs$AddOptions), from contact-us-options.tmpl.html: a
         template takes a loop inside a loop and no deeper.
       -->
       <div
@@ -184,6 +254,18 @@
         aria-labelledby="{{attrId}}-label"
       ></div>
       {{/controlRadioGroup}}
+      {{#iconTrailing}}
+      <svg
+        class="icon contact-us__field-icon contact-us__field-icon--trailing"
+        viewBox="0 -960 960 960"
+        aria-hidden="true"
+      >
+        <path d="{{attrIconPath}}" />
+      </svg>
+      {{/iconTrailing}}
+      <p class="contact-us__field-support" id="{{attrId}}-support"
+        >{{supportingText}}</p
+      >
       <p class="contact-us__field-error" id="{{attrId}}-error"></p>
     </div>
     {{/formFields}}

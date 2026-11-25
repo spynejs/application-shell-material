@@ -19,7 +19,9 @@ This app is on the Material template: Google's Material Design 3 for the SpyneJS
 |---|---|---|
 | Button | a `button` key beside a call to action's `ctaText` (below) | `src/app/traits/utils/material-button-options.js` |
 | Card | a page's sub-pages are drawn as cards; a card has no keys of its own | `src/app/components/page-items/cards-container-view.js` |
-| Text field | an entry of the contact form's `formFields` (below) | `src/app/traits/form/form-contact-us-traits.js` |
+| Text field | an entry of the contact form's `formFields` (below); anywhere else, any `<input>` or `<textarea>` in a template. It is Material's outlined field, or the filled one where what holds it says so; a date or a time is a text field of that type; it can have supporting text and an icon at its start or its end | `src/app/traits/form/form-contact-us-traits.js`, `src/scss/03-components/material/_text-fields.scss`, `_filled-text-field.scss`, `_field-extras.scss` |
+| Select | in the contact form, an entry of `formFields` with `kind: "select"` (below); anywhere else, the browser's own `<select>` in a template. The field is Material's; the list that opens is the device's own | `src/scss/03-components/material/_select.scss` |
+| Slider | in the contact form, an entry of `formFields` with `kind: "slider"` (below); anywhere else, the browser's own `<input type="range">` in a view that says where its handle is (below, "In a view") | `src/scss/03-components/material/_slider.scss`, `src/app/traits/material/material-slider-traits.js`, `src/app/components/page-items/sliders-view.js` |
 | Checkbox, radio button, switch | in the contact form, an entry of `formFields` with a `kind` (below); anywhere else, the browser's own control written in a template (below, "In a view"). The control's type is what draws it: no class asks for Material's | `src/scss/03-components/material/_checkbox.scss`, `_radio.scss`, `_switch.scss`, and `_selection.scss` for a control's row and a set |
 | List, divider | a page item drawn from `timetable.tmpl.html` or `price-list.tmpl.html`: each of its `rows` or `items` is a list item; no keys of its own | `src/scss/03-components/material/_list.scss` |
 | Tabs | lists of one kind (price lists, or timetables) that are next to each other on a page and give the same `tabGroup` (below): a row of tabs over them, and one list shown at a time | `src/app/components/page-items/tabs-view.js`, `src/app/traits/utils/tab-sets.js`, `src/scss/03-components/material/_tabs.scss` |
@@ -52,12 +54,12 @@ A call to action takes a `button` key for its button's look. Every key of it can
 
 It is read in a page's `hero`, in a call-to-action banner, in each row of a split feature, and in the contact form's data, beside `formFields`. Write only what is not a default.
 
-An entry of the contact form's `formFields` is a text field, or with a `kind` it is a choice. It takes five keys of Material's, and every one can be left out:
+An entry of the contact form's `formFields` is a text field, or with a `kind` it is another control. It takes five keys that say which control it is and what state it starts in, and every one can be left out:
 
 | Key of an entry | Value | Left out |
 |---|---|---|
-| `kind` | `checkbox`, `switch` or `radio` | a text field |
-| `attrRequired` | `true`: the field must be filled in, the checkbox ticked, one of the set chosen | it need not be. A switch is never required: off is an answer |
+| `kind` | `checkbox`, `switch`, `radio`, `select` or `slider` | a text field |
+| `attrRequired` | `true`: the field must be filled in, the checkbox ticked, one of the set or of the select chosen | it need not be. A switch and a slider are never required: off is an answer, and so is any place along a slider |
 | `attrDisabled` | `true`: shown, but not to be used | it can be used |
 | `multiline` | `true`: a text field of several lines, a `<textarea>` | one line |
 | `attrChecked` | `true`: a checkbox or a switch that starts on | it starts off. A checkbox that must be ticked always starts off |
@@ -66,11 +68,32 @@ An entry of the contact form's `formFields` is a text field, or with a `kind` it
 { "kind": "checkbox", "attrId": "contact-copy", "label": "Send me a copy", "attrName": "copy" }
 ```
 
-A `radio` is a set of radio buttons under the entry's `label`, one for each entry of its `options`. An option has a `label` and an `attrValue`, and the one that starts chosen has `attrChecked`:
+A `radio` is a set of radio buttons under the entry's `label`, one for each entry of its `options`. A `select` takes `options` the same way, and draws one field with the list the device opens for it; its first option is an empty one, so that nothing is chosen until the visitor chooses. An option has a `label` and an `attrValue`, and the one that starts chosen has `attrChecked`:
 
 ```json
 { "kind": "radio", "attrId": "contact-reason", "label": "What is it about?", "attrName": "reason", "attrRequired": true, "options": [{ "label": "A booking", "attrValue": "booking" }, { "label": "A question", "attrValue": "question" }] }
 ```
+
+Other keys an entry takes, by what it is:
+
+| Other key | On | Value |
+|---|---|---|
+| `attrType` | a text field | the input's type. `date`, `time`, `datetime-local`, `month` or `week` makes it a date or a time, with the browser's own picker |
+| `supportingText` | a text field or a select | a line of words under the field. It gives way to the error line |
+| `leadingIcon`, `trailingIcon` | a text field or a select | a name in `src/app/traits/utils/icon-shapes.js`: an icon at the field's start, or at its end. Not on a date or a time, where the browser draws its own at the end |
+| `attrMin`, `attrMax`, `attrStep`, `attrValue` | a slider | its two ends, its step and where it starts. Left out: 0, 100, 1 and the middle |
+
+```json
+{ "kind": "select", "attrId": "contact-heard", "label": "How did you hear of us?", "attrName": "heard", "options": [{ "label": "From a friend", "attrValue": "friend" }, { "label": "A search", "attrValue": "search" }] }
+```
+
+```json
+{ "kind": "slider", "attrId": "contact-party", "label": "How many are coming?", "attrName": "party", "attrMin": 1, "attrMax": 12, "attrValue": 2 }
+```
+
+The form itself takes one key beside `formFields`: `fieldStyle`, which is `filled` for Material's filled text fields. Left out, or `outlined`, its fields are outlined. Material advises one of the two to a form, not a mix, so the key is the form's and not a field's.
+
+A slider shows no number: where one matters, say the range in the field's `label`. The words of a select's options cannot be clicked to edit in the CMS, since an option holds text and nothing else; change them in the model. Every other label can be.
 
 Every entry has an `attrId` that no other on the page has, a `label`, and an `attrName`. A checkbox or a switch that is on sends `on`, or its `attrValue` where it has one; one that is off sends nothing. A field that is required and left empty shows the browser's own words under it when the form is sent, in the visitor's language. **The form's sending names what it sends**: `contactUs$SendFormData` in `src/app/traits/form/form-contact-us-traits.js` takes the name, the email and the message. A field you add is held by the form and is not sent until you add its name there. `src/app/components/page-items/templates/forms-demo.tmpl.html` shows every control in every state.
 
@@ -177,11 +200,55 @@ A checkbox, a radio button or a switch outside the contact form is the browser's
 
 The states are the control's own attributes and nothing else: `checked`, `disabled`, `required`. Radio buttons of one `name` are one choice, and the arrow keys move between them. A row's label wraps its control, or is a `<label for>` beside it; either way the control is drawn first. `selection--trailing` beside `selection` puts the control at the row's far end, as a setting in a list has it; `selection-group--row` beside `selection-group` puts a set's options side by side. A control that is wrong takes the error color from the browser's own `:user-invalid`, or from `aria-invalid="true"` where your code decides; `selection-group__error` is the line of words under a set. To hear a control change, declare its `input` in `broadcastEvents`, as `['input[type="checkbox"]', 'input']`, and read `e.srcElement.el.checked` in the listener for `CHANNEL_UI_INPUT_EVENT`. Not drawn: a checkbox's third state, and a switch's icons.
 
+A text field, a select, a date and a time outside the contact form are the browser's own controls too, and each is drawn as Material's outlined field wherever it is. A field with a label that floats, supporting text or an icon is written as the contact form writes one, in an element of the class `contact-us__field`:
+
+```html
+<div class="fields-filled">
+  <div class="contact-us__field">
+    <label for="reply-to">Reply to</label>
+    <svg class="icon contact-us__field-icon contact-us__field-icon--leading" viewBox="0 -960 960 960" aria-hidden="true">
+      <path d="{{attrIconPath}}" />
+    </svg>
+    <input id="reply-to" name="replyTo" type="email" placeholder=" " />
+    <p class="contact-us__field-support">We reply to this address.</p>
+  </div>
+  <div class="contact-us__field">
+    <label for="size">Size</label>
+    <select id="size" name="size">
+      <option value=""></option>
+      <option value="small">Small</option>
+    </select>
+  </div>
+</div>
+```
+
+`fields-filled` on anything that holds fields makes them filled; without it they are outlined. A text field needs a `placeholder`, even one that is a space: the label rests in the field while the placeholder is shown, and rises when the field is in focus or holds something. A select needs its empty first option for the same reason. An icon's place is its class, `contact-us__field-icon--leading` or `--trailing`, and the field makes room for it by holding it. Write an option's words with the token that keeps the CMS from wrapping them, `{{%label%}}`.
+
+A slider is the one control here that needs a line of script. A stylesheet cannot know where a slider's handle is, so the view that holds one says so, and the track is filled from that:
+
+```js
+props.traits = [MaterialSliderTraits];
+
+addActionListeners() {
+  return [['CHANNEL_UI_INPUT_EVENT', 'materialSlider$OnInput']];
+}
+
+broadcastEvents() {
+  return [['input[type="range"]', 'input']];
+}
+
+onRendered() {
+  this.materialSlider$FillAll();
+}
+```
+
+A page item that holds sliders and needs nothing else asks for this with `"viewClass": "SlidersView"`. A view that already listens for `CHANNEL_UI_INPUT_EVENT` takes one listener for it, so it calls `MaterialSliderTraits.materialSlider$Fill(e.srcElement.el)` from that one, as the contact form does. Without any of it a slider still works, and its track stays filled to the middle. A slider's label is a `<label for>` before it, the two in an element of the class `slider-field`. Not drawn: the label that shows a slider's value while it is dragged, its tick marks, a slider with two handles, Material's own menu for a select, and its own calendar and clock.
+
 A control with a tooltip sends more than clicks on `CHANNEL_UI`. Anything that listens for that control there must name the click: a listener on `CHANNEL_UI_CLICK_EVENT`, or a `ChannelPayloadFilter` with `action: 'CHANNEL_UI_CLICK_EVENT'`. One that takes every event from the control would act when the pointer only comes to rest on it.
 
 ### Adding a Material component the template does not have
 
-The template has no chips, dialog, slider, menu, search, badge, sheet, progress indicator, carousel or data table. Google's values for every one of them are already installed: `@material/web` is a dependency for its design tokens, and `node_modules/@material/web/tokens/versions/latest/sass/` holds a file for each, such as `_md-comp-filter-chip.scss` and `_md-comp-slider.scss`. Do not import Google's web components from that package: a component here is plain markup and SpyneJS code, drawn from Google's values.
+The template has no chips, dialog, menu, search, badge, sheet, progress indicator, carousel or data table. Google's values for every one of them are already installed: `@material/web` is a dependency for its design tokens, and `node_modules/@material/web/tokens/versions/latest/sass/` holds a file for each, such as `_md-comp-filter-chip.scss` and `_md-comp-dialog.scss`. Do not import Google's web components from that package: a component here is plain markup and SpyneJS code, drawn from Google's values.
 
 A component is four parts, and each has one place:
 
