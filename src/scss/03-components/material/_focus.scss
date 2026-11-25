@@ -7,6 +7,9 @@
 // Left out, because each already has Material's own indicator for its kind: buttons
 // (.btn), cards that are links, the drawer's links (drawn inside the item) and text
 // fields (a thicker outline in the primary colour).
+//
+// And the stage, which the link that skips to the content gives the focus to: it is
+// the whole page, and a ring round a whole page says nothing.
 
 @use 'sass:map';
 @use '../../00-spynejs-design-system/tokens/material';
@@ -20,7 +23,8 @@ $color: map.get(map.get(material.$button, base), 'focus-indicator-color');
     :is(a, button, summary, [tabindex]):not(
         .btn,
         .page-card,
-        #menu-drawer *
+        #menu-drawer *,
+        #stage-view
       ):focus-visible {
       outline: $thickness solid $color;
       outline-offset: $offset;

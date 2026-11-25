@@ -1,0 +1,38 @@
+// The link that skips to the page's content.
+//
+// It is the first thing in the app, so the first press of Tab reaches it. It is not
+// seen until then: it stands above the top of the window, and comes down to the
+// window's corner, over the app bar, while it has the focus. A press on it gives
+// the focus to the stage, which holds the page.
+//
+// Material has no such link. It is drawn as Material's filled button, by the
+// buttons' own styles (it has the class `btn`); where it stands is chosen here.
+//
+//   .skip-link    the link (components/ui-elements/ui-skip-link-view.js)
+//   #stage-view   where it leads: the stage takes the focus
+
+@mixin styles {
+  main#app {
+    .skip-link {
+      position: fixed;
+      z-index: 1200; // in front of the header (1000) and the snackbar (1100)
+      inset-block-start: 8px;
+      inset-inline-start: 8px;
+      // Above the window: its own height, and the 8px it stands from the top.
+      transform: translateY(calc(-100% - 16px));
+
+      &:focus,
+      &:focus-visible {
+        transform: none;
+      }
+    }
+
+    // The stage is given the focus so that the keyboard goes on from the page's
+    // content. It is the whole page, and a ring round a whole page says nothing:
+    // the browser's own is taken off here, and Material's is not given to it
+    // (_focus.scss).
+    #stage-view:focus {
+      outline: none;
+    }
+  }
+}

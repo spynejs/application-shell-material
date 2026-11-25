@@ -40,6 +40,8 @@ This app is on the Material template: Google's Material Design 3 for the SpyneJS
 | Navigation drawer | its links are the routes in `src/index.js`; it is there in a window under 840px | `src/app/components/ui-elements/ui-menu-drawer-view.js` |
 | Navigation bar | its destinations are the top-level routes in `src/index.js`; it is there in a window under 600px, for an app with three to five of them; a top-level page gives its destination an icon and a label with `navIcon` and `navLabel` (below) | `src/app/components/nav/nav-destinations-view.js`, `src/scss/03-components/material/_navigation-bar.scss` |
 | Navigation rail | the same destinations, down the leading edge of a window from 600 to 839px, for an app with three to seven of them; it has no keys of its own | `src/app/components/nav/nav-destinations-view.js`, `src/scss/03-components/material/_navigation-rail.scss` |
+| Footer | it is the app's footer; its one line of words is the model's `text.footer`. The key `footer` at the root of the model (below) puts links over that line: columns of them, each under a title, and one row for the site's pages elsewhere | `src/app/components/ui-elements/ui-footer-links-view.js`, `src/app/traits/utils/footer-links.js`, `src/scss/03-components/material/_footer-links.scss` |
+| Skip link | every app has it; nothing asks for it. It is the first thing the keyboard reaches and is not seen until then; a press on it gives the focus to the page's content. Its words are the model's `text.skipLink` (below) | `src/app/components/ui-elements/ui-skip-link-view.js`, `src/app/components/stage-container.js`, `src/scss/03-components/material/_skip-link.scss` |
 | Page transitions | named from the route: `top-level`, `forward`, `backward`, `container-transform` | `src/app/traits/channel/channel-material-traits.js` |
 | Ripple, reduced motion, breakpoints | every app has them; nothing asks for them | `src/app/traits/material/material-ripple-traits.js`, `src/scss/03-components/material/_motion.scss` |
 
@@ -173,6 +175,35 @@ An app takes one key, at the root of its model, for a floating action button. It
 ```
 
 The FAB is a call to action, and its keys are a call to action's: with no page named it leads where a hero's button leads, to the page that holds the contact form (`src/app/traits/utils/call-to-action-routes.js`). It is Material's extended FAB: an icon, drawn filled, and words. It is not shown at the top of a page, where the hero's own button is, and comes in once the page is scrolled; it is never shown on the page it leads to. An app has one, or none: an app with no `fab`, or with no contact form and no page named, has none. To take it away, remove the key.
+
+An app takes one more key at the root of its model, `footer`, for links in its footer. It can be left out, and so can either of its keys:
+
+| Key of `footer` | Value | Left out |
+|---|---|---|
+| `columns` | a list of columns. Each has a `title`, the words over it, and `links`, a list of links | no columns |
+| `social` | a list of links, drawn as one row under the columns: the site's pages elsewhere | no row |
+
+A link, in a column or in the row, has words and names where it leads, in one of two ways:
+
+| Key of a link | Value |
+|---|---|
+| `label` | the link's words |
+| `attrPageId`, `attrTopicId` | a page of the app, by the route's ids. `attrTopicId` is for one of the page's sub-pages, and can be left out |
+| `attrHref` | somewhere else: a whole address, one that begins `https://`, `http://`, `mailto:` or `tel:` |
+
+```json
+{ "footer": { "columns": [{ "title": "Visit", "links": [{ "label": "Menu", "attrPageId": "menu" }, { "label": "Beginners", "attrPageId": "classes", "attrTopicId": "beginners" }] }], "social": [{ "label": "Instagram", "attrHref": "https://www.instagram.com/example" }] } }
+```
+
+The links are drawn over the footer's one line of words. That line is the model's `text.footer` and stays as it is: `footer` and `text.footer` are two keys, and an app can have either, both or neither. A link to a page of the app changes the route and loads nothing, as a link in the drawer does. A web address opens in a new tab; a `mailto:` or a `tel:` does not. A link that names both a page and an address leads to the page.
+
+**A link that leads nowhere is not drawn**: one with no `label`, one whose `attrPageId` is not a page the app has, or one whose `attrHref` is not a whole address. An address inside the app, such as `/menu`, is not a whole address: name the page by its `attrPageId`. An `attrTopicId` that is not one of the page's sub-pages leads to the page. A column left with no links is not drawn, and a `footer` that leaves nothing to draw leaves the footer as it was. A column's `title` can be left out. As many columns stand side by side as have 140px each, and the rest go under them. The row is words and not marks: the app's icons hold no company's mark. `src/app/traits/utils/footer-links.js` works the links out, and its head says the same with every case.
+
+The skip link's words are "Skip to content". An app in another language gives its own, beside the header's words:
+
+```json
+{ "text": { "header": "Panadería Sol", "skipLink": "Saltar al contenido" } }
+```
 
 ### In a view
 
@@ -395,6 +426,8 @@ The browser opens the menu when its button is pressed, closes it on a press outs
 Each menu has an `id` no other on the page has. An item is a `<button>`, or a link written as any link in the app is, with its words in a `<span>`; it may hold an icon before them. `aria-current="true"` on an item draws it selected, for a menu that chooses among things: the view sets it, since which one is chosen is the view's to know. `disabled` on an item dims it. A press on an item is heard as any press is, by listing the items in `broadcastEvents`. A view takes one listener for an action: one that hears its own buttons and a menu's items on `CHANNEL_UI_CLICK_EVENT` hears them in one listener and tells them apart by what was pressed, as `dialogMenuDemo$OnPress` does in `src/app/components/page-items/dialog-menu-demo-view.js` and its trait. The keyboard reaches a menu's items with Tab, as it reaches any buttons, and Enter presses one. The arrow keys do not move between them, and the menu is not given the menu role, which would promise that they do: do not add `role="menu"`. Not drawn: a menu that opens a second menu, an item's trailing icon, and the menu growing as it opens.
 
 A control with a tooltip sends more than clicks on `CHANNEL_UI`. Anything that listens for that control there must name the click: a listener on `CHANNEL_UI_CLICK_EVENT`, or a `ChannelPayloadFilter` with `action: 'CHANNEL_UI_CLICK_EVENT'`. One that takes every event from the control would act when the pointer only comes to rest on it.
+
+The skip link is the first view the app adds (`app$OnAppViewRendered` in `src/app/traits/app/app-container-traits.js`), and it must stay first: a view added before it is one the keyboard reaches before it. A press on it is heard by the stage, `#stage-view`, which holds the page and takes the focus (`stage$OnSkipToContent` in `src/app/traits/app/stage-container-traits.js`). The stage shows no ring when it has the focus: a ring round a whole page says nothing. The next press of Tab goes to the first control in the page.
 
 ### Adding a Material component the template does not have
 

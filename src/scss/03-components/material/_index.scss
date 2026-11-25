@@ -16,6 +16,7 @@
 @use 'field-extras';
 @use 'filled-text-field';
 @use 'focus';
+@use 'footer-links';
 @use 'icon';
 @use 'icon-button';
 @use 'list';
@@ -29,6 +30,7 @@
 @use 'ripple';
 @use 'select';
 @use 'selection';
+@use 'skip-link';
 @use 'slider';
 @use 'snackbar';
 @use 'switch';
@@ -85,4 +87,9 @@
   // and a menu's item draws its own focus indicator.
   @include dialog.styles;
   @include menu.styles;
+  // After the footer's own styles, the FAB and focus: the footer's links make it
+  // as tall as what it holds, and the link that skips to the content is a button
+  // that stands where it is told.
+  @include footer-links.styles;
+  @include skip-link.styles;
 }

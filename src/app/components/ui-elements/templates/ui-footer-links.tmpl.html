@@ -1,0 +1,43 @@
+<div class="footer-links__columns" data-count="{{attrColumnCount}}">
+  {{#columns}}
+  <div class="footer-links__column">
+    <p class="footer-links__title" id="{{attrTitleId}}">{{title}}</p>
+    <ul class="footer-links__list" aria-labelledby="{{attrTitleId}}">
+      {{#links}}
+      <li>
+        <a
+          class="footer-link"
+          href="{{attrHref}}"
+          target="{{attrTarget}}"
+          rel="{{attrRel}}"
+          data-channel="{{attrChannel}}"
+          data-event-prevent-default="true"
+          data-page-id="{{attrPageId}}"
+          data-topic-id="{{attrTopicId}}"
+          data-end-route="true"
+          >{{label}}</a
+        >
+      </li>
+      {{/links}}
+    </ul>
+  </div>
+  {{/columns}}
+</div>
+<ul class="footer-links__social" data-count="{{attrSocialCount}}">
+  {{#social}}
+  <li>
+    <a
+      class="footer-link"
+      href="{{attrHref}}"
+      target="{{attrTarget}}"
+      rel="{{attrRel}}"
+      data-channel="{{attrChannel}}"
+      data-event-prevent-default="true"
+      data-page-id="{{attrPageId}}"
+      data-topic-id="{{attrTopicId}}"
+      data-end-route="true"
+      >{{label}}</a
+    >
+  </li>
+  {{/social}}
+</ul>

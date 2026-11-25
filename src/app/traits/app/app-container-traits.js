@@ -1,5 +1,6 @@
 import { SpyneTrait } from 'spyne';
 import { UIHeaderView } from 'components/ui-elements/ui-header-view.js';
+import { UISkipLinkView } from 'components/ui-elements/ui-skip-link-view.js';
 import { UIMenuDrawerView } from 'components/ui-elements/ui-menu-drawer-view.js';
 import { StageContainer } from 'components/stage-container.js';
 import { UIFooterView } from 'components/ui-elements/ui-footer-view.js';
@@ -51,6 +52,8 @@ export class AppContainerTraits extends SpyneTrait {
   }
 
   static app$OnAppViewRendered() {
+    // First, so that it is the first thing the keyboard reaches.
+    this.appendView(new UISkipLinkView());
     this.appendView(new UIHeaderView());
     this.appendView(new UIMenuDrawerView());
     this.appendView(new StageContainer());

@@ -7,6 +7,7 @@ import {
 import { routeCallsToAction } from 'traits/utils/call-to-action-routes.js';
 import { navDestinations } from 'traits/utils/nav-icons.js';
 import { fabOf } from 'traits/utils/fab.js';
+import { footerLinksOf } from 'traits/utils/footer-links.js';
 
 export class AppStatusTraits extends SpyneTrait {
   constructor(context) {
@@ -33,7 +34,7 @@ export class AppStatusTraits extends SpyneTrait {
     this.props.uiText = this.props.data?.text;
 
     const { navLinks, isDeepLink, routeData } = e['CHANNEL_ROUTE'].payload;
-    const { footer, header } = e['CHANNEL_FETCH_MODEL'].payload.text;
+    const { footer, header, skipLink } = e['CHANNEL_FETCH_MODEL'].payload.text;
     // Optional authored node ({ label, attrHref }) crediting the image source.
     // Passed through as-is; absent means the footer renders no credit.
     const { photoCredit } = e['CHANNEL_FETCH_MODEL'].payload;
@@ -45,6 +46,15 @@ export class AppStatusTraits extends SpyneTrait {
       // The app's floating action button, where its model asks for one: what
       // it says and the page it leads to. null where it asks for none.
       fab: fabOf(this.props.data, AppStatusTraits.appStatus$HrefOf),
+      // The footer's links, where the model asks for any: columns of them, and
+      // a row for the site's pages elsewhere. null where it asks for none.
+      footerLinks: footerLinksOf(
+        this.props.data,
+        AppStatusTraits.appStatus$HrefOf,
+      ),
+      // The words of the link that skips to the content, where the model gives
+      // any; the link has words of its own.
+      skipLink,
       isDeepLink,
       routeData,
       footer,

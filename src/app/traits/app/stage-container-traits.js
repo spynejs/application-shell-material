@@ -136,6 +136,13 @@ export class StageContainerTraits extends SpyneTrait {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }
 
+  // The link that skips to the content was pressed. The stage holds the page, so
+  // it takes the focus itself: the keyboard goes on from the top of the page's
+  // content, past the app bar. Nothing is loaded and the address does not change.
+  static stage$OnSkipToContent() {
+    this.props.el.focus();
+  }
+
   static stage$OnAppInitEvent(e) {
     this.stage$OnRouteEvent(e, true);
   }

@@ -1,0 +1,137 @@
+// The footer's links: columns of them, each under a title, and one row under the
+// columns for a site's pages elsewhere.
+//
+// Material has no footer. This is a part of the page's frame drawn with Material's
+// type and color roles: a title is title-small in on-surface, a link is body-medium
+// in on-surface-variant, and the lines are outline-variant. Every size and space
+// here is chosen here.
+//
+// The markup is the footer's own (ui-elements/templates/ui-footer-links.tmpl.html):
+//
+//   .footer-links            added to the footer where the app's model asks for
+//                            links (traits/utils/footer-links.js)
+//   .footer-links__columns   the columns; `data-count` is how many there are
+//   .footer-links__column    one of them: its title, and its list
+//   .footer-links__title     a column's title
+//   .footer-links__list      a column's links, one under another
+//   .footer-links__social    the row under the columns; `data-count` likewise
+//   .footer-link             a link, of either kind
+//
+// A footer with no .footer-links is the Shell's own, one line of words at a height
+// the Shell gives it, and nothing here touches it. With links, the footer is as
+// tall as what it holds, and its one line of words is under them, past a line.
+
+@use 'type';
+
+// A link is 40px tall, so that a finger finds it; its words are in the middle.
+$link-height: 40px;
+// A column is 140px wide at least: two side by side in a window of 375px.
+$column-min: 140px;
+$between-columns: 24px;
+$around: 24px;
+// What the Shell keeps at each side of the footer's one line of words
+// (ui/footer.scss): the links keep the same, so that the two start together.
+$side: clamp(0.25rem, 2vw, 1rem);
+
+@mixin styles {
+  main#app {
+    #site-footer:has(.footer-links) {
+      block-size: auto;
+      // The Shell centers the footer's one line; the links start where words do.
+      text-align: start;
+
+      // The line of words, and the credit beside it: under the links, past a
+      // line, as tall as they are.
+      .footer-content {
+        position: relative;
+        block-size: auto;
+        padding-block: 16px;
+
+        // The line, as long as the one over the row of links elsewhere.
+        &::before {
+          position: absolute;
+          inset-block-start: 0;
+          inset-inline: $side;
+          border-block-start: 1px solid var(--md-sys-color-outline-variant);
+          content: '';
+        }
+      }
+    }
+
+    .footer-links {
+      box-sizing: border-box;
+      inline-size: min(100%, var(--max-content-width));
+      margin-inline: auto;
+      padding: $around $side;
+    }
+
+    .footer-links__columns {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax($column-min, 1fr));
+      gap: $between-columns;
+
+      // No columns asked for: the row of links elsewhere stands alone.
+      &[data-count='0'] {
+        display: none;
+      }
+    }
+
+    .footer-links__title {
+      @include type.style('title-small');
+
+      margin: 0 0 4px;
+      color: var(--md-sys-color-on-surface);
+
+      // A column may have no title.
+      &:empty {
+        display: none;
+      }
+    }
+
+    .footer-links__list,
+    .footer-links__social {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .footer-links__social {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0 $between-columns;
+
+      &[data-count='0'] {
+        display: none;
+      }
+    }
+
+    // Under columns, the row is marked off from them.
+    .footer-links__columns:not([data-count='0']) + .footer-links__social {
+      margin-block-start: 16px;
+      padding-block-start: 8px;
+      border-block-start: 1px solid var(--md-sys-color-outline-variant);
+    }
+
+    .footer-link {
+      @include type.style('body-medium');
+
+      display: inline-flex;
+      align-items: center;
+      min-block-size: $link-height;
+      color: var(--md-sys-color-on-surface-variant);
+      text-decoration: none;
+
+      @media (hover: hover) {
+        &:hover {
+          color: var(--md-sys-color-on-surface);
+          text-decoration: underline;
+          text-underline-offset: 0.2em;
+        }
+      }
+
+      &:active {
+        color: var(--md-sys-color-primary);
+      }
+    }
+  }
+}
