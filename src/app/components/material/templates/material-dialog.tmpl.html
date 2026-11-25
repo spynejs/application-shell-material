@@ -1,0 +1,32 @@
+<div
+  class="material-dialog__scrim"
+  aria-hidden="true"
+  data-answer="dismiss"
+  data-dialog-id="{{attrDialogId}}"
+></div>
+<div class="material-dialog__container">
+  {{#headline}}
+  <h2 class="material-dialog__headline" id="{{attrId}}">{{words}}</h2>
+  {{/headline}}
+  <p class="material-dialog__text" id="{{attrTextId}}">{{text}}</p>
+  <div class="material-dialog__actions">
+    {{#dismiss}}
+    <button
+      type="button"
+      class="btn btn-text"
+      data-answer="dismiss"
+      data-dialog-id="{{attrDialogId}}"
+    >
+      <span>{{label}}</span>
+    </button>
+    {{/dismiss}}
+    <button
+      type="button"
+      class="btn btn-text"
+      data-answer="confirm"
+      data-dialog-id="{{attrDialogId}}"
+    >
+      <span>{{confirmLabel}}</span>
+    </button>
+  </div>
+</div>

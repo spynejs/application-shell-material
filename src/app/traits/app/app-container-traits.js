@@ -5,6 +5,7 @@ import { StageContainer } from 'components/stage-container.js';
 import { UIFooterView } from 'components/ui-elements/ui-footer-view.js';
 import { NavDestinationsView } from 'components/nav/nav-destinations-view.js';
 import { MaterialSnackbarHostView } from 'components/material/material-snackbar-host-view.js';
+import { MaterialDialogHostView } from 'components/material/material-dialog-host-view.js';
 import { MaterialFabHostView } from 'components/material/material-fab-host-view.js';
 import { MaterialTooltipHostView } from 'components/material/material-tooltip-host-view.js';
 import { MaterialRippleNullView } from 'components/material/material-ripple-null-view.js';
@@ -55,6 +56,7 @@ export class AppContainerTraits extends SpyneTrait {
     this.appendView(new StageContainer());
     this.appendView(new UIFooterView());
     this.appendView(new MaterialSnackbarHostView());
+    this.appendView(new MaterialDialogHostView());
     this.appendView(new MaterialFabHostView());
     this.appendView(new MaterialTooltipHostView());
     new LocalStorageNullView().appendToNull();

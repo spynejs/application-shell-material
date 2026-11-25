@@ -184,7 +184,80 @@ export class ChannelMaterialTraits extends SpyneTrait {
     this.sendChannelPayload(action, { snackbarId });
   }
 
+  /**
+   * A view asked for a dialog (sendInfoToChannel with the REQUEST action). One
+   * is open at a time: a dialog that is open is answered as dismissed before the
+   * new one is shown.
+   *
+   * A dialog with no `dismissLabel` has one button, which acknowledges. One with
+   * no `confirmLabel` is given a plain one: a dialog cannot be left with no way
+   * to answer it.
+   */
+  static channelMaterial$OnDialogRequest(e) {
+    const {
+      name = '',
+      headline = '',
+      text = '',
+      confirmLabel = 'OK',
+      dismissLabel = '',
+    } = e.payload;
+
+    this.channelMaterial$AnswerDialog('dismiss');
+    this.props.dialogId += 1;
+
+    const { dialogId } = this.props;
+    const action = 'CHANNEL_MATERIAL_DIALOG_SHOW_EVENT';
+
+    this.props.dialog = { dialogId, name };
+    this.sendChannelPayload(action, {
+      dialogId,
+      name,
+      headline,
+      text,
+      confirmLabel,
+      dismissLabel,
+    });
+  }
+
+  // The dialog says how it was answered: by one of its buttons, by a press
+  // outside it, or closed by the browser. Only the open dialog's word counts.
+  static channelMaterial$OnDialogCloseRequest(e) {
+    const { dialogId, answer } = e.payload;
+
+    if (this.props.dialog?.dialogId === Number(dialogId)) {
+      this.channelMaterial$AnswerDialog(
+        answer === 'confirm' ? 'confirm' : 'dismiss',
+      );
+    }
+  }
+
+  /**
+   * Answers the dialog that is open, and says whether one was. The dialog hears
+   * the answer and removes itself; the view that asked hears it by the `name` it
+   * gave. The channel has no dialog open from the moment it answers, so a view
+   * may ask again from inside its own listener.
+   */
+  static channelMaterial$AnswerDialog(answer) {
+    const { dialog } = this.props;
+
+    if (dialog === null) {
+      return false;
+    }
+
+    const action = 'CHANNEL_MATERIAL_DIALOG_ANSWER_EVENT';
+
+    this.props.dialog = null;
+    this.sendChannelPayload(action, { ...dialog, answer });
+
+    return true;
+  }
+
   static channelMaterial$OnEscapeKey() {
+    // A dialog is in front of whatever else is open: Escape is its alone.
+    if (this.channelMaterial$AnswerDialog('dismiss')) {
+      return;
+    }
+
     this.channelMaterial$SendDismissEvent('escape');
   }
 
@@ -199,6 +272,8 @@ export class ChannelMaterialTraits extends SpyneTrait {
 
     this.props.route = routeFromPayload(e.payload);
 
+    // A question asked on one page is not carried to the next.
+    this.channelMaterial$AnswerDialog('dismiss');
     this.channelMaterial$SendDismissEvent('route');
     // srcElement is the link that was followed. A move by the browser's history
     // has none, and that is how the two are told apart (`byLink`): the route's

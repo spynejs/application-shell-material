@@ -1,0 +1,91 @@
+<header class="dialog-menu-demo__header">
+  <h2>{{headline}}</h2>
+  <p>{{intro}}</p>
+</header>
+
+<section
+  class="dialog-menu-demo__kind"
+  aria-labelledby="dialog-menu-demo-dialog"
+>
+  <h3 id="dialog-menu-demo-dialog">{{dialogName}}</h3>
+  <p class="dialog-menu-demo__note">{{dialogNote}}</p>
+  <div class="dialog-menu-demo__set">
+    {{#asks}}
+    <button
+      type="button"
+      class="btn btn-tonal"
+      data-demo="ask"
+      data-ask="{{attrName}}"
+    >
+      <span>{{label}}</span>
+    </button>
+    {{/asks}}
+  </div>
+  <p class="dialog-menu-demo__said" role="status">
+    <span class="dialog-menu-demo__answer">{{answerNone}}</span>
+  </p>
+</section>
+
+<section class="dialog-menu-demo__kind" aria-labelledby="dialog-menu-demo-menu">
+  <h3 id="dialog-menu-demo-menu">{{menuName}}</h3>
+  <p class="dialog-menu-demo__note">{{menuNote}}</p>
+  <div class="dialog-menu-demo__set">
+    <button
+      type="button"
+      class="btn btn-outlined"
+      popovertarget="dialog-menu-demo-sort"
+    >
+      <span>{{sortLabel}}</span>
+    </button>
+    <div class="menu" id="dialog-menu-demo-sort" popover>
+      {{#sorts}}
+      <button
+        type="button"
+        class="menu__item"
+        popovertarget="dialog-menu-demo-sort"
+        popovertargetaction="hide"
+        aria-current="{{attrCurrent}}"
+        data-demo="sort"
+        data-words="{{attrWords}}"
+      >
+        <span>{{label}}</span>
+      </button>
+      {{/sorts}}
+    </div>
+
+    <button
+      type="button"
+      class="icon-button"
+      aria-label="{{attrMoreLabel}}"
+      popovertarget="dialog-menu-demo-more"
+    >
+      <svg class="icon" viewBox="0 -960 960 960" aria-hidden="true">
+        <path d="{{attrIconPath}}" />
+      </svg>
+    </button>
+    <div class="menu" id="dialog-menu-demo-more" popover>
+      {{#actions}}
+      <button
+        type="button"
+        class="menu__item"
+        popovertarget="dialog-menu-demo-more"
+        popovertargetaction="hide"
+        data-demo="act"
+        data-words="{{attrWords}}"
+      >
+        <svg class="icon" viewBox="0 -960 960 960" aria-hidden="true">
+          <path d="{{attrIconPath}}" />
+        </svg>
+        <span>{{label}}</span>
+      </button>
+      {{/actions}}
+      <hr class="menu__divider" />
+      <button type="button" class="menu__item" disabled>
+        <span>{{disabled}}</span>
+      </button>
+    </div>
+  </div>
+  <p class="dialog-menu-demo__said" role="status">
+    <span class="dialog-menu-demo__chosen">{{chosenNone}}</span>
+  </p>
+</section>

@@ -1,0 +1,163 @@
+// Material dialog: the basic dialog, a question a visitor must answer before
+// going on.
+//
+// Values are read at build time from Google's dialog and scrim tokens
+// (@material/web 2.5.0, tokens/versions/latest) through tokens/_material.scss. The
+// sizes and spaces are from m3.material.io (Dialogs, specs), read 2026-11-25, and
+// are marked where they are used, as is what neither carries.
+//
+// The markup is two views: #material-dialog-host, an empty region that is always
+// there, and dialog.material-dialog, added when the Material channel shows one and
+// gone when it is answered. Nothing here decides when; that is the channel.
+//
+// The dialog is the browser's own <dialog>, opened as a modal. The browser draws
+// it over everything else, in front of the header and the drawer, whatever their
+// order; it keeps the focus inside and closes the page behind. Here the element is
+// the whole window, with nothing of its own to see: it holds the scrim and, in its
+// middle, the container that is the dialog a visitor sees.
+//
+// Its two actions are text buttons, drawn by the buttons' own styles
+// (elements/_buttons.scss).
+//
+// Not drawn: the icon over a headline, the divider, a dialog with fields or a list
+// in it, and the full-screen dialog.
+
+@use 'sass:map';
+@use '../../00-spynejs-design-system/tokens/material';
+@use 'type';
+
+$t: material.$dialog;
+// Material's specs: 24px round the container's content, 16px under the headline,
+// 24px over the actions and 8px between them; a container 280px wide at least and
+// 560px at most.
+$space: 24px;
+$under-headline: 16px;
+$between-actions: 8px;
+$min-width: 280px;
+$max-width: 560px;
+// What is left of the window round a dialog in a narrow one: 24px at each side,
+// which is what Google's package keeps clear on the web
+// (dialog/internal/_dialog.scss: 100% less 48px).
+$from-edge: 24px;
+
+@mixin styles {
+  // The page behind an open dialog does not scroll. The Shell keeps the
+  // scrollbar's room whether or not there is one (core/_reset.scss), so nothing
+  // moves sideways when the page stops scrolling and when it starts again.
+  html:has(.material-dialog[open]) {
+    overflow: hidden;
+  }
+
+  main#app {
+    .material-dialog {
+      position: fixed;
+      inset: 0;
+      box-sizing: border-box;
+      inline-size: 100%;
+      block-size: 100%;
+      max-inline-size: none;
+      max-block-size: none;
+      margin: 0;
+      padding: $from-edge;
+      border: 0;
+      background: transparent;
+      color: map.get($t, 'headline-color');
+      overflow: hidden;
+
+      // Only while it is open: closed, the browser does not show it.
+      &[open] {
+        display: grid;
+        place-items: center;
+      }
+
+      // The browser's own backdrop is not used: the scrim is an element, so that
+      // a press on it is heard as any press is.
+      &::backdrop {
+        background: transparent;
+      }
+    }
+
+    .material-dialog__scrim {
+      position: absolute;
+      inset: 0;
+      background: map.get(material.$scrim, 'container-color');
+      opacity: map.get(material.$scrim, 'container-opacity');
+      // 150ms, linear: a scrim comes as fast as a state layer. Chosen here.
+      animation: material-dialog-scrim 150ms linear backwards;
+    }
+
+    .material-dialog__container {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+      inline-size: min(#{$max-width}, 100%);
+      min-inline-size: min(#{$min-width}, 100%);
+      max-block-size: 100%;
+      padding: $space;
+      border-radius: map.get($t, 'container-shape');
+      background: map.get($t, 'container-color');
+      box-shadow: material.elevation-shadow(map.get($t, 'container-elevation'));
+      // It comes forward as it appears. 250ms is Material's medium1; the specs
+      // give no numbers for a dialog on the web. Chosen here.
+      animation: material-dialog-in var(--md-sys-motion-duration-medium1)
+        var(--md-sys-motion-easing-emphasized-decelerate) backwards;
+    }
+
+    .material-dialog__headline {
+      @include type.style('headline-small');
+
+      margin: 0 0 $under-headline;
+      color: map.get($t, 'headline-color');
+    }
+
+    // The text scrolls where a dialog is taller than the window; the headline and
+    // the actions stay.
+    .material-dialog__text {
+      @include type.style('body-medium');
+
+      min-block-size: 0;
+      margin: 0;
+      color: map.get($t, 'supporting-text-color');
+      overflow-y: auto;
+    }
+
+    // The confirming action is last, at the far side; the dismissing one before
+    // it.
+    .material-dialog__actions {
+      display: flex;
+      flex: none;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: $between-actions;
+      margin-block-start: $space;
+    }
+
+    // Reduced motion: it fades in, quickly, and does not move.
+    @media (prefers-reduced-motion: reduce) {
+      .material-dialog__container {
+        animation: material-dialog-fade var(--md-sys-motion-duration-short2)
+          linear backwards;
+      }
+    }
+  }
+
+  @keyframes material-dialog-scrim {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes material-dialog-in {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+  }
+
+  @keyframes material-dialog-fade {
+    from {
+      opacity: 0;
+    }
+  }
+}

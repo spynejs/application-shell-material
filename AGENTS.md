@@ -27,6 +27,8 @@ This app is on the Material template: Google's Material Design 3 for the SpyneJS
 | Progress | the browser's own `<progress>` for a line, with a `value` or with none; the class `progress-circular` on an element with `role="progressbar"` for a ring (below, "In a view"). Nothing in the app shows one by itself | `src/scss/03-components/material/_progress.scss` |
 | Accordion | a page item drawn from `faq-accordion.tmpl.html` (below): a FAQ whose rows open; anywhere else, the browser's own `<details>` in an element of the class `accordion` | `src/app/components/page-items/templates/faq-accordion.tmpl.html`, `src/scss/03-components/material/_accordion.scss` |
 | Table | a page item drawn from `table.tmpl.html` (below); anywhere else, a `<table class="table">` in an element of the class `table-scroll` | `src/app/components/page-items/templates/table.tmpl.html`, `src/scss/03-components/material/_table.scss` |
+| Dialog | a view sends `CHANNEL_MATERIAL_DIALOG_REQUEST` with a headline, a text and the words of one or two buttons, and hears the answer on `CHANNEL_MATERIAL_DIALOG_ANSWER_EVENT` (below, "In a view"). It is the browser's own `<dialog>`: the focus stays inside it and the page behind is closed | `src/app/components/material/material-dialog-host-view.js`, `src/app/components/material/material-dialog-view.js`, `src/scss/03-components/material/_dialog.scss` |
+| Menu | an element of the class `menu` with the attribute `popover`, and a button that names it in `popovertarget` (below, "In a view"). It is the browser's own popover; the view that holds it says where it stands | `src/app/traits/material/material-menu-traits.js`, `src/scss/03-components/material/_menu.scss` |
 | Checkbox, radio button, switch | in the contact form, an entry of `formFields` with a `kind` (below); anywhere else, the browser's own control written in a template (below, "In a view"). The control's type is what draws it: no class asks for Material's | `src/scss/03-components/material/_checkbox.scss`, `_radio.scss`, `_switch.scss`, and `_selection.scss` for a control's row and a set |
 | List, divider | a page item drawn from `timetable.tmpl.html` or `price-list.tmpl.html`: each of its `rows` or `items` is a list item; no keys of its own | `src/scss/03-components/material/_list.scss` |
 | Tabs | lists of one kind (price lists, or timetables) that are next to each other on a page and give the same `tabGroup` (below): a row of tabs over them, and one list shown at a time | `src/app/components/page-items/tabs-view.js`, `src/app/traits/utils/tab-sets.js`, `src/scss/03-components/material/_tabs.scss` |
@@ -177,9 +179,12 @@ The FAB is a call to action, and its keys are a call to action's: with no page n
 Material's events go through one channel, `CHANNEL_MATERIAL`. Its file, `src/app/channels/channel-material.js`, says at its head what every action carries.
 
 - `CHANNEL_MATERIAL_SNACKBAR_REQUEST`, sent by a view with `{ message }`: show a snackbar.
+- `CHANNEL_MATERIAL_DIALOG_REQUEST`, sent by a view with `{ name, headline, text, confirmLabel, dismissLabel }`: ask a question in a dialog.
+- `CHANNEL_MATERIAL_DIALOG_ANSWER_EVENT`, `{ dialogId, name, answer }`: the question a view named was answered, with `confirm` or `dismiss`.
+- `CHANNEL_MATERIAL_DIALOG_SHOW_EVENT` and `CHANNEL_MATERIAL_DIALOG_CLOSE_REQUEST`: between the channel and the dialog itself. A view of yours neither sends them nor listens for them.
 - `CHANNEL_MATERIAL_SCROLL_EVENT`, `{ scrolled }`: the page left its top, or came back to it.
 - `CHANNEL_MATERIAL_BREAKPOINT_EVENT`, `{ breakpoint }`: the window entered `compact`, `medium`, `expanded`, `large` or `extra-large`.
-- `CHANNEL_MATERIAL_DISMISS_EVENT`, `{ reason }`: whatever is open is to close.
+- `CHANNEL_MATERIAL_DISMISS_EVENT`, `{ reason }`: whatever is open is to close, on Escape or a move to another page. While a dialog is open, Escape is the dialog's alone and this is not sent.
 - `CHANNEL_MATERIAL_PAGE_LEAVING_EVENT` and `CHANNEL_MATERIAL_PAGE_LEFT_EVENT`: a move between pages beginning and ending, with its transition.
 
 A control that shows no words, only an icon, gets a tooltip in its own markup. No key in a model asks for one. Two things are written, both in the view that holds the control:
@@ -308,11 +313,92 @@ An icon button, a chip, a line or a ring of progress, an accordion and a table a
 
 An icon button has no words, so it has an `aria-label`, and asks for a tooltip as any control with no words does (above). A chip may hold an icon before its words, as `<svg class="icon" …>`. A filter chip is the browser's own checkbox: it is on when the checkbox is `checked`, a form has it as a checkbox, and a view hears it as one, by its `input`. A `<progress>` with a `value` shows how much is done, and one with none shows only that something is at work; a ring says how much twice, in `aria-valuenow` for assistive technology and in `--progress` for the drawing, the same number from 0 to 100, and turns when it has neither. Progress is the drawing: a view that waits puts one in its template and takes it out, and nothing in the app shows one by itself. A row of an accordion is the browser's own `<details>`, which opens to a press, to Enter and to Space; more than one can be open. A table's cells keep their words whole, and a table too wide is scrolled inside `table-scroll`, which can be reached by the keyboard and so has a `role` and a name; `table__number` on a cell sets a number to the far side. In a template, write a table's loops on one line inside the row (`<tr>{{#cells}}<td>{{.}}</td>{{/cells}}</tr>`): loose text between a table's tags is moved out of the table when the page is read. Not drawn: an icon button that stays pressed, the input chip, the wavy forms of progress, a row moving as it opens, and a table's sorting.
 
+A dialog asks a question that must be answered before going on: a decision to confirm, or something to acknowledge. For anything less, send a snackbar. A view does not write a dialog. It asks for one on `CHANNEL_MATERIAL`, and hears the answer there:
+
+```js
+props.channels = ['CHANNEL_UI', 'CHANNEL_MATERIAL'];
+
+addActionListeners() {
+  // An answer comes back with the name its question was given. The method is
+  // your trait's own; the one written here is the sample's.
+  const ownAnswer = new ChannelPayloadFilter({ name: 'basket:clear' });
+
+  return [
+    ['CHANNEL_MATERIAL_DIALOG_ANSWER_EVENT', 'dialogMenuDemo$OnAnswer', ownAnswer],
+  ];
+}
+```
+
+```js
+// In the view's trait: ask.
+this.sendInfoToChannel(
+  'CHANNEL_MATERIAL',
+  {
+    name: 'basket:clear',
+    headline: 'Clear the basket?',
+    text: 'Everything in it is taken out. This cannot be undone.',
+    confirmLabel: 'Clear it',
+    dismissLabel: 'Keep it',
+  },
+  'CHANNEL_MATERIAL_DIALOG_REQUEST',
+);
+
+// And in the listener for the answer: e.payload.answer is 'confirm' or 'dismiss'.
+```
+
+| Key of a request | Value | Left out |
+|---|---|---|
+| `name` | the view's own word for its question. It comes back with the answer, and is how a view knows an answer for its own | write one: every view that listens hears every answer |
+| `headline` | the question, in a few words | the dialog has no headline, and is named by its text |
+| `text` | what is being asked, or what must be known | write one |
+| `confirmLabel` | the words of the button that confirms: say what it does, such as "Clear it" | the button says "OK" |
+| `dismissLabel` | the words of the button that does not | the dialog has one button, which acknowledges |
+
+The dialog does nothing but ask. What `confirm` means is the asking view's to do, in its listener. `dismiss` is the dismissing button, a press outside the dialog, Escape, a move to another page, or another dialog being asked for: treat it as no. One dialog is open at a time. It is the browser's own `<dialog>`, opened as a modal: the focus goes to its first button and stays inside it, the page behind is closed to the keyboard and to assistive technology and does not scroll, and the focus goes back to where it was when the dialog closes. Material allows it two buttons at most, the dismissing one first. `src/app/traits/page/dialog-menu-demo-traits.js` asks two questions and hears their answers (`dialogMenuDemo$Ask`, `dialogMenuDemo$OnAnswer`), on the sample's More blocks page. Not drawn: an icon over the headline, a dialog with fields or a list in it, and the full-screen dialog.
+
+A menu is a list of things to press that opens from a button. It is the browser's own popover, so most of it is markup:
+
+```html
+<button type="button" class="btn btn-outlined" popovertarget="sort-menu">
+  <span>Sort by</span>
+</button>
+<div class="menu" id="sort-menu" popover>
+  <button type="button" class="menu__item" popovertarget="sort-menu" popovertargetaction="hide" aria-current="true" data-sort="newest">
+    <span>Newest</span>
+  </button>
+  <button type="button" class="menu__item" popovertarget="sort-menu" popovertargetaction="hide" data-sort="price">
+    <svg class="icon" viewBox="0 -960 960 960" aria-hidden="true"><path d="{{attrIconPath}}" /></svg>
+    <span>Price</span>
+  </button>
+  <hr class="menu__divider" />
+  <button type="button" class="menu__item" disabled>
+    <span>Distance</span>
+  </button>
+</div>
+```
+
+```js
+props.traits = [MaterialMenuTraits];
+props.channels = ['CHANNEL_UI'];
+
+addActionListeners() {
+  return [['CHANNEL_UI_TOGGLE_EVENT', 'materialMenu$OnToggle']];
+}
+
+broadcastEvents() {
+  return [['.menu', 'toggle']];
+}
+```
+
+The browser opens the menu when its button is pressed, closes it on a press outside it and on Escape, draws it over everything else, and gives the focus back to the button. An item that names the menu in `popovertarget`, with `popovertargetaction="hide"`, closes it when it is pressed. The one thing the browser does not do is put the menu beside its button, and that is what the script is for: the view that holds a menu composes `MaterialMenuTraits` and hears the menu's `toggle`, and the trait says on the menu where it stands. **Write both lines.** A menu in a view without them opens in the middle of the window, a moment late: that is the sign they are missing. It stands under its button where it fits and over it where it does not, with its start on the button's start, or its end on the button's end where that fits better; it moves with the page when the page is scrolled, and stays in the window where its button does, as in the app bar.
+
+Each menu has an `id` no other on the page has. An item is a `<button>`, or a link written as any link in the app is, with its words in a `<span>`; it may hold an icon before them. `aria-current="true"` on an item draws it selected, for a menu that chooses among things: the view sets it, since which one is chosen is the view's to know. `disabled` on an item dims it. A press on an item is heard as any press is, by listing the items in `broadcastEvents`. A view takes one listener for an action: one that hears its own buttons and a menu's items on `CHANNEL_UI_CLICK_EVENT` hears them in one listener and tells them apart by what was pressed, as `dialogMenuDemo$OnPress` does in `src/app/components/page-items/dialog-menu-demo-view.js` and its trait. The keyboard reaches a menu's items with Tab, as it reaches any buttons, and Enter presses one. The arrow keys do not move between them, and the menu is not given the menu role, which would promise that they do: do not add `role="menu"`. Not drawn: a menu that opens a second menu, an item's trailing icon, and the menu growing as it opens.
+
 A control with a tooltip sends more than clicks on `CHANNEL_UI`. Anything that listens for that control there must name the click: a listener on `CHANNEL_UI_CLICK_EVENT`, or a `ChannelPayloadFilter` with `action: 'CHANNEL_UI_CLICK_EVENT'`. One that takes every event from the control would act when the pointer only comes to rest on it.
 
 ### Adding a Material component the template does not have
 
-The template has no dialog, menu, search, badge, sheet or carousel. Google's values for every one of them are already installed: `@material/web` is a dependency for its design tokens, and `node_modules/@material/web/tokens/versions/latest/sass/` holds a file for each, such as `_md-comp-dialog.scss` and `_md-comp-menu.scss`. Do not import Google's web components from that package: a component here is plain markup and SpyneJS code, drawn from Google's values.
+The template has no search, badge, sheet or carousel. Google's values for every one of them are already installed: `@material/web` is a dependency for its design tokens, and `node_modules/@material/web/tokens/versions/latest/sass/` holds a file for each, such as `_md-comp-search-bar.scss` and `_md-comp-badge.scss`. Do not import Google's web components from that package: a component here is plain markup and SpyneJS code, drawn from Google's values.
 
 A component is four parts, and each has one place:
 

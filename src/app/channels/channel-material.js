@@ -19,6 +19,24 @@ import { ChannelMaterialTraits } from 'traits/channel/channel-material-traits.js
 //   CHANNEL_MATERIAL_SNACKBAR_SHOW_EVENT  out: { snackbarId, message }
 //   CHANNEL_MATERIAL_SNACKBAR_HIDE_EVENT  out, when its time is up: { snackbarId }
 //
+// And it is where a view asks a visitor a question that must be answered, in
+// Material's dialog, and hears the answer:
+//
+//   CHANNEL_MATERIAL_DIALOG_REQUEST        in, from any view: { name, headline,
+//                                          text, confirmLabel, dismissLabel }
+//   CHANNEL_MATERIAL_DIALOG_SHOW_EVENT     out: the same, with { dialogId }
+//   CHANNEL_MATERIAL_DIALOG_CLOSE_REQUEST  in, from the dialog itself:
+//                                          { dialogId, answer }
+//   CHANNEL_MATERIAL_DIALOG_ANSWER_EVENT   out: { dialogId, name, answer }
+//                                          answer: 'confirm' | 'dismiss'
+//
+// `name` is the asking view's own word for its question: it comes back with the
+// answer, and that is how a view knows an answer for its own. One dialog is open
+// at a time. Escape and a move to another page answer the open one with 'dismiss';
+// so does a second request, before its own dialog is shown. While a dialog is
+// open, Escape is its alone: it is in front of whatever else is open, and the
+// DISMISS above is not sent.
+//
 // And it says when a move between pages begins and ends, and which of Material's
 // transitions the move takes:
 //
@@ -36,8 +54,9 @@ import { ChannelMaterialTraits } from 'traits/channel/channel-material-traits.js
 // move that these two actions begin and end, for the pages and the stage.
 //
 // It keeps a little state: whether the page is scrolled, so that it reports the
-// change and not every scroll; the number of the latest snackbar and of the latest
-// move; and the route the visitor is on, so that a move can say where it is from. It does not
+// change and not every scroll; the number of the latest snackbar, of the latest
+// dialog and of the latest move; the dialog that is open, if one is; and the route
+// the visitor is on, so that a move can say where it is from. It does not
 // replay: its actions are moments, and a moment replayed to a late subscriber would
 // be acted on twice.
 export class ChannelMaterial extends Channel {
@@ -49,6 +68,9 @@ export class ChannelMaterial extends Channel {
     this.props.snackbarId = 0;
     // How long a snackbar stays. Material: 4 to 10 seconds for one with no action.
     this.props.snackbarDuration = 5000;
+    this.props.dialogId = 0;
+    // The dialog that is open: { dialogId, name }. None is, until one is asked for.
+    this.props.dialog = null;
     this.props.pageMoveId = 0;
     // The route the visitor is on: { pageId, topicId }. Unknown until the first
     // route arrives.
@@ -76,6 +98,13 @@ export class ChannelMaterial extends Channel {
       ],
       'CHANNEL_MATERIAL_SNACKBAR_SHOW_EVENT',
       'CHANNEL_MATERIAL_SNACKBAR_HIDE_EVENT',
+      ['CHANNEL_MATERIAL_DIALOG_REQUEST', 'channelMaterial$OnDialogRequest'],
+      'CHANNEL_MATERIAL_DIALOG_SHOW_EVENT',
+      [
+        'CHANNEL_MATERIAL_DIALOG_CLOSE_REQUEST',
+        'channelMaterial$OnDialogCloseRequest',
+      ],
+      'CHANNEL_MATERIAL_DIALOG_ANSWER_EVENT',
       'CHANNEL_MATERIAL_PAGE_LEAVING_EVENT',
       'CHANNEL_MATERIAL_PAGE_LEFT_EVENT',
     ];

@@ -192,6 +192,12 @@
   latest-data-table;
 @use '@material/web/tokens/versions/latest/sass/md-comp-data-table-meta' as
   latest-data-table-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-dialog' as latest-dialog;
+@use '@material/web/tokens/versions/latest/sass/md-comp-dialog-meta' as
+  latest-dialog-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-menu' as latest-menu;
+@use '@material/web/tokens/versions/latest/sass/md-comp-menu-meta' as
+  latest-menu-meta;
 @use '@material/web/tokens/versions/latest/sass/md-comp-scrim-meta' as
   latest-scrim-meta;
 @use '@material/web/tokens/versions/latest/sass/md-ref-typeface' as
@@ -705,6 +711,22 @@ $progress-indicator: (
 $data-table: _component(
   meta.module-variables(latest-data-table),
   meta.module-variables(latest-data-table-meta)
+);
+
+// The basic dialog: its container, its headline and its supporting text. Its
+// actions are text buttons, which the buttons' own styles draw. The icon a dialog
+// can have over its headline, its divider and the full-screen dialog are in the
+// set and are not drawn.
+$dialog: _component(
+  meta.module-variables(latest-dialog),
+  meta.module-variables(latest-dialog-meta)
+);
+
+// The menu: its container and the items of its list. A menu that opens a second
+// menu, and an item's trailing icon, are in the set and are not drawn.
+$menu: _component(
+  meta.module-variables(latest-menu),
+  meta.module-variables(latest-menu-meta)
 );
 
 // The scrim behind a modal surface: the `scrim` colour role and its opacity.

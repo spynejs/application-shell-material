@@ -316,11 +316,11 @@ export class FormContactUsTraits extends SpyneTrait {
    * where a slider's handle is; MaterialSliderTraits says so on the control.
    */
   static contactUs$FillSliders() {
-    this.props
-      .el$('input[type="range"]')
-      .els.forEach((slider) =>
-        MaterialSliderTraits.materialSlider$Fill(slider),
-      );
+    // Asked of the element itself: most forms have no slider, and the view's own
+    // selector says so in the console each time it finds none.
+    this.props.el
+      .querySelectorAll('input[type="range"]')
+      .forEach((slider) => MaterialSliderTraits.materialSlider$Fill(slider));
   }
 
   static contactUs$SendFormData(e, props = this.props) {

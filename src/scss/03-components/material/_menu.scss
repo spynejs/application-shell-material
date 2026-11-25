@@ -1,0 +1,243 @@
+// Material menu: a list of things to press, that opens from a button.
+//
+// Values are read at build time from Google's menu tokens (@material/web 2.5.0,
+// tokens/versions/latest) through tokens/_material.scss. What the tokens do not
+// carry is marked where it is used.
+//
+// It is the browser's own popover, so the browser opens it and closes it, draws it
+// over everything else, and gives the focus back to its button:
+//
+//   <button type="button" class="btn btn-outlined" popovertarget="sort-menu">
+//     Sort by
+//   </button>
+//   <div class="menu" id="sort-menu" popover>
+//     <button type="button" class="menu__item" popovertarget="sort-menu"
+//       popovertargetaction="hide"><span>Price</span></button>
+//     <hr class="menu__divider" />
+//     <a class="menu__item" href="/about"><span>About</span></a>
+//   </div>
+//
+//   .menu           the menu: an element with the attribute `popover` and an id
+//   .menu__item     a thing to press in it: a <button>, or an <a> that leads
+//                   somewhere. Its words are in a <span>. It may hold an icon
+//                   before them: <svg class="icon" …>. A button that names
+//                   the menu in `popovertarget`, with
+//                   `popovertargetaction="hide"`, closes the menu when it is
+//                   pressed.
+//   .menu__divider  a line between two groups of items: an <hr>
+//
+// An item with `aria-current="true"` is the one chosen, of a menu that chooses
+// among things, and is drawn selected. One that is `disabled` (or, for a link,
+// has `aria-disabled="true"`) is dimmed and takes no press.
+//
+// Where it stands is said by the view that holds it, in custom properties on the
+// menu (traits/material/material-menu-traits.js): which of its sides are held, how
+// far from the window's or the page's edges, and how tall it may be. Until that is
+// said (`is-placed`) an open menu is not shown, so that it is never seen anywhere
+// but beside its button. That lasts a moment and no longer: a menu in a view that
+// never says where it stands is then shown in the middle of the window, which is
+// the sign that the view does not hear the menu's toggle.
+//
+// The keyboard reaches a menu's items with Tab, as it reaches any buttons, and
+// Escape closes it. It is not given the menu role, which would promise arrow keys.
+//
+// Not drawn: a menu that opens a second menu, an item's trailing icon or its
+// supporting text, and the menu growing as it opens.
+
+@use 'sass:map';
+@use 'sass:math';
+@use '../../00-spynejs-design-system/tokens/material';
+@use 'type';
+
+$t: material.$menu;
+$icon: map.get($t, 'list-item-with-leading-icon-leading-icon-size');
+// The spaces are the ones Google's package gives its own menu on the web, which
+// the newer token set does not carry: a menu 112px wide at least, with 8px over
+// its first item and under its last, and 8px over and under a divider
+// (menu/internal/_menu.scss, tokens/_md-comp-menu.scss); 16px at each side of an
+// item, which are the list item's (tokens/versions/v0_192/_md-comp-list.scss), and
+// between an icon and the words (menu/internal/menuitem/_menu-item.scss).
+$min-width: 112px;
+$block-space: 8px;
+$side: 16px;
+// 280px wide at most. Chosen here: the package gives a least width and no
+// greatest.
+$max-width: 280px;
+// What is kept between a menu and the window's edge: the trait's own number.
+$from-edge: 8px;
+// How long an open menu waits to be placed before it is shown where it is. A view
+// places its menu within a frame or two of its opening. Chosen here.
+$wait-to-be-placed: 300ms;
+
+@function _layer($color, $opacity) {
+  @return color-mix(in srgb, $color math.percentage($opacity), transparent);
+}
+
+@mixin styles {
+  main#app {
+    .menu {
+      position: var(--menu-position, fixed);
+      // Each side is a distance or `auto`, as its view says. With nothing said,
+      // all four are 0 and the margins take up the rest: the middle of the window.
+      inset: var(--menu-top, 0) var(--menu-right, 0) var(--menu-bottom, 0)
+        var(--menu-left, 0);
+      box-sizing: border-box;
+      inline-size: max-content;
+      block-size: fit-content;
+      min-inline-size: $min-width;
+      max-inline-size: min(#{$max-width}, calc(100vw - #{2 * $from-edge}));
+      max-block-size: var(--menu-room, none);
+      margin: auto;
+      padding: $block-space 0;
+      border: 0;
+      border-radius: map.get($t, 'container-shape');
+      background: map.get($t, 'container-color');
+      box-shadow: material.elevation-shadow(map.get($t, 'container-elevation'));
+      color: map.get($t, 'list-item-label-text-color');
+      overflow: hidden auto;
+
+      // Only while it is open: closed, the browser does not show it. And not seen
+      // while it waits for the view that holds it to say where it stands.
+      &:popover-open {
+        display: flex;
+        flex-direction: column;
+        animation: material-menu-unplaced $wait-to-be-placed step-end;
+      }
+
+      &.is-placed:popover-open {
+        // 100ms is Material's short2. Chosen here: the menu's own movement, a
+        // growing from its button, is not drawn.
+        animation: material-menu-in var(--md-sys-motion-duration-short2) linear
+          backwards;
+      }
+    }
+
+    .menu__item {
+      @include type.style('label-large');
+
+      --_layer: transparent;
+
+      display: flex;
+      flex: none;
+      align-items: center;
+      gap: $side;
+      box-sizing: border-box;
+      inline-size: 100%;
+      min-block-size: map.get($t, 'list-item-container-height');
+      margin: 0;
+      padding: 0 $side;
+      border: 0;
+      border-radius: 0;
+      background-color: transparent;
+      // The state layer, drawn as the item's image, so it needs no element.
+      background-image: linear-gradient(var(--_layer), var(--_layer));
+      color: map.get($t, 'list-item-label-text-color');
+      text-align: start;
+      text-decoration: none;
+      white-space: nowrap;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+
+      // Words too long for the widest menu are cut short, with a mark that they
+      // are.
+      > span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .icon {
+        flex: none;
+        inline-size: $icon;
+        block-size: $icon;
+        fill: map.get($t, 'list-item-with-leading-icon-leading-icon-color');
+      }
+
+      @media (hover: hover) {
+        &:hover {
+          --_layer: #{_layer(
+              map.get($t, 'list-item-hover-state-layer-color'),
+              map.get($t, 'list-item-hover-state-layer-opacity')
+            )};
+        }
+      }
+
+      // The keyboard's focus: Material's ring, inside the item's edge.
+      &:focus-visible {
+        --_layer: #{_layer(
+            map.get($t, 'list-item-focus-state-layer-color'),
+            map.get($t, 'list-item-focus-state-layer-opacity')
+          )};
+
+        outline: map.get($t, 'focus-indicator-thickness') solid
+          map.get($t, 'focus-indicator-color');
+        outline-offset: map.get($t, 'focus-indicator-outline-offset');
+      }
+
+      &:active {
+        --_layer: #{_layer(
+            map.get($t, 'list-item-pressed-state-layer-color'),
+            map.get($t, 'list-item-pressed-state-layer-opacity')
+          )};
+      }
+
+      &[aria-current='true'] {
+        background-color: map.get($t, 'list-item-selected-container-color');
+        color: map.get($t, 'list-item-selected-label-text-color');
+
+        .icon {
+          fill: map.get(
+            $t,
+            'list-item-selected-with-leading-icon-leading-icon-color'
+          );
+        }
+      }
+
+      &:disabled,
+      &[aria-disabled='true'] {
+        --_layer: transparent;
+
+        color: _layer(
+          map.get($t, 'list-item-disabled-label-text-color'),
+          map.get($t, 'list-item-disabled-label-text-opacity')
+        );
+        cursor: default;
+        pointer-events: none;
+
+        .icon {
+          fill: _layer(
+            map.get(
+              $t,
+              'list-item-with-leading-icon-disabled-leading-icon-color'
+            ),
+            map.get(
+              $t,
+              'list-item-with-leading-icon-disabled-leading-icon-opacity'
+            )
+          );
+        }
+      }
+    }
+
+    .menu__divider {
+      flex: none;
+      inline-size: 100%;
+      block-size: map.get($t, 'divider-height');
+      margin: $block-space 0;
+      border: 0;
+      background: map.get($t, 'divider-color');
+    }
+  }
+
+  @keyframes material-menu-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  // Held at its start for all of its time: not seen, and then seen.
+  @keyframes material-menu-unplaced {
+    from {
+      visibility: hidden;
+    }
+  }
+}

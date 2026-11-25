@@ -53,10 +53,10 @@ export class MaterialSliderTraits extends SpyneTrait {
   }
 
   static materialSlider$FillAll() {
-    this.props
-      .el$('input[type="range"]')
-      .els.forEach((slider) =>
-        MaterialSliderTraits.materialSlider$Fill(slider),
-      );
+    // Asked of the element itself: a view with no slider in it is not an error,
+    // and the view's own selector reports one in the console when it finds none.
+    this.props.el
+      .querySelectorAll('input[type="range"]')
+      .forEach((slider) => MaterialSliderTraits.materialSlider$Fill(slider));
   }
 }
