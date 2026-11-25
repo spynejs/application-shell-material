@@ -1,0 +1,73 @@
+<!--
+  A set's radio buttons, one row for each entry of `options`. The button is
+  there once for each case (plain, checked, required, disabled), each inside a
+  section of its own, and the form's trait gives every entry exactly one
+  (contactUs$ShapeOptions). Not formatted by Prettier, which runs the sections
+  together.
+-->
+{{#options}}
+<div class="selection">
+  <label for="{{attrOptionId}}">{{label}}</label>
+  {{#option}}
+  <input
+    id="{{attrOptionId}}"
+    name="{{attrName}}"
+    type="radio"
+    value="{{attrValue}}"
+    aria-describedby="{{attrErrorId}}"
+  />
+  {{/option}}
+  {{#optionChecked}}
+  <input
+    id="{{attrOptionId}}"
+    name="{{attrName}}"
+    type="radio"
+    value="{{attrValue}}"
+    checked
+    aria-describedby="{{attrErrorId}}"
+  />
+  {{/optionChecked}}
+  {{#optionRequired}}
+  <input
+    id="{{attrOptionId}}"
+    name="{{attrName}}"
+    type="radio"
+    value="{{attrValue}}"
+    required
+    aria-describedby="{{attrErrorId}}"
+  />
+  {{/optionRequired}}
+  {{#optionRequiredChecked}}
+  <input
+    id="{{attrOptionId}}"
+    name="{{attrName}}"
+    type="radio"
+    value="{{attrValue}}"
+    checked
+    required
+    aria-describedby="{{attrErrorId}}"
+  />
+  {{/optionRequiredChecked}}
+  {{#optionDisabled}}
+  <input
+    id="{{attrOptionId}}"
+    name="{{attrName}}"
+    type="radio"
+    value="{{attrValue}}"
+    disabled
+    aria-describedby="{{attrErrorId}}"
+  />
+  {{/optionDisabled}}
+  {{#optionDisabledChecked}}
+  <input
+    id="{{attrOptionId}}"
+    name="{{attrName}}"
+    type="radio"
+    value="{{attrValue}}"
+    checked
+    disabled
+    aria-describedby="{{attrErrorId}}"
+  />
+  {{/optionDisabledChecked}}
+</div>
+{{/options}}

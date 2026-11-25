@@ -8,6 +8,7 @@
 // (elements/_buttons.scss, ui/menu-drawer.scss).
 @use 'app-bar';
 @use 'cards';
+@use 'checkbox';
 @use 'fab';
 @use 'focus';
 @use 'icon';
@@ -16,8 +17,11 @@
 @use 'navigation';
 @use 'navigation-bar';
 @use 'navigation-rail';
+@use 'radio';
 @use 'ripple';
+@use 'selection';
 @use 'snackbar';
+@use 'switch';
 @use 'tabs';
 @use 'text-fields';
 @use 'tooltip';
@@ -32,6 +36,11 @@
   @include app-bar.styles;
   @include navigation.styles;
   @include text-fields.styles;
+  // After the text fields: a choice in a form shows the field's own error line.
+  @include checkbox.styles;
+  @include radio.styles;
+  @include switch.styles;
+  @include selection.styles;
   @include focus.styles;
   @include motion.styles;
   @include snackbar.styles;

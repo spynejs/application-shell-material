@@ -1,0 +1,166 @@
+<header class="forms-demo__header">
+  <h2>{{headline}}</h2>
+  <p>{{intro}}</p>
+</header>
+
+<section class="forms-demo__kind" aria-labelledby="forms-demo-checkbox">
+  <h3 id="forms-demo-checkbox">{{checkboxName}}</h3>
+  <p class="forms-demo__note">{{checkboxNote}}</p>
+  <div class="forms-demo__set">
+    <label class="selection">
+      <input type="checkbox" name="demo-checkbox-off" />
+      <span>{{off}}</span>
+    </label>
+    <label class="selection">
+      <input type="checkbox" name="demo-checkbox-on" checked />
+      <span>{{on}}</span>
+    </label>
+    <label class="selection">
+      <input type="checkbox" name="demo-checkbox-error" aria-invalid="true" />
+      <span>{{inError}}</span>
+    </label>
+    <label class="selection">
+      <input type="checkbox" name="demo-checkbox-disabled" disabled />
+      <span>{{disabled}}</span>
+    </label>
+    <label class="selection">
+      <input
+        type="checkbox"
+        name="demo-checkbox-disabled-on"
+        checked
+        disabled
+      />
+      <span>{{disabledOn}}</span>
+    </label>
+  </div>
+</section>
+
+<section class="forms-demo__kind" aria-labelledby="forms-demo-radio">
+  <h3 id="forms-demo-radio">{{radioName}}</h3>
+  <p class="forms-demo__note">{{radioNote}}</p>
+  <div class="forms-demo__set">
+    <div
+      class="selection-group"
+      role="radiogroup"
+      aria-labelledby="forms-demo-radio-a"
+    >
+      <span class="selection-group__label" id="forms-demo-radio-a"
+        >{{radioSetLabel}}</span
+      >
+      <div class="selection-group__options">
+        <label class="selection">
+          <input type="radio" name="demo-radio" value="one" checked />
+          <span>{{radioOne}}</span>
+        </label>
+        <label class="selection">
+          <input type="radio" name="demo-radio" value="two" />
+          <span>{{radioTwo}}</span>
+        </label>
+        <label class="selection">
+          <input type="radio" name="demo-radio" value="three" />
+          <span>{{radioThree}}</span>
+        </label>
+      </div>
+    </div>
+    <div
+      class="selection-group"
+      role="radiogroup"
+      aria-labelledby="forms-demo-radio-b"
+    >
+      <span class="selection-group__label" id="forms-demo-radio-b"
+        >{{radioErrorLabel}}</span
+      >
+      <div class="selection-group__options">
+        <label class="selection">
+          <input
+            type="radio"
+            name="demo-radio-error"
+            value="one"
+            aria-invalid="true"
+          />
+          <span>{{radioOne}}</span>
+        </label>
+        <label class="selection">
+          <input
+            type="radio"
+            name="demo-radio-error"
+            value="two"
+            aria-invalid="true"
+          />
+          <span>{{radioTwo}}</span>
+        </label>
+      </div>
+      <p class="selection-group__error">{{radioErrorText}}</p>
+    </div>
+    <div
+      class="selection-group"
+      role="radiogroup"
+      aria-labelledby="forms-demo-radio-c"
+    >
+      <span class="selection-group__label" id="forms-demo-radio-c"
+        >{{radioDisabledLabel}}</span
+      >
+      <div class="selection-group__options">
+        <label class="selection">
+          <input
+            type="radio"
+            name="demo-radio-disabled"
+            value="one"
+            checked
+            disabled
+          />
+          <span>{{radioOne}}</span>
+        </label>
+        <label class="selection">
+          <input type="radio" name="demo-radio-disabled" value="two" disabled />
+          <span>{{radioTwo}}</span>
+        </label>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="forms-demo__kind" aria-labelledby="forms-demo-switch">
+  <h3 id="forms-demo-switch">{{switchName}}</h3>
+  <p class="forms-demo__note">{{switchNote}}</p>
+  <div class="forms-demo__set">
+    <label class="selection">
+      <input type="checkbox" role="switch" name="demo-switch-off" />
+      <span>{{off}}</span>
+    </label>
+    <label class="selection">
+      <input type="checkbox" role="switch" name="demo-switch-on" checked />
+      <span>{{on}}</span>
+    </label>
+    <label class="selection">
+      <input
+        type="checkbox"
+        role="switch"
+        name="demo-switch-disabled"
+        disabled
+      />
+      <span>{{disabled}}</span>
+    </label>
+    <label class="selection">
+      <input
+        type="checkbox"
+        role="switch"
+        name="demo-switch-disabled-on"
+        checked
+        disabled
+      />
+      <span>{{disabledOn}}</span>
+    </label>
+  </div>
+  <div class="forms-demo__list">
+    <label class="selection selection--trailing">
+      <input
+        type="checkbox"
+        role="switch"
+        name="demo-switch-trailing"
+        checked
+      />
+      <span>{{switchTrailing}}</span>
+    </label>
+  </div>
+</section>

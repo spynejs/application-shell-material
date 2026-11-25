@@ -1,0 +1,243 @@
+// Material checkbox, for a plain <input type="checkbox">.
+//
+// Values are read at build time from Google's checkbox tokens (@material/web 2.5.0,
+// tokens/versions/latest) through tokens/_material.scss. What the tokens do not carry
+// is marked where it is used.
+//
+// The control is the browser's own. It is checked, focused, disabled and invalid by
+// the browser, and these rules read those states; no script takes part.
+//
+//   the input      the state layer: a 40px circle, with 4px of margin round it so
+//                  that what a finger touches is 48px
+//   ::before       the container: an 18px box, outlined, or filled when checked
+//   ::after        the mark, cut out of an 18px box in the icon's color
+//
+// A switch is also a checkbox (role="switch") and is drawn by _switch.scss.
+//
+// Not drawn: the third state (neither on nor off).
+
+@use 'sass:map';
+@use 'sass:math';
+@use '../../00-spynejs-design-system/tokens/material';
+
+$c: material.$checkbox;
+$layer: map.get($c, 'state-layer-size');
+$box: map.get($c, 'container-size');
+// 48px: what a finger touches (stable checkbox/internal/_checkbox.scss, .touch-target).
+$target: 48px;
+$inset: math.div($layer - $box, 2);
+$control: "input[type='checkbox']:not([role='switch'])";
+
+// The mark (stable checkbox/internal/_checkbox.scss): two strokes 2px wide that meet
+// at 7px, 14px in the 18px box. The short one runs 4px back and up from there, the
+// long one 8px on and up. These are the six corners of the two together.
+$_x: 7px;
+$_y: 14px;
+$_short: 4px;
+$_long: 8px;
+$_half: math.div(2px, math.sqrt(2));
+$mark: polygon(
+  #{$_x - $_short} #{$_y - $_short},
+  #{$_x - $_short + $_half} #{$_y - $_short - $_half},
+  #{$_x} #{$_y - 2 * $_half},
+  #{$_x + $_long - $_half} #{$_y - $_long - $_half},
+  #{$_x + $_long} #{$_y - $_long},
+  #{$_x} #{$_y}
+);
+
+@function _layer($color, $opacity) {
+  @return color-mix(in srgb, $color math.percentage($opacity), transparent);
+}
+
+@mixin styles {
+  main#app {
+    #{$control} {
+      position: relative;
+      flex: none;
+      box-sizing: border-box;
+      inline-size: $layer;
+      block-size: $layer;
+      margin: math.div($target - $layer, 2);
+      padding: 0;
+      border: 0;
+      border-radius: map.get($c, 'state-layer-shape');
+      outline: 0;
+      background: transparent;
+      appearance: none;
+      cursor: pointer;
+      // 150ms: the same as the container's own change (stable _checkbox.scss).
+      transition: background-color 150ms linear;
+
+      &::before,
+      &::after {
+        position: absolute;
+        inset: $inset;
+        box-sizing: border-box;
+        content: '';
+      }
+
+      // The container.
+      &::before {
+        border: map.get($c, 'unselected-outline-width') solid
+          map.get($c, 'unselected-outline-color');
+        border-radius: map.get($c, 'container-shape');
+        transition:
+          background-color 150ms linear,
+          border-color 150ms linear;
+      }
+
+      // The mark: there, and at 60%, until the box is checked (stable
+      // _checkbox.scss: 350ms in on the emphasized-decelerate easing, 150ms out).
+      &::after {
+        background: map.get($c, 'selected-icon-color');
+        clip-path: $mark;
+        opacity: 0;
+        transform: scale(0.6);
+        transition:
+          transform 150ms var(--md-sys-motion-easing-emphasized-accelerate),
+          opacity 50ms linear;
+      }
+
+      @media (hover: hover) {
+        &:hover {
+          background: _layer(
+            map.get($c, 'unselected-hover-state-layer-color'),
+            map.get($c, 'unselected-hover-state-layer-opacity')
+          );
+
+          &::before {
+            border-color: map.get($c, 'unselected-hover-outline-color');
+          }
+        }
+      }
+
+      // The keyboard's focus: the state layer, and Material's ring 2px outside it.
+      &:focus-visible {
+        outline: map.get($c, 'focus-indicator-thickness') solid
+          map.get($c, 'focus-indicator-color');
+        outline-offset: map.get($c, 'focus-indicator-outline-offset');
+        background: _layer(
+          map.get($c, 'unselected-focus-state-layer-color'),
+          map.get($c, 'unselected-focus-state-layer-opacity')
+        );
+
+        &::before {
+          border-color: map.get($c, 'unselected-focus-outline-color');
+        }
+      }
+
+      &:active {
+        background: _layer(
+          map.get($c, 'unselected-pressed-state-layer-color'),
+          map.get($c, 'unselected-pressed-state-layer-opacity')
+        );
+
+        &::before {
+          border-color: map.get($c, 'unselected-pressed-outline-color');
+        }
+      }
+
+      // ---- Checked ----
+      &:checked {
+        &::before {
+          border-width: map.get($c, 'selected-outline-width');
+          background: map.get($c, 'selected-container-color');
+        }
+
+        &::after {
+          opacity: 1;
+          transform: scale(1);
+          transition:
+            transform 350ms var(--md-sys-motion-easing-emphasized-decelerate),
+            opacity 50ms linear;
+        }
+
+        @media (hover: hover) {
+          &:hover {
+            background: _layer(
+              map.get($c, 'selected-hover-state-layer-color'),
+              map.get($c, 'selected-hover-state-layer-opacity')
+            );
+          }
+        }
+
+        &:focus-visible {
+          background: _layer(
+            map.get($c, 'selected-focus-state-layer-color'),
+            map.get($c, 'selected-focus-state-layer-opacity')
+          );
+        }
+
+        &:active {
+          background: _layer(
+            map.get($c, 'selected-pressed-state-layer-color'),
+            map.get($c, 'selected-pressed-state-layer-opacity')
+          );
+        }
+      }
+
+      // ---- In error: once the visitor has used it, or tried to send the form ----
+      &:user-invalid,
+      &[aria-invalid='true'] {
+        &::before {
+          border-color: map.get($c, 'unselected-error-outline-color');
+        }
+
+        &:checked::before {
+          background: map.get($c, 'selected-error-container-color');
+        }
+
+        &:checked::after {
+          background: map.get($c, 'selected-error-icon-color');
+        }
+
+        @media (hover: hover) {
+          &:hover {
+            background: _layer(
+              map.get($c, 'error-hover-state-layer-color'),
+              map.get($c, 'error-hover-state-layer-opacity')
+            );
+          }
+        }
+
+        &:focus-visible {
+          background: _layer(
+            map.get($c, 'error-focus-state-layer-color'),
+            map.get($c, 'error-focus-state-layer-opacity')
+          );
+        }
+
+        &:active {
+          background: _layer(
+            map.get($c, 'error-pressed-state-layer-color'),
+            map.get($c, 'error-pressed-state-layer-opacity')
+          );
+        }
+      }
+
+      // ---- Disabled: no state layer, and the container dimmed ----
+      &:disabled {
+        background: transparent;
+        cursor: default;
+
+        &::before {
+          border-color: _layer(
+            map.get($c, 'unselected-disabled-outline-color'),
+            map.get($c, 'unselected-disabled-container-opacity')
+          );
+        }
+
+        &:checked::before {
+          background: _layer(
+            map.get($c, 'selected-disabled-container-color'),
+            map.get($c, 'selected-disabled-container-opacity')
+          );
+        }
+
+        &:checked::after {
+          background: map.get($c, 'selected-disabled-icon-color');
+        }
+      }
+    }
+  }
+}

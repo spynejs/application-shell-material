@@ -134,6 +134,17 @@
   latest-plain-tooltip;
 @use '@material/web/tokens/versions/latest/sass/md-comp-plain-tooltip-meta' as
   latest-plain-tooltip-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-checkbox' as
+  latest-checkbox;
+@use '@material/web/tokens/versions/latest/sass/md-comp-checkbox-meta' as
+  latest-checkbox-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-radio-button' as
+  latest-radio-button;
+@use '@material/web/tokens/versions/latest/sass/md-comp-radio-button-meta' as
+  latest-radio-button-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-switch' as latest-switch;
+@use '@material/web/tokens/versions/latest/sass/md-comp-switch-meta' as
+  latest-switch-meta;
 @use '@material/web/tokens/versions/latest/sass/md-comp-scrim-meta' as
   latest-scrim-meta;
 @use '@material/web/tokens/versions/latest/sass/md-ref-typeface' as
@@ -539,6 +550,28 @@ $extended-fab: map.merge(
 $plain-tooltip: _component(
   meta.module-variables(latest-plain-tooltip),
   meta.module-variables(latest-plain-tooltip-meta)
+);
+
+// The selection controls: the checkbox, the radio button and the switch. Each set
+// gives its control's sizes, its colors in every state (unselected and selected;
+// at rest, hovered, focused, pressed, disabled; and for the checkbox, in error) and
+// the size of the state layer round it. None gives a label's type or the space
+// between a control and its label: the stylesheet that draws a row says those.
+//
+// Not drawn from these sets: the checkbox's third state, and the switch's icons.
+$checkbox: _component(
+  meta.module-variables(latest-checkbox),
+  meta.module-variables(latest-checkbox-meta)
+);
+
+$radio-button: _component(
+  meta.module-variables(latest-radio-button),
+  meta.module-variables(latest-radio-button-meta)
+);
+
+$switch: _component(
+  meta.module-variables(latest-switch),
+  meta.module-variables(latest-switch-meta)
 );
 
 // The scrim behind a modal surface: the `scrim` colour role and its opacity.

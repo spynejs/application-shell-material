@@ -40,5 +40,7 @@ export class FormContactUsView extends ViewStream {
     ];
   }
 
-  onRendered() {}
+  onRendered() {
+    this.contactUs$AddRadioSets();
+  }
 }

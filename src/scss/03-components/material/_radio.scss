@@ -1,0 +1,171 @@
+// Material radio button, for a plain <input type="radio">.
+//
+// Values are read at build time from Google's radio button tokens (@material/web
+// 2.5.0, tokens/versions/latest) through tokens/_material.scss. What the tokens do
+// not carry is marked where it is used.
+//
+// The control is the browser's own: radio buttons of one name are one choice, the
+// arrow keys move between them, and the browser says which is checked. These rules
+// read those states; no script takes part.
+//
+//   the input      the state layer: a 40px circle, with 4px of margin round it so
+//                  that what a finger touches is 48px
+//   ::before       the icon: a 20px ring
+//   ::after        the dot in it, there when the button is checked
+
+@use 'sass:map';
+@use 'sass:math';
+@use '../../00-spynejs-design-system/tokens/material';
+
+$r: material.$radio-button;
+$layer: map.get($r, 'state-layer-size');
+$icon: map.get($r, 'icon-size');
+// 48px: what a finger touches (stable radio/internal/_radio.scss, .touch-target).
+$target: 48px;
+$inset: math.div($layer - $icon, 2);
+// The ring is 2px and the dot 10px across (stable radio/internal/radio.js: circles
+// of radius 8 and 5 in a box of 20, the outer one cut out to leave 2px).
+$ring: 2px;
+$dot: 10px;
+
+@function _layer($color, $opacity) {
+  @return color-mix(in srgb, $color math.percentage($opacity), transparent);
+}
+
+@mixin styles {
+  main#app {
+    input[type='radio'] {
+      position: relative;
+      flex: none;
+      box-sizing: border-box;
+      inline-size: $layer;
+      block-size: $layer;
+      margin: math.div($target - $layer, 2);
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      outline: 0;
+      background: transparent;
+      // The ring and the dot take this color.
+      color: map.get($r, 'unselected-icon-color');
+      appearance: none;
+      cursor: pointer;
+      transition: background-color 150ms linear;
+
+      &::before,
+      &::after {
+        position: absolute;
+        box-sizing: border-box;
+        border-radius: 50%;
+        content: '';
+      }
+
+      &::before {
+        inset: $inset;
+        border: $ring solid currentColor;
+      }
+
+      // The dot grows from nothing (stable radio/internal/_radio.scss: 300ms on the
+      // emphasized-decelerate easing).
+      &::after {
+        inset: math.div($layer - $dot, 2);
+        background: currentColor;
+        transform: scale(0);
+        transition: transform 300ms
+          var(--md-sys-motion-easing-emphasized-decelerate);
+      }
+
+      @media (hover: hover) {
+        &:hover {
+          background: _layer(
+            map.get($r, 'unselected-hover-state-layer-color'),
+            map.get($r, 'unselected-hover-state-layer-opacity')
+          );
+          color: map.get($r, 'unselected-hover-icon-color');
+        }
+      }
+
+      // The keyboard's focus: the state layer, and Material's ring 2px outside it.
+      // The radio button's tokens name no ring; its color is the checkbox's.
+      &:focus-visible {
+        outline: map.get(material.$focus-ring, 'thickness') solid
+          map.get(material.$checkbox, 'focus-indicator-color');
+        outline-offset: map.get(material.$focus-ring, 'outer-offset');
+        background: _layer(
+          map.get($r, 'unselected-focus-state-layer-color'),
+          map.get($r, 'unselected-focus-state-layer-opacity')
+        );
+        color: map.get($r, 'unselected-focus-icon-color');
+      }
+
+      &:active {
+        background: _layer(
+          map.get($r, 'unselected-pressed-state-layer-color'),
+          map.get($r, 'unselected-pressed-state-layer-opacity')
+        );
+        color: map.get($r, 'unselected-pressed-icon-color');
+      }
+
+      // ---- Checked ----
+      &:checked {
+        color: map.get($r, 'selected-icon-color');
+
+        &::after {
+          transform: scale(1);
+        }
+
+        @media (hover: hover) {
+          &:hover {
+            background: _layer(
+              map.get($r, 'selected-hover-state-layer-color'),
+              map.get($r, 'selected-hover-state-layer-opacity')
+            );
+            color: map.get($r, 'selected-hover-icon-color');
+          }
+        }
+
+        &:focus-visible {
+          background: _layer(
+            map.get($r, 'selected-focus-state-layer-color'),
+            map.get($r, 'selected-focus-state-layer-opacity')
+          );
+          color: map.get($r, 'selected-focus-icon-color');
+        }
+
+        &:active {
+          background: _layer(
+            map.get($r, 'selected-pressed-state-layer-color'),
+            map.get($r, 'selected-pressed-state-layer-opacity')
+          );
+          color: map.get($r, 'selected-pressed-icon-color');
+        }
+      }
+
+      // ---- In error ----
+      // Google's radio button tokens have no error state. A choice that must be made
+      // and has not been takes the checkbox's error color, so that the two read alike
+      // in one form. Inferred.
+      &:user-invalid,
+      &[aria-invalid='true'] {
+        color: map.get(material.$checkbox, 'unselected-error-outline-color');
+      }
+
+      // ---- Disabled: no state layer, and the icon dimmed ----
+      &:disabled {
+        background: transparent;
+        color: _layer(
+          map.get($r, 'disabled-unselected-icon-color'),
+          map.get($r, 'disabled-unselected-icon-opacity')
+        );
+        cursor: default;
+
+        &:checked {
+          color: _layer(
+            map.get($r, 'disabled-selected-icon-color'),
+            map.get($r, 'disabled-selected-icon-opacity')
+          );
+        }
+      }
+    }
+  }
+}

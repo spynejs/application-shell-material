@@ -1,0 +1,170 @@
+// A selection control with its words, and a set of them under one label.
+//
+// The controls themselves are _checkbox.scss, _radio.scss and _switch.scss. This is
+// what goes round one: Material's component tokens stop at the control, so the type
+// of a label and the space between a control and its label are from Material's type
+// scale and its 4px grid, chosen here, and marked.
+//
+//   .selection            one control and its label, in a row. The control comes
+//                         first whichever is written first, so the label may be a
+//                         <label for> before the control (a form's field) or may
+//                         wrap it (<label class="selection">).
+//   .selection--trailing  the label first and the control at the row's far end, as
+//                         a setting in a list has it.
+//   .selection-group      a set of controls under one label: the label, then
+//                         .selection-group__options, then the error line.
+//
+// In a form (.contact-us__choice) the error line is the field's own
+// (.contact-us__field-error), shown by the same state that shows a text field's.
+
+@use 'sass:map';
+@use 'sass:math';
+@use '../../00-spynejs-design-system/tokens/material';
+@use 'type';
+
+$t: material.$outlined-text-field;
+// A disabled control's label is dimmed as a disabled field's is.
+$disabled: color-mix(
+  in srgb,
+  map.get($t, 'disabled-label-text-color')
+    math.percentage(map.get($t, 'disabled-label-text-opacity')),
+  transparent
+);
+$controls: "input:is([type='checkbox'], [type='radio'])";
+
+@mixin _error-line {
+  margin: 0;
+  // In line with a row's words: past the control (48px) and the gap (8px).
+  padding-inline-start: 56px;
+  color: map.get($t, 'error-supporting-text-color');
+  font-family: map.get($t, 'supporting-text-font'), system-ui, sans-serif;
+  font-size: map.get($t, 'supporting-text-size');
+  line-height: map.get($t, 'supporting-text-line-height');
+  font-weight: map.get($t, 'supporting-text-weight');
+  letter-spacing: map.get($t, 'supporting-text-tracking');
+}
+
+@mixin styles {
+  main#app {
+    // ---- One control and its label ----
+    .selection {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      // 8px between the control's 48px and its words. Chosen here.
+      column-gap: 8px;
+      min-block-size: 48px;
+      margin: 0;
+      // Body-large in the on-surface color, as a list item's headline. Chosen here.
+      @include type.style('body-large');
+
+      color: var(--md-sys-color-on-surface);
+
+      // The control first, whichever is written first.
+      > #{$controls} {
+        order: -1;
+      }
+
+      // A <label for> beside its control: plain words that can be pressed.
+      > label,
+      > span {
+        @include type.style('body-large');
+
+        flex: 1;
+        min-inline-size: 0;
+        margin: 0;
+        padding-block: 12px;
+        color: inherit;
+        cursor: pointer;
+      }
+
+      &:has(#{$controls}:disabled) {
+        color: $disabled;
+
+        > label,
+        > span {
+          cursor: default;
+        }
+      }
+    }
+
+    label.selection {
+      cursor: pointer;
+
+      &:has(#{$controls}:disabled) {
+        cursor: default;
+      }
+    }
+
+    .selection--trailing > #{$controls} {
+      order: 1;
+    }
+
+    // ---- A set of controls under one label ----
+    .selection-group {
+      display: flex;
+      flex-direction: column;
+      min-inline-size: 0;
+      margin: 0;
+      padding: 0;
+      border: 0;
+
+      // The set's label: its first child, a <label> or a <legend>, or anything
+      // given the class. Body-large in the on-surface-variant color. Chosen here.
+      > label:first-child,
+      > legend,
+      .selection-group__label {
+        @include type.style('body-large');
+
+        margin: 0;
+        padding: 0 0 4px;
+        color: var(--md-sys-color-on-surface-variant);
+      }
+    }
+
+    .selection-group__options {
+      display: flex;
+      flex-direction: column;
+    }
+
+    // Side by side, where the options are few and short.
+    .selection-group--row .selection-group__options {
+      flex-flow: row wrap;
+      column-gap: 16px;
+
+      .selection > label,
+      .selection > span {
+        flex: none;
+      }
+    }
+
+    .selection-group__error {
+      @include _error-line;
+    }
+
+    // ---- In a form ----
+    // A field that is a choice: 24px under it, as under a text field.
+    .contact-us__choice {
+      margin-block: 0 24px;
+
+      .contact-us__field-error {
+        @include _error-line;
+
+        inline-size: 100%;
+      }
+
+      &:has(#{$controls}:user-invalid) {
+        margin-block-end: 20px;
+
+        .contact-us__field-error {
+          display: block;
+        }
+      }
+    }
+
+    // The set's own error is under the set and starts where its label does.
+    .contact-us__choice.selection-group .contact-us__field-error {
+      padding-inline-start: 0;
+    }
+  }
+}

@@ -10,14 +10,16 @@
 
   <form class="contact-us__form" data-event-prevent-default="true" novalidate>
     <!--
-      A field's control, once for each case: one line or several, and plain,
-      required or disabled. An attribute such as "required" is there or not
-      there, so each case is an element of its own inside a section, and the
-      form's trait gives every field exactly one section (contactUs$ShapeData).
+      A field's control, once for each case: a text field of one line or
+      several, a checkbox, a switch or a set of radio buttons; and plain,
+      required, disabled or checked. An attribute such as "required" is there
+      or not there, so each case is an element of its own inside a section, and
+      the form's trait gives every field exactly one section, and the class of
+      the element that holds it (contactUs$ShapeData).
     -->
     {{#formFields}}
-    <div class="contact-us__field">
-      <label for="{{attrId}}">{{label}}</label>
+    <div class="{{attrFieldClass}}">
+      <label id="{{attrId}}-label" for="{{attrId}}">{{label}}</label>
       {{#controlInput}}
       <input
         id="{{attrId}}"
@@ -76,6 +78,112 @@
         aria-describedby="{{attrId}}-error"
       ></textarea>
       {{/controlTextareaDisabled}}
+      {{#controlCheckbox}}
+      <input
+        id="{{attrId}}"
+        name="{{attrName}}"
+        type="checkbox"
+        value="{{attrValue}}"
+        aria-describedby="{{attrId}}-error"
+      />
+      {{/controlCheckbox}}
+      {{#controlCheckboxChecked}}
+      <input
+        id="{{attrId}}"
+        name="{{attrName}}"
+        type="checkbox"
+        value="{{attrValue}}"
+        checked
+        aria-describedby="{{attrId}}-error"
+      />
+      {{/controlCheckboxChecked}}
+      {{#controlCheckboxRequired}}
+      <input
+        id="{{attrId}}"
+        name="{{attrName}}"
+        type="checkbox"
+        value="{{attrValue}}"
+        required
+        aria-describedby="{{attrId}}-error"
+      />
+      {{/controlCheckboxRequired}}
+      {{#controlCheckboxDisabled}}
+      <input
+        id="{{attrId}}"
+        name="{{attrName}}"
+        type="checkbox"
+        value="{{attrValue}}"
+        disabled
+        aria-describedby="{{attrId}}-error"
+      />
+      {{/controlCheckboxDisabled}}
+      {{#controlCheckboxDisabledChecked}}
+      <input
+        id="{{attrId}}"
+        name="{{attrName}}"
+        type="checkbox"
+        value="{{attrValue}}"
+        checked
+        disabled
+        aria-describedby="{{attrId}}-error"
+      />
+      {{/controlCheckboxDisabledChecked}}
+      {{#controlSwitch}}
+      <input
+        id="{{attrId}}"
+        name="{{attrName}}"
+        type="checkbox"
+        role="switch"
+        value="{{attrValue}}"
+        aria-describedby="{{attrId}}-error"
+      />
+      {{/controlSwitch}}
+      {{#controlSwitchChecked}}
+      <input
+        id="{{attrId}}"
+        name="{{attrName}}"
+        type="checkbox"
+        role="switch"
+        value="{{attrValue}}"
+        checked
+        aria-describedby="{{attrId}}-error"
+      />
+      {{/controlSwitchChecked}}
+      {{#controlSwitchDisabled}}
+      <input
+        id="{{attrId}}"
+        name="{{attrName}}"
+        type="checkbox"
+        role="switch"
+        value="{{attrValue}}"
+        disabled
+        aria-describedby="{{attrId}}-error"
+      />
+      {{/controlSwitchDisabled}}
+      {{#controlSwitchDisabledChecked}}
+      <input
+        id="{{attrId}}"
+        name="{{attrName}}"
+        type="checkbox"
+        role="switch"
+        value="{{attrValue}}"
+        checked
+        disabled
+        aria-describedby="{{attrId}}-error"
+      />
+      {{/controlSwitchDisabledChecked}}
+      {{#controlRadioGroup}}
+      <!--
+        The set's region. Its radio buttons are put in once the form has
+        rendered (contactUs$AddRadioSets), from contact-us-options.tmpl.html: a
+        template takes a loop inside a loop and no deeper.
+      -->
+      <div
+        id="{{attrId}}"
+        role="radiogroup"
+        aria-labelledby="{{attrId}}-label"
+      ></div>
+      {{/controlRadioGroup}}
       <p class="contact-us__field-error" id="{{attrId}}-error"></p>
     </div>
     {{/formFields}}

@@ -20,6 +20,7 @@ This app is on the Material template: Google's Material Design 3 for the SpyneJS
 | Button | a `button` key beside a call to action's `ctaText` (below) | `src/app/traits/utils/material-button-options.js` |
 | Card | a page's sub-pages are drawn as cards; a card has no keys of its own | `src/app/components/page-items/cards-container-view.js` |
 | Text field | an entry of the contact form's `formFields` (below) | `src/app/traits/form/form-contact-us-traits.js` |
+| Checkbox, radio button, switch | in the contact form, an entry of `formFields` with a `kind` (below); anywhere else, the browser's own control written in a template (below, "In a view"). The control's type is what draws it: no class asks for Material's | `src/scss/03-components/material/_checkbox.scss`, `_radio.scss`, `_switch.scss`, and `_selection.scss` for a control's row and a set |
 | List, divider | a page item drawn from `timetable.tmpl.html` or `price-list.tmpl.html`: each of its `rows` or `items` is a list item; no keys of its own | `src/scss/03-components/material/_list.scss` |
 | Tabs | lists of one kind (price lists, or timetables) that are next to each other on a page and give the same `tabGroup` (below): a row of tabs over them, and one list shown at a time | `src/app/components/page-items/tabs-view.js`, `src/app/traits/utils/tab-sets.js`, `src/scss/03-components/material/_tabs.scss` |
 | Icon | an `icon` key beside an item's words, in a page item drawn from `icon-grid.tmpl.html` (below) | `src/app/traits/utils/icon-shapes.js`, `src/scss/03-components/material/_icon.scss` |
@@ -51,13 +52,27 @@ A call to action takes a `button` key for its button's look. Every key of it can
 
 It is read in a page's `hero`, in a call-to-action banner, in each row of a split feature, and in the contact form's data, beside `formFields`. Write only what is not a default.
 
-An entry of the contact form's `formFields` takes three keys of Material's, each `true` or left out:
+An entry of the contact form's `formFields` is a text field, or with a `kind` it is a choice. It takes five keys of Material's, and every one can be left out:
 
-| Key of an entry | `true` means |
-|---|---|
-| `attrRequired` | the field must be filled in |
-| `attrDisabled` | the field is shown, but not to be used |
-| `multiline` | several lines, a `<textarea>` |
+| Key of an entry | Value | Left out |
+|---|---|---|
+| `kind` | `checkbox`, `switch` or `radio` | a text field |
+| `attrRequired` | `true`: the field must be filled in, the checkbox ticked, one of the set chosen | it need not be. A switch is never required: off is an answer |
+| `attrDisabled` | `true`: shown, but not to be used | it can be used |
+| `multiline` | `true`: a text field of several lines, a `<textarea>` | one line |
+| `attrChecked` | `true`: a checkbox or a switch that starts on | it starts off. A checkbox that must be ticked always starts off |
+
+```json
+{ "kind": "checkbox", "attrId": "contact-copy", "label": "Send me a copy", "attrName": "copy" }
+```
+
+A `radio` is a set of radio buttons under the entry's `label`, one for each entry of its `options`. An option has a `label` and an `attrValue`, and the one that starts chosen has `attrChecked`:
+
+```json
+{ "kind": "radio", "attrId": "contact-reason", "label": "What is it about?", "attrName": "reason", "attrRequired": true, "options": [{ "label": "A booking", "attrValue": "booking" }, { "label": "A question", "attrValue": "question" }] }
+```
+
+Every entry has an `attrId` that no other on the page has, a `label`, and an `attrName`. A checkbox or a switch that is on sends `on`, or its `attrValue` where it has one; one that is off sends nothing. A field that is required and left empty shows the browser's own words under it when the form is sent, in the visitor's language. **The form's sending names what it sends**: `contactUs$SendFormData` in `src/app/traits/form/form-contact-us-traits.js` takes the name, the email and the message. A field you add is held by the form and is not sent until you add its name there. `src/app/components/page-items/templates/forms-demo.tmpl.html` shows every control in every state.
 
 An item of an icon grid names its icon with an `icon` key. The value is one of the names in `src/app/traits/utils/icon-shapes.js`: they are Google's Material Symbols names, such as `schedule`, `location_on` and `verified`. A name that is not there draws nothing.
 
@@ -137,11 +152,36 @@ broadcastEvents() {
 
 The tooltip's words are the control's `aria-label`, so the name is written once. The four events are how the tooltip's region hears the pointer and the focus come and go: a control in a view that does not broadcast them gets no tooltip. Do not add a `title` as well, and do not give a tooltip to a control that already shows its words. It is Material's plain tooltip: it shows after the pointer has rested half a second, or at once for the keyboard's focus, stays 1.5 seconds after the pointer leaves, and stands under the control, which is where Material puts it in an app bar; above a control is not built. It is placed when the pointer or the focus arrives and does not follow a control that then moves, as one in a page does when the page is scrolled: the two that have one are in the app bar, which stays where it is. A finger's touch shows none.
 
+A checkbox, a radio button or a switch outside the contact form is the browser's own control, written in the template of the view that holds it. Nothing asks for Material's drawing: an `<input type="checkbox">`, an `<input type="radio">` and an `<input type="checkbox" role="switch">` are drawn as Material's wherever they are. A control and its words are one row, and a set is under one label:
+
+```html
+<label class="selection">
+  <input type="checkbox" name="updates" />
+  <span>Send me updates</span>
+</label>
+
+<div class="selection-group" role="radiogroup" aria-labelledby="size-label">
+  <span class="selection-group__label" id="size-label">Size</span>
+  <div class="selection-group__options">
+    <label class="selection">
+      <input type="radio" name="size" value="small" checked />
+      <span>Small</span>
+    </label>
+    <label class="selection">
+      <input type="radio" name="size" value="large" />
+      <span>Large</span>
+    </label>
+  </div>
+</div>
+```
+
+The states are the control's own attributes and nothing else: `checked`, `disabled`, `required`. Radio buttons of one `name` are one choice, and the arrow keys move between them. A row's label wraps its control, or is a `<label for>` beside it; either way the control is drawn first. `selection--trailing` beside `selection` puts the control at the row's far end, as a setting in a list has it; `selection-group--row` beside `selection-group` puts a set's options side by side. A control that is wrong takes the error color from the browser's own `:user-invalid`, or from `aria-invalid="true"` where your code decides; `selection-group__error` is the line of words under a set. To hear a control change, declare its `input` in `broadcastEvents`, as `['input[type="checkbox"]', 'input']`, and read `e.srcElement.el.checked` in the listener for `CHANNEL_UI_INPUT_EVENT`. Not drawn: a checkbox's third state, and a switch's icons.
+
 A control with a tooltip sends more than clicks on `CHANNEL_UI`. Anything that listens for that control there must name the click: a listener on `CHANNEL_UI_CLICK_EVENT`, or a `ChannelPayloadFilter` with `action: 'CHANNEL_UI_CLICK_EVENT'`. One that takes every event from the control would act when the pointer only comes to rest on it.
 
 ### Adding a Material component the template does not have
 
-The template builds a component when a page uses it. It has no chips, dialog, switch, checkbox, radio button, slider, menu, search, badge, sheet, progress indicator, carousel or data table. Google's values for every one of them are already installed: `@material/web` is a dependency for its design tokens, and `node_modules/@material/web/tokens/versions/latest/sass/` holds a file for each, such as `_md-comp-filter-chip.scss` and `_md-comp-switch.scss`. Do not import Google's web components from that package: a component here is plain markup and SpyneJS code, drawn from Google's values.
+The template has no chips, dialog, slider, menu, search, badge, sheet, progress indicator, carousel or data table. Google's values for every one of them are already installed: `@material/web` is a dependency for its design tokens, and `node_modules/@material/web/tokens/versions/latest/sass/` holds a file for each, such as `_md-comp-filter-chip.scss` and `_md-comp-slider.scss`. Do not import Google's web components from that package: a component here is plain markup and SpyneJS code, drawn from Google's values.
 
 A component is four parts, and each has one place:
 
@@ -152,10 +192,12 @@ A component is four parts, and each has one place:
 
 The navigation bar, part by part: `$navigation-bar` in the tokens file; `src/scss/03-components/material/_navigation-bar.scss`; `src/app/components/nav/nav-destinations-view.js` with `src/app/traits/nav/nav-destinations-view-traits.js` and the data shaped in `src/app/traits/utils/nav-icons.js`; its row, the keys `navIcon` and `navLabel`, and `src/tests/unit-tests/traits/nav-icons.test.js`.
 
-Four things that are not obvious:
+Six things that are not obvious:
 
 - **A template is cleaned before it is drawn.** An SVG `<use>` does not survive, so an icon is its shape in place: `<svg class="icon" viewBox="0 -960 960 960" aria-hidden="true"><path d="{{attrIconPath}}" /></svg>`. A new icon is a new entry in `src/app/traits/utils/icon-shapes.js`; its head says how to add one.
 - **A `<button>` written in a template string inside `app.model.json` does not survive either.** Put markup that has one in a template file.
+- **A template takes a loop inside a loop, and no deeper**, and a section counts as a level. A list inside a section inside a loop draws every case of it, empty. Give the inner list a template of its own and put it in once the view has rendered, as the contact form does a set of radio buttons (`contactUs$AddRadioSets`, `contact-us-options.tmpl.html`).
+- **Shape a model's data in place.** A trait that gets data ready for a template takes its own copy with `safeClone` and adds keys to the entries it was given, as `contactUs$ShapeData` does. An entry made anew, `{ label: option.label }`, holds the same words and draws the same, and the CMS can no longer be clicked to edit them: it knows a word by what it has put on the entry.
 - **Which layout a window gets is a media query**, and a count or a state the styles need is an attribute on an element. The bar is a bar, a rail, or not there, with no script listening to the window.
 - **Check it in light and in dark, at 375px, 700px and 1200px**, then run `npm run lint`, `npm test` and `npm run build`.
 

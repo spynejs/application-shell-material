@@ -1,0 +1,263 @@
+// Material switch, for a plain <input type="checkbox" role="switch">.
+//
+// Values are read at build time from Google's switch tokens (@material/web 2.5.0,
+// tokens/versions/latest) through tokens/_material.scss. What the tokens do not carry
+// is marked where it is used.
+//
+// The control is the browser's own checkbox, told by its role that it is a switch:
+// assistive technology says "on" and "off", Space turns it, and the browser says
+// which it is. These rules read those states; no script takes part.
+//
+//   the input      the track: 52px by 32px, with 8px of margin above and below so
+//                  that what a finger touches is 48px tall
+//   ::before       the handle: 16px when off, 24px when on, 28px while pressed, with
+//                  the state layer drawn round it as a 40px circle
+//
+// Not drawn: the icons a handle can hold. The tokens give the handle an elevation;
+// Google's own switch draws no shadow from it, and neither does this.
+
+@use 'sass:map';
+@use 'sass:math';
+@use '../../00-spynejs-design-system/tokens/material';
+
+$s: material.$switch;
+$track-width: map.get($s, 'track-width');
+$track-height: map.get($s, 'track-height');
+$outline: map.get($s, 'track-outline-width');
+$layer: map.get($s, 'state-layer-size');
+$off: map.get($s, 'unselected-handle-width');
+$on: map.get($s, 'selected-handle-width');
+$pressed: map.get($s, 'pressed-handle-width');
+// 48px: what a finger touches (stable switch/internal/_switch.scss).
+$target: 48px;
+// The handle's center is half the track's height from the end it rests at (stable
+// switch/internal/_handle.scss: a square of the track's height that moves by the
+// track's width less its height). Measured from inside the track's outline.
+$center-off: math.div($track-height, 2) - $outline;
+$center-on: $track-width - math.div($track-height, 2) - $outline;
+// 300ms on an easing that overshoots, for the move; 250ms on the standard easing,
+// for the size; 67ms for the colors (stable _handle.scss, _track.scss).
+$move: 300ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+$grow: 250ms var(--md-sys-motion-easing-standard);
+$tint: 67ms linear;
+$control: "input[type='checkbox'][role='switch']";
+
+@function _layer($color, $opacity) {
+  @return color-mix(in srgb, $color math.percentage($opacity), transparent);
+}
+
+// The handle at one size, its center where the track's state puts it, and the state
+// layer's 40px circle round it in $color (transparent: none).
+@mixin _handle($size, $center, $color: transparent) {
+  inset-inline-start: $center - math.div($size, 2);
+  inline-size: $size;
+  block-size: $size;
+  box-shadow: 0 0 0 math.div($layer - $size, 2) $color;
+}
+
+@mixin styles {
+  main#app {
+    #{$control} {
+      position: relative;
+      flex: none;
+      box-sizing: border-box;
+      inline-size: $track-width;
+      block-size: $track-height;
+      margin: math.div($target - $track-height, 2) 0;
+      padding: 0;
+      border: $outline solid map.get($s, 'unselected-track-outline-color');
+      border-radius: map.get($s, 'track-shape');
+      outline: 0;
+      background: map.get($s, 'unselected-track-color');
+      appearance: none;
+      cursor: pointer;
+      transition:
+        background-color $tint,
+        border-color $tint;
+
+      &::before {
+        @include _handle($off, $center-off);
+
+        position: absolute;
+        top: 50%;
+        border-radius: map.get($s, 'handle-shape');
+        background: map.get($s, 'unselected-handle-color');
+        content: '';
+        translate: 0 -50%;
+        transition:
+          inset-inline-start $move,
+          inline-size $grow,
+          block-size $grow,
+          background-color $tint,
+          box-shadow $tint;
+      }
+
+      @media (hover: hover) {
+        &:hover {
+          border-color: map.get($s, 'unselected-hover-track-outline-color');
+          background: map.get($s, 'unselected-hover-track-color');
+
+          &::before {
+            @include _handle(
+              $off,
+              $center-off,
+              _layer(
+                map.get($s, 'unselected-hover-state-layer-color'),
+                map.get($s, 'unselected-hover-state-layer-opacity')
+              )
+            );
+
+            background: map.get($s, 'unselected-hover-handle-color');
+          }
+        }
+      }
+
+      // The keyboard's focus: Material's ring 2px outside the track.
+      &:focus-visible {
+        outline: map.get($s, 'focus-indicator-thickness') solid
+          map.get($s, 'focus-indicator-color');
+        outline-offset: map.get($s, 'focus-indicator-offset');
+        border-color: map.get($s, 'unselected-focus-track-outline-color');
+        background: map.get($s, 'unselected-focus-track-color');
+
+        &::before {
+          @include _handle(
+            $off,
+            $center-off,
+            _layer(
+              map.get($s, 'unselected-focus-state-layer-color'),
+              map.get($s, 'unselected-focus-state-layer-opacity')
+            )
+          );
+
+          background: map.get($s, 'unselected-focus-handle-color');
+        }
+      }
+
+      &:active {
+        border-color: map.get($s, 'unselected-pressed-track-outline-color');
+        background: map.get($s, 'unselected-pressed-track-color');
+
+        &::before {
+          @include _handle(
+            $pressed,
+            $center-off,
+            _layer(
+              map.get($s, 'unselected-pressed-state-layer-color'),
+              map.get($s, 'unselected-pressed-state-layer-opacity')
+            )
+          );
+
+          background: map.get($s, 'unselected-pressed-handle-color');
+        }
+      }
+
+      // ---- On ----
+      &:checked {
+        border-color: map.get($s, 'selected-track-color');
+        background: map.get($s, 'selected-track-color');
+
+        &::before {
+          @include _handle($on, $center-on);
+
+          background: map.get($s, 'selected-handle-color');
+        }
+
+        @media (hover: hover) {
+          &:hover {
+            border-color: map.get($s, 'selected-hover-track-color');
+            background: map.get($s, 'selected-hover-track-color');
+
+            &::before {
+              @include _handle(
+                $on,
+                $center-on,
+                _layer(
+                  map.get($s, 'selected-hover-state-layer-color'),
+                  map.get($s, 'selected-hover-state-layer-opacity')
+                )
+              );
+
+              background: map.get($s, 'selected-hover-handle-color');
+            }
+          }
+        }
+
+        &:focus-visible {
+          border-color: map.get($s, 'selected-focus-track-color');
+          background: map.get($s, 'selected-focus-track-color');
+
+          &::before {
+            @include _handle(
+              $on,
+              $center-on,
+              _layer(
+                map.get($s, 'selected-focus-state-layer-color'),
+                map.get($s, 'selected-focus-state-layer-opacity')
+              )
+            );
+
+            background: map.get($s, 'selected-focus-handle-color');
+          }
+        }
+
+        &:active {
+          border-color: map.get($s, 'selected-pressed-track-color');
+          background: map.get($s, 'selected-pressed-track-color');
+
+          &::before {
+            @include _handle(
+              $pressed,
+              $center-on,
+              _layer(
+                map.get($s, 'selected-pressed-state-layer-color'),
+                map.get($s, 'selected-pressed-state-layer-opacity')
+              )
+            );
+
+            background: map.get($s, 'selected-pressed-handle-color');
+          }
+        }
+      }
+
+      // ---- Disabled: no state layer, nothing moves under a press ----
+      &:disabled {
+        border-color: _layer(
+          map.get($s, 'disabled-unselected-track-outline-color'),
+          map.get($s, 'disabled-track-opacity')
+        );
+        background: _layer(
+          map.get($s, 'disabled-unselected-track-color'),
+          map.get($s, 'disabled-track-opacity')
+        );
+        cursor: default;
+
+        &::before {
+          @include _handle($off, $center-off);
+
+          background: _layer(
+            map.get($s, 'disabled-unselected-handle-color'),
+            map.get($s, 'disabled-unselected-handle-opacity')
+          );
+        }
+
+        &:checked {
+          border-color: transparent;
+          background: _layer(
+            map.get($s, 'disabled-selected-track-color'),
+            map.get($s, 'disabled-track-opacity')
+          );
+
+          &::before {
+            @include _handle($on, $center-on);
+
+            background: _layer(
+              map.get($s, 'disabled-selected-handle-color'),
+              map.get($s, 'disabled-selected-handle-opacity')
+            );
+          }
+        }
+      }
+    }
+  }
+}

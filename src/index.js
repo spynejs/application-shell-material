@@ -80,6 +80,7 @@ const config = {
 
           about: 'about',
           buttons: 'buttons',
+          forms: 'forms',
         },
       },
     },
