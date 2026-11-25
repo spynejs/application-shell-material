@@ -22,6 +22,11 @@ This app is on the Material template: Google's Material Design 3 for the SpyneJS
 | Text field | an entry of the contact form's `formFields` (below); anywhere else, any `<input>` or `<textarea>` in a template. It is Material's outlined field, or the filled one where what holds it says so; a date or a time is a text field of that type; it can have supporting text and an icon at its start or its end | `src/app/traits/form/form-contact-us-traits.js`, `src/scss/03-components/material/_text-fields.scss`, `_filled-text-field.scss`, `_field-extras.scss` |
 | Select | in the contact form, an entry of `formFields` with `kind: "select"` (below); anywhere else, the browser's own `<select>` in a template. The field is Material's; the list that opens is the device's own | `src/scss/03-components/material/_select.scss` |
 | Slider | in the contact form, an entry of `formFields` with `kind: "slider"` (below); anywhere else, the browser's own `<input type="range">` in a view that says where its handle is (below, "In a view") | `src/scss/03-components/material/_slider.scss`, `src/app/traits/material/material-slider-traits.js`, `src/app/components/page-items/sliders-view.js` |
+| Icon button | the class `icon-button` on a `<button>` or an `<a>` that holds one icon and no words, with `icon-button--filled`, `icon-button--tonal` or `icon-button--outlined` for the three other styles (below, "In a view") | `src/scss/03-components/material/_icon-button.scss` |
+| Chips | `chip` on a `<button>` or an `<a>` for an assist chip, which does one thing; `chip chip--filter` on a `<label>` that holds a checkbox for a filter chip, which is on or off; `chips` on what holds a set (below, "In a view") | `src/scss/03-components/material/_chips.scss` |
+| Progress | the browser's own `<progress>` for a line, with a `value` or with none; the class `progress-circular` on an element with `role="progressbar"` for a ring (below, "In a view"). Nothing in the app shows one by itself | `src/scss/03-components/material/_progress.scss` |
+| Accordion | a page item drawn from `faq-accordion.tmpl.html` (below): a FAQ whose rows open; anywhere else, the browser's own `<details>` in an element of the class `accordion` | `src/app/components/page-items/templates/faq-accordion.tmpl.html`, `src/scss/03-components/material/_accordion.scss` |
+| Table | a page item drawn from `table.tmpl.html` (below); anywhere else, a `<table class="table">` in an element of the class `table-scroll` | `src/app/components/page-items/templates/table.tmpl.html`, `src/scss/03-components/material/_table.scss` |
 | Checkbox, radio button, switch | in the contact form, an entry of `formFields` with a `kind` (below); anywhere else, the browser's own control written in a template (below, "In a view"). The control's type is what draws it: no class asks for Material's | `src/scss/03-components/material/_checkbox.scss`, `_radio.scss`, `_switch.scss`, and `_selection.scss` for a control's row and a set |
 | List, divider | a page item drawn from `timetable.tmpl.html` or `price-list.tmpl.html`: each of its `rows` or `items` is a list item; no keys of its own | `src/scss/03-components/material/_list.scss` |
 | Tabs | lists of one kind (price lists, or timetables) that are next to each other on a page and give the same `tabGroup` (below): a row of tabs over them, and one list shown at a time | `src/app/components/page-items/tabs-view.js`, `src/app/traits/utils/tab-sets.js`, `src/scss/03-components/material/_tabs.scss` |
@@ -130,6 +135,28 @@ A price list or a timetable takes two keys for tabs, in its `props.data` beside 
 ```
 
 A set is two or more lists of one kind, next to each other in a page's `pageItems`, with the same word: a price list and a timetable do not make one, and neither do two lists with another item between them. The first list is shown when the page opens. Under its tab a list does not repeat its title. To take a list out of its set, remove its `tabGroup`; to have two lists one under another, give them none. Material advises no more than four tabs; with more, or with long labels, the row scrolls sideways and no label is cut. `TAB_TEMPLATES` in `src/app/traits/utils/tab-sets.js` names the templates that may be a set.
+
+A FAQ whose rows open is the FAQ's own data drawn with another template. A page item that names `faq-accordion.tmpl.html` shows each question as a row and its answer when the row is opened; one that names `faq.tmpl.html` shows every answer, as before. Nothing else differs:
+
+```json
+{ "template": "faq-accordion.tmpl.html", "data": { "title": "Before you book", "items": [{ "q": "Can I bring a dog?", "a": "Yes, on a lead." }] } }
+```
+
+A table is a page item drawn from `table.tmpl.html`:
+
+| Key of a table's data | Value | Left out |
+|---|---|---|
+| `title` | the heading over the table | no heading's words |
+| `attrLabel` | the table's name for assistive technology: what it is a table of | write one: what holds the table can be reached by the keyboard, and needs a name |
+| `head` | a list of words, one for each column | no header |
+| `rows` | a list of rows, each with its `cells`: a list of words, one for each column | no rows |
+| `note` | a line of small print under the table | none |
+
+```json
+{ "template": "table.tmpl.html", "data": { "title": "Sizes and prices", "attrLabel": "Sizes and prices", "head": ["Size", "Serves", "Price"], "rows": [{ "cells": ["Small", "2 to 4", "$18"] }, { "cells": ["Large", "10 to 12", "$46"] }] } }
+```
+
+Every row has as many cells as there are columns. In a window too narrow for it a table is scrolled sideways inside what holds it, and the page is not. Use a table for what is read across and down, such as sizes against prices; a list of things with one detail each is a price list or a timetable.
 
 An app takes one key, at the root of its model, for a floating action button. It can be left out, and so can every key of it but its words:
 
@@ -244,11 +271,48 @@ onRendered() {
 
 A page item that holds sliders and needs nothing else asks for this with `"viewClass": "SlidersView"`. A view that already listens for `CHANNEL_UI_INPUT_EVENT` takes one listener for it, so it calls `MaterialSliderTraits.materialSlider$Fill(e.srcElement.el)` from that one, as the contact form does. Without any of it a slider still works, and its track stays filled to the middle. A slider's label is a `<label for>` before it, the two in an element of the class `slider-field`. Not drawn: the label that shows a slider's value while it is dragged, its tick marks, a slider with two handles, Material's own menu for a select, and its own calendar and clock.
 
+An icon button, a chip, a line or a ring of progress, an accordion and a table are each plain markup with a class, and none needs a script:
+
+```html
+<button type="button" class="icon-button icon-button--tonal" aria-label="Share" data-tooltip="true">
+  <svg class="icon" viewBox="0 -960 960 960" aria-hidden="true"><path d="{{attrIconPath}}" /></svg>
+</button>
+
+<div class="chips">
+  <button type="button" class="chip">Add to calendar</button>
+  <label class="chip chip--filter">
+    <input type="checkbox" name="open-now" />
+    <span>Open now</span>
+  </label>
+</div>
+
+<progress value="40" max="100" aria-label="Uploading"></progress>
+<progress aria-label="Sending"></progress>
+<span class="progress-circular" role="progressbar" aria-label="Uploading" aria-valuenow="40" style="--progress: 40"></span>
+<span class="progress-circular" role="progressbar" aria-label="Sending"></span>
+
+<div class="accordion">
+  <details>
+    <summary>Can I bring a dog?</summary>
+    <p class="accordion__panel">Yes, on a lead.</p>
+  </details>
+</div>
+
+<div class="table-scroll" tabindex="0" role="region" aria-label="Sizes and prices">
+  <table class="table">
+    <thead><tr><th scope="col">Size</th><th scope="col">Price</th></tr></thead>
+    <tbody><tr><td>Small</td><td class="table__number">$18</td></tr></tbody>
+  </table>
+</div>
+```
+
+An icon button has no words, so it has an `aria-label`, and asks for a tooltip as any control with no words does (above). A chip may hold an icon before its words, as `<svg class="icon" …>`. A filter chip is the browser's own checkbox: it is on when the checkbox is `checked`, a form has it as a checkbox, and a view hears it as one, by its `input`. A `<progress>` with a `value` shows how much is done, and one with none shows only that something is at work; a ring says how much twice, in `aria-valuenow` for assistive technology and in `--progress` for the drawing, the same number from 0 to 100, and turns when it has neither. Progress is the drawing: a view that waits puts one in its template and takes it out, and nothing in the app shows one by itself. A row of an accordion is the browser's own `<details>`, which opens to a press, to Enter and to Space; more than one can be open. A table's cells keep their words whole, and a table too wide is scrolled inside `table-scroll`, which can be reached by the keyboard and so has a `role` and a name; `table__number` on a cell sets a number to the far side. In a template, write a table's loops on one line inside the row (`<tr>{{#cells}}<td>{{.}}</td>{{/cells}}</tr>`): loose text between a table's tags is moved out of the table when the page is read. Not drawn: an icon button that stays pressed, the input chip, the wavy forms of progress, a row moving as it opens, and a table's sorting.
+
 A control with a tooltip sends more than clicks on `CHANNEL_UI`. Anything that listens for that control there must name the click: a listener on `CHANNEL_UI_CLICK_EVENT`, or a `ChannelPayloadFilter` with `action: 'CHANNEL_UI_CLICK_EVENT'`. One that takes every event from the control would act when the pointer only comes to rest on it.
 
 ### Adding a Material component the template does not have
 
-The template has no chips, dialog, menu, search, badge, sheet, progress indicator, carousel or data table. Google's values for every one of them are already installed: `@material/web` is a dependency for its design tokens, and `node_modules/@material/web/tokens/versions/latest/sass/` holds a file for each, such as `_md-comp-filter-chip.scss` and `_md-comp-dialog.scss`. Do not import Google's web components from that package: a component here is plain markup and SpyneJS code, drawn from Google's values.
+The template has no dialog, menu, search, badge, sheet or carousel. Google's values for every one of them are already installed: `@material/web` is a dependency for its design tokens, and `node_modules/@material/web/tokens/versions/latest/sass/` holds a file for each, such as `_md-comp-dialog.scss` and `_md-comp-menu.scss`. Do not import Google's web components from that package: a component here is plain markup and SpyneJS code, drawn from Google's values.
 
 A component is four parts, and each has one place:
 

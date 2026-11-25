@@ -1,0 +1,150 @@
+// Material icon button: a button that holds an icon and no words.
+//
+// Values are read at build time from Google's icon button tokens (@material/web
+// 2.5.0, tokens/versions/latest) through tokens/_material.scss, at the small size
+// (a 40px container and a 24px icon). What the tokens do not carry is marked where
+// it is used.
+//
+//   .icon-button             the standard style: an icon and no container
+//   .icon-button--filled     a container in the primary color
+//   .icon-button--tonal      a container in the secondary-container color
+//   .icon-button--outlined   a line round it
+//
+// It is a <button>, or an <a> that leads somewhere, holding one icon:
+//   <svg class="icon" viewBox="0 -960 960 960" aria-hidden="true">…</svg>
+// With no words it must have a name for assistive technology (aria-label), and
+// should ask for a tooltip (data-tooltip, see _tooltip.scss).
+//
+// The app bar's own two, the menu button and the light and dark switch, were drawn
+// before this class and are left as they are (_navigation.scss).
+//
+// Not drawn: the toggle (an icon button that stays pressed), the other four sizes,
+// and the square and the wide and narrow forms.
+
+@use 'sass:map';
+@use 'sass:math';
+@use '../../00-spynejs-design-system/tokens/material';
+
+$i: material.$icon-button;
+$styles: material.$icon-button-styles;
+
+@function _layer($color, $opacity) {
+  @return color-mix(in srgb, $color math.percentage($opacity), transparent);
+}
+
+// The three states of a style, each a layer in the color its set names, laid over
+// the container, and the icon's color in that state.
+@mixin _states($set) {
+  @media (hover: hover) {
+    &:hover {
+      --_layer: #{_layer(
+          map.get($set, 'hovered-state-layer-color'),
+          map.get($set, 'hovered-state-layer-opacity')
+        )};
+
+      color: map.get($set, 'hovered-icon-color');
+    }
+  }
+
+  &:focus-visible {
+    --_layer: #{_layer(
+        map.get($set, 'focused-state-layer-color'),
+        map.get($set, 'focused-state-layer-opacity')
+      )};
+
+    color: map.get($set, 'focused-icon-color');
+  }
+
+  &:active {
+    --_layer: #{_layer(
+        map.get($set, 'pressed-state-layer-color'),
+        map.get($set, 'pressed-state-layer-opacity')
+      )};
+
+    color: map.get($set, 'pressed-icon-color');
+  }
+}
+
+@mixin styles {
+  main#app {
+    .icon-button {
+      @include _states($i);
+
+      --_layer: transparent;
+
+      display: inline-grid;
+      flex: none;
+      place-items: center;
+      box-sizing: border-box;
+      inline-size: map.get($i, 'container-height');
+      block-size: map.get($i, 'container-height');
+      margin: 0;
+      padding: 0;
+      border: 0;
+      border-radius: map.get($i, 'container-shape-round');
+      // The state layer, drawn as the container's image, so it needs no element.
+      background-color: transparent;
+      background-image: linear-gradient(var(--_layer), var(--_layer));
+      color: map.get($i, 'icon-color');
+      text-decoration: none;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+
+      .icon {
+        inline-size: map.get($i, 'icon-size');
+        block-size: map.get($i, 'icon-size');
+        fill: currentColor;
+      }
+
+      &:disabled,
+      &[aria-disabled='true'] {
+        --_layer: transparent;
+
+        color: _layer(
+          map.get($i, 'disabled-icon-color'),
+          map.get($i, 'disabled-icon-opacity')
+        );
+        cursor: default;
+        pointer-events: none;
+      }
+    }
+
+    @each $name in (filled, tonal) {
+      $set: map.get($styles, $name);
+
+      .icon-button--#{$name} {
+        @include _states($set);
+
+        background-color: map.get($set, 'container-color');
+        color: map.get($set, 'icon-color');
+
+        &:disabled,
+        &[aria-disabled='true'] {
+          background-color: _layer(
+            map.get($set, 'disabled-container-color'),
+            map.get($set, 'disabled-container-opacity')
+          );
+          color: _layer(
+            map.get($set, 'disabled-icon-color'),
+            map.get($set, 'disabled-icon-opacity')
+          );
+        }
+      }
+    }
+
+    $outlined: map.get($styles, outlined);
+
+    .icon-button--outlined {
+      @include _states($outlined);
+
+      border: map.get($i, 'outlined-outline-width') solid
+        map.get($outlined, 'outline-color');
+      color: map.get($outlined, 'icon-color');
+
+      &:disabled,
+      &[aria-disabled='true'] {
+        border-color: map.get($outlined, 'disabled-outline-color');
+      }
+    }
+  }
+}

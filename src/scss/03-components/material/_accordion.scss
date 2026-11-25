@@ -1,0 +1,142 @@
+// An accordion: rows that open, each to show what is under it.
+//
+// Material 3 has no component of this name. It has the list, whose items can
+// expand, and this is that: every row is a Material list item (_list.scss), with an
+// arrow at its end that turns when the row is open. Values are read at build time
+// from Google's list and divider tokens (@material/web 2.5.0, tokens/versions/latest)
+// through tokens/_material.scss. What the tokens do not carry is marked where it is
+// used.
+//
+// A row is the browser's own <details>, so it opens to a press, to Enter and to
+// Space, says to assistive technology whether it is open, and can be found by the
+// browser's own search of the page even while it is closed. No script takes part.
+//
+//   <div class="accordion">
+//     <details>
+//       <summary>The row's words</summary>
+//       <p class="accordion__panel">What is under it.</p>
+//     </details>
+//   </div>
+//
+// More than one row can be open. Give the rows the same `name` (an attribute of
+// <details>) for one at a time, where the browser has it.
+//
+// Not drawn: any movement as a row opens. A row is open or it is not.
+
+@use 'sass:map';
+@use 'sass:math';
+@use '../../00-spynejs-design-system/tokens/material';
+@use 'list';
+@use 'type';
+
+$l: material.$list;
+$icon: map.get($l, 'list-item-trailing-icon-size');
+$side: map.get($l, 'list-item-leading-space');
+// The arrow is Google's keyboard_arrow_down in its 24px box (M480-344 240-584l56-56
+// 184 184 184-184 56 56-240 240Z, a 960 box): the six corners of that shape.
+$arrow: polygon(
+  12px 15.4px,
+  6px 9.4px,
+  7.4px 8px,
+  12px 12.6px,
+  16.6px 8px,
+  18px 9.4px
+);
+
+@function _layer($color, $opacity) {
+  @return color-mix(in srgb, $color math.percentage($opacity), transparent);
+}
+
+@mixin styles {
+  main#app {
+    .accordion {
+      display: flex;
+      flex-direction: column;
+      margin: 0;
+      padding: 0;
+
+      // The same rules a list has: one over the first row and one under each.
+      @include list.divider('start');
+
+      details {
+        @include list.divider;
+
+        margin: 0;
+      }
+
+      summary {
+        @include list.text('label-text');
+        @include list.item-space;
+
+        --_layer: transparent;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        box-sizing: border-box;
+        min-block-size: map.get($l, 'list-item-one-line-container-height');
+        padding-inline: $side map.get($l, 'list-item-trailing-space');
+        background-image: linear-gradient(var(--_layer), var(--_layer));
+        list-style: none;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+
+        // The browser's own marker, which the arrow stands in for.
+        &::-webkit-details-marker {
+          display: none;
+        }
+
+        &::after {
+          flex: none;
+          inline-size: $icon;
+          block-size: $icon;
+          background: map.get($l, 'list-item-trailing-icon-color');
+          clip-path: $arrow;
+          content: '';
+          // 200ms on the standard easing. Chosen here.
+          transition: rotate 200ms var(--md-sys-motion-easing-standard);
+        }
+
+        @media (hover: hover) {
+          &:hover {
+            --_layer: #{_layer(
+                map.get($l, 'list-item-hover-state-layer-color'),
+                map.get($l, 'list-item-hover-state-layer-opacity')
+              )};
+          }
+        }
+
+        &:focus-visible {
+          --_layer: #{_layer(
+              map.get($l, 'list-item-focus-state-layer-color'),
+              map.get($l, 'list-item-focus-state-layer-opacity')
+            )};
+
+          // Inside the row: a ring outside it would be cut by what holds the rows.
+          outline-offset: -3px;
+        }
+
+        &:active {
+          --_layer: #{_layer(
+              map.get($l, 'list-item-pressed-state-layer-color'),
+              map.get($l, 'list-item-pressed-state-layer-opacity')
+            )};
+        }
+      }
+
+      details[open] > summary::after {
+        rotate: 180deg;
+      }
+
+      // What is under a row: the list's supporting text, in line with the row's
+      // words.
+      .accordion__panel {
+        @include list.text('supporting-text');
+
+        margin: 0;
+        padding: 0 $side map.get($l, 'list-item-bottom-space');
+      }
+    }
+  }
+}

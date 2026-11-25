@@ -1,0 +1,260 @@
+// Material chips: the assist chip and the filter chip.
+//
+// Values are read at build time from Google's assist chip and filter chip tokens
+// (@material/web 2.5.0, tokens/versions/latest) through tokens/_material.scss. What
+// the tokens do not carry is marked where it is used.
+//
+//   .chips           a set of chips, side by side, on as many lines as it takes
+//   .chip            an assist chip: a <button>, or an <a> that leads somewhere.
+//                    It does one thing when pressed. It may hold an icon before its
+//                    words: <svg class="icon" …>
+//   .chip--filter    a filter chip: a <label> that holds a checkbox and its words.
+//                    It is on or off, and several of a set can be on. The control
+//                    is the browser's own checkbox, so the keyboard, a form and
+//                    assistive technology have it as one; it is drawn as a chip,
+//                    with Material's check before its words while it is on.
+//
+// Not drawn: the input chip (something typed, that can be taken away), the
+// suggestion chip, the elevated forms, and a chip's trailing icon.
+
+@use 'sass:map';
+@use 'sass:math';
+@use '../../00-spynejs-design-system/tokens/material';
+@use 'checkbox';
+@use 'type';
+
+$a: material.$assist-chip;
+$f: material.$filter-chip;
+$icon: map.get($a, 'with-icon-icon-size');
+// 16px at each end of a chip's words, and 8px where an icon comes first, with 8px
+// from the icon to the words: the values Google's package gives its own chips on
+// the web (tokens/_md-comp-assist-chip.scss, tokens/_md-comp-filter-chip.scss),
+// which the newer token set does not carry.
+$space: 16px;
+$with-icon: 8px;
+// 8px between chips: stable chips/internal/_chip-set.scss.
+$between: 8px;
+
+@function _layer($color, $opacity) {
+  @return color-mix(in srgb, $color math.percentage($opacity), transparent);
+}
+
+@mixin styles {
+  main#app {
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: $between;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    // ---- The assist chip, and what every chip is ----
+    .chip {
+      @include type.style('label-large');
+
+      --_layer: transparent;
+
+      position: relative;
+      display: inline-flex;
+      flex: none;
+      align-items: center;
+      gap: $with-icon;
+      box-sizing: border-box;
+      block-size: map.get($a, 'container-height');
+      margin: 0;
+      padding: 0 $space;
+      border: map.get($a, 'flat-outline-width') solid
+        map.get($a, 'flat-outline-color');
+      border-radius: map.get($a, 'container-shape');
+      background-color: transparent;
+      background-image: linear-gradient(var(--_layer), var(--_layer));
+      color: map.get($a, 'label-text-color');
+      text-decoration: none;
+      white-space: nowrap;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+
+      .icon {
+        inline-size: $icon;
+        block-size: $icon;
+        margin-inline-start: $with-icon - $space;
+        fill: map.get($a, 'with-icon-icon-color');
+      }
+
+      @media (hover: hover) {
+        &:hover {
+          --_layer: #{_layer(
+              map.get($a, 'hover-state-layer-color'),
+              map.get($a, 'hover-state-layer-opacity')
+            )};
+        }
+      }
+
+      &:focus-visible {
+        --_layer: #{_layer(
+            map.get($a, 'focus-state-layer-color'),
+            map.get($a, 'focus-state-layer-opacity')
+          )};
+
+        border-color: map.get($a, 'flat-focus-outline-color');
+      }
+
+      &:active {
+        --_layer: #{_layer(
+            map.get($a, 'pressed-state-layer-color'),
+            map.get($a, 'pressed-state-layer-opacity')
+          )};
+      }
+
+      &:disabled,
+      &[aria-disabled='true'] {
+        --_layer: transparent;
+
+        border-color: _layer(
+          map.get($a, 'flat-disabled-outline-color'),
+          map.get($a, 'flat-disabled-outline-opacity')
+        );
+        color: _layer(
+          map.get($a, 'disabled-label-text-color'),
+          map.get($a, 'disabled-label-text-opacity')
+        );
+        cursor: default;
+        pointer-events: none;
+
+        .icon {
+          fill: _layer(
+            map.get($a, 'with-icon-disabled-icon-color'),
+            map.get($a, 'with-icon-disabled-icon-opacity')
+          );
+        }
+      }
+    }
+
+    // ---- The filter chip ----
+    .chip--filter {
+      border-color: map.get($f, 'flat-unselected-outline-color');
+      color: map.get($f, 'unselected-label-text-color');
+
+      // The checkbox itself: over the whole chip, so that a press anywhere on the
+      // chip is a press on it, and not drawn as a checkbox.
+      input[type='checkbox'] {
+        position: absolute;
+        inset: 0;
+        inline-size: 100%;
+        block-size: 100%;
+        margin: 0;
+        border-radius: inherit;
+        background: transparent;
+        opacity: 0;
+        cursor: pointer;
+
+        &::before,
+        &::after {
+          content: none;
+        }
+      }
+
+      // The check that comes before the words while the chip is on. It is the
+      // checkbox's own mark, and takes no room while the chip is off: it has no
+      // width then, and its margin takes back the space the chip keeps between its
+      // parts. While the chip is on, the same margin brings the check to 8px from
+      // the chip's edge, where an icon goes.
+      &::before {
+        inline-size: 0;
+        block-size: $icon;
+        margin-inline: ($with-icon - $space) 0;
+        background: map.get(
+          $f,
+          'with-leading-icon-selected-leading-icon-color'
+        );
+        clip-path: checkbox.$mark;
+        content: '';
+        // 150ms: the chip makes room as fast as a state layer comes. Chosen here.
+        transition: inline-size 150ms var(--md-sys-motion-easing-standard);
+      }
+
+      @media (hover: hover) {
+        &:hover {
+          --_layer: #{_layer(
+              map.get($f, 'unselected-hover-state-layer-color'),
+              map.get($f, 'unselected-hover-state-layer-opacity')
+            )};
+        }
+      }
+
+      // The keyboard's focus is on the checkbox inside; the chip shows it, with
+      // Material's ring.
+      &:has(input:focus-visible) {
+        --_layer: #{_layer(
+            map.get($f, 'unselected-focus-state-layer-color'),
+            map.get($f, 'unselected-focus-state-layer-opacity')
+          )};
+
+        outline: map.get($f, 'focus-indicator-thickness') solid
+          map.get($f, 'focus-indicator-color');
+        outline-offset: map.get($f, 'focus-indicator-outline-offset');
+      }
+
+      &:has(input:checked) {
+        border-color: transparent;
+        background-color: map.get($f, 'flat-selected-container-color');
+        color: map.get($f, 'selected-label-text-color');
+
+        &::before {
+          inline-size: $icon;
+        }
+
+        @media (hover: hover) {
+          &:hover {
+            --_layer: #{_layer(
+                map.get($f, 'selected-hover-state-layer-color'),
+                map.get($f, 'selected-hover-state-layer-opacity')
+              )};
+          }
+        }
+
+        &:has(input:focus-visible) {
+          --_layer: #{_layer(
+              map.get($f, 'selected-focus-state-layer-color'),
+              map.get($f, 'selected-focus-state-layer-opacity')
+            )};
+        }
+      }
+
+      &:has(input:disabled) {
+        --_layer: transparent;
+
+        border-color: _layer(
+          map.get($f, 'flat-disabled-unselected-outline-color'),
+          map.get($f, 'flat-disabled-unselected-outline-opacity')
+        );
+        color: _layer(
+          map.get($f, 'disabled-label-text-color'),
+          map.get($f, 'disabled-label-text-opacity')
+        );
+        cursor: default;
+
+        input[type='checkbox'] {
+          cursor: default;
+        }
+
+        &::before {
+          background: _layer(
+            map.get($f, 'disabled-label-text-color'),
+            map.get($f, 'disabled-label-text-opacity')
+          );
+        }
+
+        &:has(input:checked) {
+          border-color: transparent;
+          background-color: _layer(
+            map.get($f, 'flat-disabled-selected-container-color'),
+            map.get($f, 'flat-disabled-selected-container-opacity')
+          );
+        }
+      }
+    }
+  }
+}

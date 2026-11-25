@@ -1,0 +1,98 @@
+<header class="blocks-demo__header">
+  <h2>{{headline}}</h2>
+  <p>{{intro}}</p>
+</header>
+
+<section class="blocks-demo__kind" aria-labelledby="blocks-demo-icon-button">
+  <h3 id="blocks-demo-icon-button">{{iconButtonName}}</h3>
+  <p class="blocks-demo__note">{{iconButtonNote}}</p>
+  <div class="blocks-demo__set">
+    {{#iconButtons}}
+    <button
+      type="button"
+      class="icon-button {{attrClass}}"
+      aria-label="{{attrLabel}}"
+    >
+      <svg class="icon" viewBox="0 -960 960 960" aria-hidden="true">
+        <path d="{{attrIconPath}}" />
+      </svg>
+    </button>
+    {{/iconButtons}} {{#iconButtonsDisabled}}
+    <button
+      type="button"
+      class="icon-button {{attrClass}}"
+      aria-label="{{attrLabel}}"
+      disabled
+    >
+      <svg class="icon" viewBox="0 -960 960 960" aria-hidden="true">
+        <path d="{{attrIconPath}}" />
+      </svg>
+    </button>
+    {{/iconButtonsDisabled}}
+  </div>
+</section>
+
+<section class="blocks-demo__kind" aria-labelledby="blocks-demo-chips">
+  <h3 id="blocks-demo-chips">{{chipsName}}</h3>
+  <p class="blocks-demo__note">{{assistNote}}</p>
+  <div class="chips">
+    {{#assistChips}}
+    <button type="button" class="chip">
+      <svg class="icon" viewBox="0 -960 960 960" aria-hidden="true">
+        <path d="{{attrIconPath}}" />
+      </svg>
+      <span>{{label}}</span>
+    </button>
+    {{/assistChips}}
+    <button type="button" class="chip"><span>{{plainChip}}</span></button>
+    <button type="button" class="chip" disabled>
+      <span>{{disabled}}</span>
+    </button>
+  </div>
+  <p class="blocks-demo__note blocks-demo__note--second">{{filterNote}}</p>
+  <div class="chips" role="group" aria-label="{{attrFilterLabel}}">
+    <label class="chip chip--filter">
+      <input type="checkbox" name="demo-filter-one" checked />
+      <span>{{filterOne}}</span>
+    </label>
+    <label class="chip chip--filter">
+      <input type="checkbox" name="demo-filter-two" />
+      <span>{{filterTwo}}</span>
+    </label>
+    <label class="chip chip--filter">
+      <input type="checkbox" name="demo-filter-three" />
+      <span>{{filterThree}}</span>
+    </label>
+    <label class="chip chip--filter">
+      <input type="checkbox" name="demo-filter-disabled" disabled />
+      <span>{{disabled}}</span>
+    </label>
+  </div>
+</section>
+
+<section class="blocks-demo__kind" aria-labelledby="blocks-demo-progress">
+  <h3 id="blocks-demo-progress">{{progressName}}</h3>
+  <p class="blocks-demo__note">{{progressNote}}</p>
+  <div class="blocks-demo__column">
+    <progress
+      value="40"
+      max="100"
+      aria-label="{{attrProgressLabel}}"
+    ></progress>
+    <progress aria-label="{{attrWorkingLabel}}"></progress>
+  </div>
+  <div class="blocks-demo__set blocks-demo__set--second">
+    <span
+      class="progress-circular"
+      role="progressbar"
+      aria-label="{{attrProgressLabel}}"
+      aria-valuenow="40"
+      style="--progress: 40"
+    ></span>
+    <span
+      class="progress-circular"
+      role="progressbar"
+      aria-label="{{attrWorkingLabel}}"
+    ></span>
+  </div>
+</section>

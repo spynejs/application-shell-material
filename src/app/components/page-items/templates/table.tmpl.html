@@ -1,0 +1,17 @@
+<div class="page-item--table">
+  <h2 class="table-title">{{title}}</h2>
+  <div
+    class="table-scroll"
+    tabindex="0"
+    role="region"
+    aria-label="{{attrLabel}}"
+  >
+    <table class="table">
+      <thead>
+        <tr>{{#head}}<th scope="col">{{.}}</th>{{/head}}</tr>
+      </thead>
+      <tbody>{{#rows}}<tr>{{#cells}}<td>{{.}}</td>{{/cells}}</tr>{{/rows}}</tbody>
+    </table>
+  </div>
+  <p class="table-note">{{note}}</p>
+</div>

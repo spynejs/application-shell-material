@@ -75,6 +75,7 @@ const config = {
               'card-a': 'card-a',
               'card-b': 'card-b',
               'card-c': 'card-c',
+              blocks: 'blocks',
             },
           },
 

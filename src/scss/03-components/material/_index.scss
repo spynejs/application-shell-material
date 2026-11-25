@@ -6,19 +6,23 @@
 // upstream has nothing to collide with. The button and the navigation drawer were
 // ported before this folder existed and live where they were written
 // (elements/_buttons.scss, ui/menu-drawer.scss).
+@use 'accordion';
 @use 'app-bar';
 @use 'cards';
 @use 'checkbox';
+@use 'chips';
 @use 'fab';
 @use 'field-extras';
 @use 'filled-text-field';
 @use 'focus';
 @use 'icon';
+@use 'icon-button';
 @use 'list';
 @use 'motion';
 @use 'navigation';
 @use 'navigation-bar';
 @use 'navigation-rail';
+@use 'progress';
 @use 'radio';
 @use 'ripple';
 @use 'select';
@@ -26,6 +30,7 @@
 @use 'slider';
 @use 'snackbar';
 @use 'switch';
+@use 'table';
 @use 'tabs';
 @use 'text-fields';
 @use 'tooltip';
@@ -52,6 +57,14 @@
   @include switch.styles;
   @include selection.styles;
   @include slider.styles;
+  // After the checkbox: a filter chip is a checkbox drawn as a chip, and takes
+  // the drawing of one off the control inside it.
+  @include chips.styles;
+  @include icon-button.styles;
+  @include progress.styles;
+  // After the list: an accordion is rows of one, that open.
+  @include accordion.styles;
+  @include table.styles;
   @include focus.styles;
   @include motion.styles;
   @include snackbar.styles;

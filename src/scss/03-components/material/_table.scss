@@ -1,0 +1,123 @@
+// A table: rows and columns of words and numbers.
+//
+// Material 3's guidelines have no table. Google's token set has one, the data
+// table, and this is drawn from it: the heights of a header and of a row, their type
+// and colors, the lines between rows and round the whole. Values are read at build
+// time (@material/web 2.5.0, tokens/versions/latest) through tokens/_material.scss.
+// What the tokens do not carry is marked where it is used.
+//
+// It is the browser's own <table>, so assistive technology reads it as one: a
+// header cell names its column (<th scope="col">) or its row (<th scope="row">).
+//
+//   <div class="table-scroll" tabindex="0" role="region" aria-label="Prices">
+//     <table class="table">
+//       <thead><tr><th scope="col">Size</th><th scope="col">Price</th></tr></thead>
+//       <tbody><tr><td>Small</td><td>$3</td></tr></tbody>
+//     </table>
+//   </div>
+//
+// .table-scroll is what a table stands in. A table too wide for it is scrolled
+// sideways inside it, and the page is not; it can take the keyboard's focus so that
+// the arrow keys can scroll it, and so it has a name.
+//
+// .table__number on a cell, or on a header, sets it to the far side, as numbers are
+// read.
+//
+// The Application Shell has plain styles for the class `table` (its design system's
+// elements); these are laid over them.
+//
+// Not drawn: a row that can be chosen, sorting, and the footer with its pages.
+
+@use 'sass:map';
+@use '../../00-spynejs-design-system/tokens/material';
+@use 'type';
+
+$d: material.$data-table;
+// 16px each side of a cell's words, the space a list item keeps at its sides. Chosen
+// here: the set names no side space.
+$side: 16px;
+
+@mixin styles {
+  main#app {
+    .table-scroll {
+      overflow-x: auto;
+      border: map.get($d, 'outline-width') solid map.get($d, 'outline-color');
+      border-radius: map.get($d, 'container-shape');
+      background: map.get($d, 'row-item-unselected-container-color');
+    }
+
+    .table {
+      inline-size: 100%;
+      margin: 0;
+      border: 0;
+      border-collapse: collapse;
+      border-spacing: 0;
+      background: transparent;
+
+      th,
+      td {
+        box-sizing: border-box;
+        block-size: map.get($d, 'row-item-container-height');
+        padding: 8px $side;
+        border: 0;
+        border-block-end: map.get($d, 'row-item-divider-thickness') solid
+          map.get($d, 'row-item-outline-color');
+        background: transparent;
+        text-align: start;
+        vertical-align: middle;
+        // A cell's words stay whole. The app breaks a long word anywhere so that
+        // nothing is wider than the window; in a table that breaks every word of a
+        // narrow column. A table too wide is scrolled instead.
+        word-break: normal;
+        overflow-wrap: normal;
+      }
+
+      // A header cell: title-small in the on-surface-variant color.
+      thead th {
+        @include type.style('title-small');
+
+        block-size: map.get($d, 'header-container-height');
+        background: map.get($d, 'header-container-color');
+        color: map.get($d, 'header-headline-color');
+        white-space: nowrap;
+      }
+
+      // A cell, and a header that names a row: body-medium in the on-surface color.
+      td,
+      tbody th {
+        @include type.style('body-medium');
+
+        color: map.get($d, 'row-item-label-text-color');
+      }
+
+      // The Shell's plain table stripes its rows and marks the one under the
+      // pointer. Neither is Material's.
+      tbody tr:nth-child(even) td,
+      tbody tr:hover td {
+        background: transparent;
+      }
+
+      tbody tr:last-child > * {
+        border-block-end: 0;
+      }
+
+      .table__number {
+        text-align: end;
+        font-variant-numeric: tabular-nums;
+      }
+    }
+
+    // ---- As a page item (table.tmpl.html) ----
+    // A line of small print under the table: the list's trailing supporting text.
+    .page-item--table .table-note {
+      @include type.style('body-small');
+
+      margin: 8px 0 0;
+      color: var(--md-sys-color-on-surface-variant);
+
+      &:empty {
+        display: none;
+      }
+    }
+  }
+}

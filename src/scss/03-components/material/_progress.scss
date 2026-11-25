@@ -1,0 +1,138 @@
+// Material progress indicators: linear and circular.
+//
+// Values are read at build time from Google's progress indicator tokens
+// (@material/web 2.5.0, tokens/versions/latest) through tokens/_material.scss. What
+// the tokens do not carry is marked where it is used.
+//
+// Linear is the browser's own <progress>:
+//   <progress value="40" max="100"></progress>     as much done as its value says
+//   <progress></progress>                          with no value: at work, and how
+//                                                  far along is not known
+// The browser knows how much is done and draws that part itself, so nothing here
+// needs a script. Give it a name for assistive technology (aria-label).
+//
+// Circular is an element of the class progress-circular, since a <progress> cannot
+// be bent:
+//   <span class="progress-circular" role="progressbar" aria-label="…"
+//     aria-valuenow="40" style="--progress: 40"></span>
+//   <span class="progress-circular" role="progressbar" aria-label="…"></span>
+// How much is done is said twice, once for assistive technology (aria-valuenow, 0 to
+// 100) and once for the drawing (--progress, the same number). With neither, it
+// turns: at work, and how far along is not known.
+//
+// These are the drawing. Nothing in the app shows one by itself: a view that waits
+// puts one in its template.
+//
+// Not drawn: the space Material leaves between the part that is done and the track,
+// the dot at a linear indicator's end, and the wavy and the thick forms.
+
+@use 'sass:map';
+@use 'sass:math';
+@use '../../00-spynejs-design-system/tokens/material';
+
+$p: map.get(material.$progress-indicator, base);
+$linear: map.get(material.$progress-indicator, linear);
+$circular: map.get(material.$progress-indicator, circular);
+$active: map.get($p, 'active-indicator-color');
+$track: map.get($p, 'track-color');
+$thickness: map.get($circular, 'active-indicator-thickness');
+// One turn of the track every 1.5s, and the linear indicator's part crossing it in
+// the same time. Chosen here: the newer token set gives no times.
+$turn: 1.5s;
+
+@mixin styles {
+  main#app {
+    // ---- Linear ----
+    progress {
+      display: block;
+      box-sizing: border-box;
+      inline-size: 100%;
+      block-size: map.get($linear, 'height');
+      margin: 0;
+      border: 0;
+      border-radius: map.get($p, 'track-shape');
+      overflow: hidden;
+      background: $track;
+      // Firefox draws the part that is done in the element's own color.
+      color: $active;
+      appearance: none;
+
+      &::-webkit-progress-bar {
+        background: transparent;
+      }
+
+      &::-webkit-progress-value {
+        border-radius: map.get($p, 'active-indicator-shape');
+        background: $active;
+      }
+
+      &::-moz-progress-bar {
+        border-radius: map.get($p, 'active-indicator-shape');
+        background: $active;
+      }
+
+      // With no value: a part of the track's length, crossing it again and again.
+      &:indeterminate {
+        background:
+          linear-gradient($active, $active) no-repeat 0 0 / 40% 100%,
+          $track;
+        animation: material-progress-linear $turn
+          var(--md-sys-motion-easing-standard) infinite;
+
+        &::-webkit-progress-value {
+          background: transparent;
+        }
+
+        &::-moz-progress-bar {
+          background: transparent;
+        }
+      }
+    }
+
+    // ---- Circular ----
+    .progress-circular {
+      display: inline-block;
+      flex: none;
+      inline-size: map.get($circular, 'size');
+      block-size: map.get($circular, 'size');
+      border-radius: 50%;
+      // The part that is done, from the top and round to as far as --progress says.
+      background: conic-gradient(
+        $active calc(var(--progress, 0) * 1%),
+        $track 0
+      );
+      // The ring: everything inside it is cut away.
+      mask: radial-gradient(
+        farthest-side,
+        transparent calc(100% - #{$thickness} - 0.5px),
+        #000 calc(100% - #{$thickness})
+      );
+
+      // With no number said: three quarters of a ring, turning.
+      &:not([aria-valuenow]) {
+        background: conic-gradient($active 75%, transparent 0);
+        animation: material-progress-circular $turn linear infinite;
+      }
+    }
+  }
+
+  @keyframes material-progress-linear {
+    from {
+      background-position:
+        -70% 0,
+        0 0;
+    }
+
+    to {
+      background-position:
+        170% 0,
+        0 0;
+    }
+  }
+
+  @keyframes material-progress-circular {
+    to {
+      rotate: 360deg;
+    }
+  }
+}

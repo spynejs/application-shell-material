@@ -156,6 +156,42 @@
 @use '@material/web/tokens/versions/latest/sass/md-comp-slider' as latest-slider;
 @use '@material/web/tokens/versions/latest/sass/md-comp-slider-meta' as
   latest-slider-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-icon-button-filled' as
+  latest-icon-button-filled;
+@use '@material/web/tokens/versions/latest/sass/md-comp-icon-button-filled-meta'
+  as latest-icon-button-filled-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-icon-button-tonal' as
+  latest-icon-button-tonal;
+@use '@material/web/tokens/versions/latest/sass/md-comp-icon-button-tonal-meta'
+  as latest-icon-button-tonal-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-icon-button-outlined' as
+  latest-icon-button-outlined;
+@use '@material/web/tokens/versions/latest/sass/md-comp-icon-button-outlined-meta'
+  as latest-icon-button-outlined-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-assist-chip' as
+  latest-assist-chip;
+@use '@material/web/tokens/versions/latest/sass/md-comp-assist-chip-meta' as
+  latest-assist-chip-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-filter-chip' as
+  latest-filter-chip;
+@use '@material/web/tokens/versions/latest/sass/md-comp-filter-chip-meta' as
+  latest-filter-chip-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-progress-indicator' as
+  latest-progress-indicator;
+@use '@material/web/tokens/versions/latest/sass/md-comp-progress-indicator-meta'
+  as latest-progress-indicator-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-progress-indicator-linear'
+  as latest-progress-indicator-linear;
+@use '@material/web/tokens/versions/latest/sass/md-comp-progress-indicator-linear-meta'
+  as latest-progress-indicator-linear-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-progress-indicator-circular'
+  as latest-progress-indicator-circular;
+@use '@material/web/tokens/versions/latest/sass/md-comp-progress-indicator-circular-meta'
+  as latest-progress-indicator-circular-meta;
+@use '@material/web/tokens/versions/latest/sass/md-comp-data-table' as
+  latest-data-table;
+@use '@material/web/tokens/versions/latest/sass/md-comp-data-table-meta' as
+  latest-data-table-meta;
 @use '@material/web/tokens/versions/latest/sass/md-comp-scrim-meta' as
   latest-scrim-meta;
 @use '@material/web/tokens/versions/latest/sass/md-ref-typeface' as
@@ -609,6 +645,66 @@ $outlined-select: _component(
 $slider: _component(
   meta.module-variables(latest-slider),
   meta.module-variables(latest-slider-meta)
+);
+
+// The icon button's three other styles, beside the standard one above: each
+// set's container and icon colors, at rest, under the pointer, in focus, pressed
+// and disabled. The size is the same small one.
+$icon-button-styles: (
+  filled: _component(
+      meta.module-variables(latest-icon-button-filled),
+      meta.module-variables(latest-icon-button-filled-meta)
+    ),
+  tonal: _component(
+      meta.module-variables(latest-icon-button-tonal),
+      meta.module-variables(latest-icon-button-tonal-meta)
+    ),
+  outlined: _component(
+      meta.module-variables(latest-icon-button-outlined),
+      meta.module-variables(latest-icon-button-outlined-meta)
+    ),
+);
+
+// The chips: the assist chip, which is an action, and the filter chip, which is a
+// choice on or off. Each set's height, corner, outline, the colors of its label
+// and its icon in each state, and for the filter chip the same when it is
+// selected. The input and the suggestion chip are not read: none is drawn.
+$assist-chip: _component(
+  meta.module-variables(latest-assist-chip),
+  meta.module-variables(latest-assist-chip-meta)
+);
+
+$filter-chip: _component(
+  meta.module-variables(latest-filter-chip),
+  meta.module-variables(latest-filter-chip-meta)
+);
+
+// Progress indicators. `base` is what the two share: the colors and shape of the
+// part that is done and of the track, and the dot at a linear one's end. `linear`
+// and `circular` are each one's sizes. The wavy forms and the thick ones are in
+// the sets and are not drawn.
+$progress-indicator: (
+  base: _component(
+      meta.module-variables(latest-progress-indicator),
+      meta.module-variables(latest-progress-indicator-meta)
+    ),
+  linear: _component(
+      meta.module-variables(latest-progress-indicator-linear),
+      meta.module-variables(latest-progress-indicator-linear-meta)
+    ),
+  circular: _component(
+      meta.module-variables(latest-progress-indicator-circular),
+      meta.module-variables(latest-progress-indicator-circular-meta)
+    ),
+);
+
+// The table. Material 3's guidelines have no table of their own; Google's token
+// set does, as the data table: the heights of a header and of a row, their type
+// and colors, and the lines between rows. Its footer, its sorting and its
+// selected rows are in the set and are not drawn.
+$data-table: _component(
+  meta.module-variables(latest-data-table),
+  meta.module-variables(latest-data-table-meta)
 );
 
 // The scrim behind a modal surface: the `scrim` colour role and its opacity.
