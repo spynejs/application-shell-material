@@ -67,6 +67,16 @@
     // nearest display style is display-medium (45px).
     .hero__headline {
       @include style('display-medium', $emphasized: true);
+
+      // In a compact window (under 600px) a long word at 45px is wider than the
+      // hero, and is broken in the middle of itself. display-small (36px) is the
+      // next style down, and the lines are balanced so that none is left with a
+      // word alone.
+      text-wrap: balance;
+
+      @media (width < 600px) {
+        @include style('display-small', $emphasized: true);
+      }
     }
   }
 }

@@ -12,7 +12,7 @@ If `node_modules/@spynejs/grammar` is missing, run `npm install` first — the G
 
 ## Material Design
 
-This app is on the Material template: Google's Material Design 3 for the SpyneJS Application Shell. All of it is already in this repo, written as SpyneJS code. A component here is not something to import: it is plain markup with classes, drawn from `src/static/data/app.model.json`. This section says what there is and how to ask for it; the Grammar says how the code is written.
+This app is on the Material template: Material Design 3 for the SpyneJS Application Shell. Material Design is an open-source design system created by Google; the template is an independent implementation of it, not affiliated with or endorsed by Google, and an app made from it should not say otherwise. All of it is already in this repo, written as SpyneJS code. A component here is not something to import: it is plain markup with classes, drawn from `src/static/data/app.model.json`. This section says what there is and how to ask for it; the Grammar says how the code is written.
 
 ### What the template has
 
@@ -46,7 +46,7 @@ This app is on the Material template: Google's Material Design 3 for the SpyneJS
 | Page transitions | named from the route: `top-level`, `forward`, `backward`, `container-transform` | `src/app/traits/channel/channel-material-traits.js` |
 | Ripple, reduced motion, breakpoints | every app has them; nothing asks for them | `src/app/traits/material/material-ripple-traits.js`, `src/scss/03-components/material/_motion.scss` |
 
-Colour, type, shape, elevation and motion are Google's tokens, as custom properties that start `--md-sys-`, such as `--md-sys-color-primary` and `--md-sys-shape-corner-medium`. A model does not choose them; a style reads them. The Material styles are in `src/scss/03-components/material/`.
+Colour, type, shape, elevation and motion are the Material Design tokens, as custom properties that start `--md-sys-`, such as `--md-sys-color-primary` and `--md-sys-shape-corner-medium`. A model does not choose them; a style reads them. The Material styles are in `src/scss/03-components/material/`.
 
 ### The keys a model writes
 
@@ -107,7 +107,7 @@ A slider shows no number: where one matters, say the range in the field's `label
 
 Every entry has an `attrId` that no other on the page has, a `label`, and an `attrName`. A checkbox or a switch that is on sends `on`, or its `attrValue` where it has one; one that is off sends nothing. A field that is required and left empty shows the browser's own words under it when the form is sent, in the visitor's language. **The form's sending names what it sends**: `contactUs$SendFormData` in `src/app/traits/form/form-contact-us-traits.js` takes the name, the email and the message. A field you add is held by the form and is not sent until you add its name there. `src/app/components/page-items/templates/forms-demo.tmpl.html` shows every control in every state.
 
-An item of an icon grid names its icon with an `icon` key. The value is one of the names in `src/app/traits/utils/icon-shapes.js`: they are Google's Material Symbols names, such as `schedule`, `location_on` and `verified`. A name that is not there draws nothing.
+An item of an icon grid names its icon with an `icon` key. The value is one of the names in `src/app/traits/utils/icon-shapes.js`: they are Material Symbols names, such as `schedule`, `location_on` and `verified`. A name that is not there draws nothing.
 
 ```json
 { "icon": "schedule", "name": "Open late", "text": "Until 8pm on weekdays." }
@@ -432,7 +432,7 @@ The skip link is the first view the app adds (`app$OnAppViewRendered` in `src/ap
 
 ### Adding a Material component the template does not have
 
-The template has no search, badge, sheet or carousel. Google's values for every one of them are already installed: `@material/web` is a dependency for its design tokens, and `node_modules/@material/web/tokens/versions/latest/sass/` holds a file for each, such as `_md-comp-search-bar.scss` and `_md-comp-badge.scss`. Do not import Google's web components from that package: a component here is plain markup and SpyneJS code, drawn from Google's values.
+The template has no search, badge, sheet or carousel. The Material Design values for every one of them are already installed: `@material/web` is a dependency for its design tokens, and `node_modules/@material/web/tokens/versions/latest/sass/` holds a file for each, such as `_md-comp-search-bar.scss` and `_md-comp-badge.scss`. Do not import the web components from that package: a component here is plain markup and SpyneJS code, drawn from the Material Design values.
 
 A component is four parts, and each has one place:
 

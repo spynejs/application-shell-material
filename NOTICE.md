@@ -6,8 +6,13 @@ and the typeface come under licenses of their own. Both are set out below.
 
 ## Material Design
 
-This template follows Google's Material Design 3. It is an independent
-implementation, and is not affiliated with or endorsed by Google.
+This template follows [Material Design 3](https://m3.material.io), an open-source
+design system created by Google. It is an independent implementation, and is not
+affiliated with or endorsed by Google.
+
+The design tokens and the icons below are under the Apache License 2.0. A copy of it is
+in `src/static/fonts/licenses/Apache-2.0.txt`, beside the typeface's, and a build
+carries it with them.
 
 - **Design tokens.** The colours, type styles, corners, durations and component
   measurements are read at build time from
@@ -19,8 +24,8 @@ implementation, and is not affiliated with or endorsed by Google.
 - **Typeface.** Roboto is served from `src/static/fonts/` under the SIL Open Font
   License 1.1. The license is in `src/static/fonts/licenses/Roboto.OFL.txt`.
 - **Icons.** The shapes in `src/app/traits/utils/icon-shapes.js` and
-  `icon-shapes-filled.js` beside it are Google's
-  [Material Symbols](https://fonts.google.com/icons), copyright Google LLC, under the
+  `icon-shapes-filled.js` beside it are
+  [Material Symbols](https://fonts.google.com/icons) icons, copyright Google LLC, under the
   [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). Each is taken
   unchanged from the SVG of its name in
   [`google/material-design-icons`](https://github.com/google/material-design-icons)

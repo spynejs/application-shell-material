@@ -31,6 +31,14 @@ $outlined: material.$outlined-card;
     .hero-component--landing {
       border-radius: map.get($elevated, 'container-shape');
       background-color: map.get($elevated, 'container-color');
+
+      // In a compact window (under 600px) the hero's own padding, 64px a side,
+      // leaves its words less than half the window, and a long word in the
+      // headline is broken in the middle of itself. Material's margin for a
+      // compact window is 16px; the hero's content keeps its own padding inside.
+      @media (width < 600px) {
+        padding-inline: 16px;
+      }
     }
 
     // ---- Outlined: the cards inside ----

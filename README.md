@@ -1,8 +1,12 @@
 # Application Shell — Material
 
 The [SpyneJS Application Shell](https://github.com/spynejs/application-shell) in
-Google's Material Design 3: the same pages, navigation, and page items, drawn with
-Material's colour roles, type scale, shapes, motion, and components.
+[Material Design 3](https://m3.material.io): the same pages, navigation, and page
+items, drawn with Material's colour roles, type scale, shapes, motion, and components.
+
+Material Design is an open-source design system created by Google. This template is
+an independent implementation of it, and is not affiliated with or endorsed by
+Google. See [NOTICE.md](NOTICE.md).
 
 Use it as the starting point for an application that needs routing and a page
 structure from the outset, and should look and move as Material does.
@@ -15,9 +19,10 @@ starting point, see
 ## What is Material here
 
 - **Tokens.** Colour roles for a light and a dark scheme, the type scale, corners,
-  elevation, durations and easings are read at build time from Google's
-  [`@material/web`](https://github.com/material-components/material-web) 2.5.0 and
-  emitted as `--md-sys-*` custom properties. No Material value is typed in by hand.
+  elevation, durations and easings are read at build time from
+  [`@material/web`](https://github.com/material-components/material-web) 2.5.0,
+  published by Google, and emitted as `--md-sys-*` custom properties. No Material
+  value is typed in by hand.
 - **Components.** Buttons (five variants, five sizes, two shapes), cards, outlined
   text fields with a floating label and an error line, the top app bar, the modal
   navigation drawer, and the snackbar.
@@ -28,9 +33,6 @@ starting point, see
   looks, with a `button` key beside `ctaText`
   (`{ "variant": "tonal", "size": "md", "shape": "square" }`), and a field of the
   contact form can say `attrRequired`, `attrDisabled`, or `multiline`.
-
-The template is an independent implementation of Material Design, and is not
-affiliated with or endorsed by Google. See [NOTICE.md](NOTICE.md).
 
 ## Requirements
 
